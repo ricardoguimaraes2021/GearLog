@@ -9,6 +9,7 @@ import { ArrowLeft, Save } from 'lucide-react';
 import { toast } from '@/utils/toast';
 import { productSchema, type ProductFormData } from '@/utils/validation';
 import { Label } from '@/components/ui/label';
+import { Skeleton } from '@/components/ui/skeleton';
 
 export default function ProductForm() {
   const { id } = useParams<{ id: string }>();
@@ -128,7 +129,29 @@ export default function ProductForm() {
   };
 
   if (isLoading && isEditing) {
-    return <div className="text-center py-8">Loading product...</div>;
+    return (
+      <div className="space-y-6">
+        <div className="flex items-center gap-4">
+          <Skeleton className="h-10 w-20" />
+          <Skeleton className="h-9 w-48" />
+        </div>
+        <Card>
+          <CardHeader>
+            <Skeleton className="h-6 w-48" />
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {[...Array(8)].map((_, i) => (
+                <div key={i}>
+                  <Skeleton className="h-4 w-24 mb-2" />
+                  <Skeleton className="h-10 w-full" />
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
   }
 
   return (

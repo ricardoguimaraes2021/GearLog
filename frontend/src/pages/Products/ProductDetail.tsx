@@ -9,6 +9,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ArrowLeft, Save, Plus, Edit } from 'lucide-react';
 import type { Movement } from '@/types';
 import { toast } from '@/utils/toast';
+import { Skeleton } from '@/components/ui/skeleton';
 
 export default function ProductDetail() {
   const { id } = useParams<{ id: string }>();
@@ -64,7 +65,49 @@ export default function ProductDetail() {
   };
 
   if (isLoading || !currentProduct) {
-    return <div className="text-center py-8">Loading product...</div>;
+    return (
+      <div className="space-y-6">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-4">
+            <Skeleton className="h-10 w-20" />
+            <div>
+              <Skeleton className="h-9 w-64 mb-2" />
+              <Skeleton className="h-5 w-32" />
+            </div>
+          </div>
+          <Skeleton className="h-10 w-24" />
+        </div>
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div className="lg:col-span-2 space-y-6">
+            <Card>
+              <CardHeader>
+                <Skeleton className="h-6 w-48" />
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-2 gap-4">
+                  {[...Array(8)].map((_, i) => (
+                    <div key={i}>
+                      <Skeleton className="h-4 w-24 mb-2" />
+                      <Skeleton className="h-5 w-full" />
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+          <div>
+            <Card>
+              <CardHeader>
+                <Skeleton className="h-6 w-24" />
+              </CardHeader>
+              <CardContent>
+                <Skeleton className="h-64 w-full" />
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+      </div>
+    );
   }
 
   return (
