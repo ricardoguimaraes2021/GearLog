@@ -9,6 +9,7 @@ import ProductForm from './pages/Products/ProductForm';
 import Categories from './pages/Categories/Categories';
 import Layout from './components/layout/Layout';
 import { Toaster } from './components/ui/toast';
+import ErrorBoundary from './components/ErrorBoundary';
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { isAuthenticated, isLoading, initialize } = useAuthStore();
@@ -42,7 +43,7 @@ function App() {
   }, [initialize]);
 
   return (
-    <>
+    <ErrorBoundary>
       <Toaster />
       <BrowserRouter>
         <Routes>
@@ -65,7 +66,7 @@ function App() {
         </Route>
       </Routes>
       </BrowserRouter>
-    </>
+    </ErrorBoundary>
   );
 }
 
