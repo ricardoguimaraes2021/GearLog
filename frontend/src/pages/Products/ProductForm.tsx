@@ -7,6 +7,8 @@ import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ArrowLeft, Save } from 'lucide-react';
 import { toast } from '@/utils/toast';
+import { productSchema, type ProductFormData } from '@/utils/validation';
+import { Label } from '@/components/ui/label';
 
 export default function ProductForm() {
   const { id } = useParams<{ id: string }>();
@@ -31,6 +33,7 @@ export default function ProductForm() {
   });
   const [image, setImage] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [errors, setErrors] = useState<Record<string, string>>({});
 
   useEffect(() => {
     fetchCategories();
@@ -74,6 +77,30 @@ export default function ProductForm() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setErrors({});
+
+    // Validate form data
+    try {
+      const validationData = {
+        ...formData,
+        category_id: formData.category_id || '',
+        value: formData.value || undefined,
+      };
+      productSchema.parse(validationData);
+    } catch (error: any) {
+      if (error.errors) {
+        const validationErrors: Record<string, string> = {};
+        error.errors.forEach((err: any) => {
+          if (err.path) {
+            validationErrors[err.path[0]] = err.message;
+          }
+        });
+        setErrors(validationErrors);
+        toast.error('Please fix the validation errors');
+        return;
+      }
+    }
+
     try {
       const formDataToSend = new FormData();
       Object.entries(formData).forEach(([key, value]) => {
@@ -126,24 +153,34 @@ export default function ProductForm() {
           <CardContent className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <Label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
                   Name *
-                </label>
+                </Label>
                 <Input
+                  id="name"
                   value={formData.name}
-                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                  onChange={(e) => {
+                    setFormData({ ...formData, name: e.target.value });
+                    if (errors.name) setErrors({ ...errors, name: '' });
+                  }}
+                  className={errors.name ? 'border-red-500' : ''}
                   required
                 />
+                {errors.name && <p className="text-sm text-red-500 mt-1">{errors.name}</p>}
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <Label htmlFor="category_id" className="block text-sm font-medium text-gray-700 mb-1">
                   Category *
-                </label>
+                </Label>
                 <select
+                  id="category_id"
                   value={formData.category_id}
-                  onChange={(e) => setFormData({ ...formData, category_id: e.target.value })}
-                  className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+                  onChange={(e) => {
+                    setFormData({ ...formData, category_id: e.target.value });
+                    if (errors.category_id) setErrors({ ...errors, category_id: '' });
+                  }}
+                  className={`w-full rounded-md border bg-background px-3 py-2 text-sm ${errors.category_id ? 'border-red-500' : 'border-input'}`}
                   required
                 >
                   <option value="">Select a category</option>
@@ -153,6 +190,7 @@ export default function ProductForm() {
                     </option>
                   ))}
                 </select>
+                {errors.category_id && <p className="text-sm text-red-500 mt-1">{errors.category_id}</p>}
               </div>
 
               <div>
@@ -200,29 +238,39 @@ export default function ProductForm() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <Label htmlFor="quantity" className="block text-sm font-medium text-gray-700 mb-1">
                   Quantity *
-                </label>
+                </Label>
                 <Input
+                  id="quantity"
                   type="number"
                   min="0"
                   value={formData.quantity}
-                  onChange={(e) =>
-                    setFormData({ ...formData, quantity: parseInt(e.target.value) || 0 })
-                  }
+                  onChange={(e) => {
+                    setFormData({ ...formData, quantity: parseInt(e.target.value) || 0 });
+                    if (errors.quantity) setErrors({ ...errors, quantity: '' });
+                  }}
+                  className={errors.quantity ? 'border-red-500' : ''}
                   required
                 />
+                {errors.quantity && <p className="text-sm text-red-500 mt-1">{errors.quantity}</p>}
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Value</label>
+                <Label htmlFor="value" className="block text-sm font-medium text-gray-700 mb-1">Value</Label>
                 <Input
+                  id="value"
                   type="number"
                   step="0.01"
                   min="0"
                   value={formData.value}
-                  onChange={(e) => setFormData({ ...formData, value: e.target.value })}
+                  onChange={(e) => {
+                    setFormData({ ...formData, value: e.target.value });
+                    if (errors.value) setErrors({ ...errors, value: '' });
+                  }}
+                  className={errors.value ? 'border-red-500' : ''}
                 />
+                {errors.value && <p className="text-sm text-red-500 mt-1">{errors.value}</p>}
               </div>
 
               <div>

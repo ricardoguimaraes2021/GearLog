@@ -5,6 +5,8 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { toast } from '@/utils/toast';
+import { loginSchema } from '@/utils/validation';
+import { Label } from '@/components/ui/label';
 
 export default function Login() {
   const [email, setEmail] = useState('');
@@ -16,6 +18,18 @@ export default function Login() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
+
+    // Validate
+    try {
+      loginSchema.parse({ email, password });
+    } catch (err: any) {
+      if (err.errors?.[0]) {
+        const validationError = err.errors[0].message;
+        setError(validationError);
+        toast.error(validationError);
+        return;
+      }
+    }
 
     try {
       await login(email, password);
@@ -45,27 +59,33 @@ export default function Login() {
               </div>
             )}
             <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700">
+              <Label htmlFor="email" className="block text-sm font-medium text-gray-700">
                 Email
-              </label>
+              </Label>
               <Input
                 id="email"
                 type="email"
                 value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                onChange={(e) => {
+                  setEmail(e.target.value);
+                  setError('');
+                }}
                 required
                 className="mt-1"
               />
             </div>
             <div>
-              <label htmlFor="password" className="block text-sm font-medium text-gray-700">
+              <Label htmlFor="password" className="block text-sm font-medium text-gray-700">
                 Password
-              </label>
+              </Label>
               <Input
                 id="password"
                 type="password"
                 value={password}
-                onChange={(e) => setPassword(e.target.value)}
+                onChange={(e) => {
+                  setPassword(e.target.value);
+                  setError('');
+                }}
                 required
                 className="mt-1"
               />

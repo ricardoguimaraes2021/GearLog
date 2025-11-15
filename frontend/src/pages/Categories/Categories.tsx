@@ -5,6 +5,8 @@ import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Plus, Trash2, Edit } from 'lucide-react';
 import { toast } from '@/utils/toast';
+import { categorySchema } from '@/utils/validation';
+import { Label } from '@/components/ui/label';
 
 export default function Categories() {
   const { categories, isLoading, fetchCategories, createCategory, updateCategory, deleteCategory } =
@@ -12,6 +14,7 @@ export default function Categories() {
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState<number | null>(null);
   const [formData, setFormData] = useState({ name: '' });
+  const [error, setError] = useState<string>('');
 
   useEffect(() => {
     fetchCategories();
@@ -19,6 +22,19 @@ export default function Categories() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setError('');
+
+    // Validate
+    try {
+      categorySchema.parse(formData);
+    } catch (err: any) {
+      if (err.errors?.[0]) {
+        setError(err.errors[0].message);
+        toast.error('Please fix the validation error');
+        return;
+      }
+    }
+
     try {
       if (editingId) {
         await updateCategory(editingId, formData);
@@ -72,15 +88,21 @@ export default function Categories() {
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <Label htmlFor="category-name" className="block text-sm font-medium text-gray-700 mb-1">
                   Name
-                </label>
+                </Label>
                 <Input
+                  id="category-name"
                   value={formData.name}
-                  onChange={(e) => setFormData({ name: e.target.value })}
+                  onChange={(e) => {
+                    setFormData({ name: e.target.value });
+                    setError('');
+                  }}
                   placeholder="Category name"
+                  className={error ? 'border-red-500' : ''}
                   required
                 />
+                {error && <p className="text-sm text-red-500 mt-1">{error}</p>}
               </div>
               <div className="flex gap-2">
                 <Button type="submit">{editingId ? 'Update' : 'Create'}</Button>
