@@ -40,8 +40,14 @@ class CategoryController extends Controller
     {
         // Business rule: Deleting a category only allowed if no products use it
         if (!$category->canDelete()) {
+            $productCount = $category->products()->count();
             return response()->json([
-                'error' => 'Cannot delete category with associated products'
+                'error' => "Cannot delete category '{$category->name}' because it has {$productCount} associated product(s). Please reassign or delete these products first.",
+                'context' => [
+                    'category_id' => $category->id,
+                    'category_name' => $category->name,
+                    'product_count' => $productCount,
+                ],
             ], 400);
         }
 

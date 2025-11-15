@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Exceptions\BusinessRuleException;
 use App\Models\Movement;
 use App\Models\Product;
 use Illuminate\Support\Facades\DB;
@@ -29,7 +30,11 @@ class MovementService
             $newQuantity = $product->quantity + $quantityChange;
 
             if ($newQuantity < 0) {
-                throw new \Exception('Stock cannot go below zero.');
+                throw new BusinessRuleException(
+                    "Insufficient stock. Current stock: {$product->quantity}, requested: {$data['quantity']}. Stock cannot go below zero.",
+                    "Stock would go negative: current={$product->quantity}, change={$quantityChange}",
+                    ['current_quantity' => $product->quantity, 'requested_quantity' => $data['quantity'], 'movement_type' => $data['type']]
+                );
             }
 
             $product->update(['quantity' => $newQuantity]);
@@ -49,14 +54,23 @@ class MovementService
     {
         // Rule: A product with status "avariado" cannot be allocated
         if ($data['type'] === 'alocacao' && $product->status === 'avariado') {
-            throw new \Exception('Cannot allocate a damaged product.');
+            throw new BusinessRuleException(
+                "Cannot allocate product '{$product->name}' because it is marked as damaged (avariado). Please repair or remove the product first.",
+                "Product {$product->id} is damaged and cannot be allocated",
+                ['product_id' => $product->id, 'product_name' => $product->name, 'status' => $product->status]
+            );
         }
 
         // Rule: No movement may reduce stock below zero
         if (in_array($data['type'], ['saida', 'alocacao'])) {
             $quantityChange = -$data['quantity'];
             if ($product->quantity + $quantityChange < 0) {
-                throw new \Exception('Insufficient stock for this movement.');
+                $available = $product->quantity;
+                throw new BusinessRuleException(
+                    "Insufficient stock for {$data['type']}. Available: {$available} item(s), requested: {$data['quantity']} item(s).",
+                    "Insufficient stock: available={$available}, requested={$data['quantity']}",
+                    ['available_quantity' => $available, 'requested_quantity' => $data['quantity'], 'movement_type' => $data['type']]
+                );
             }
         }
     }

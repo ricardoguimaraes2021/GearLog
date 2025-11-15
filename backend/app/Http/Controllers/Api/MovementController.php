@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Exceptions\BusinessRuleException;
 use App\Http\Controllers\Controller;
 use App\Models\Product;
 use App\Services\MovementService;
@@ -32,8 +33,16 @@ class MovementController extends Controller
         try {
             $movement = $this->movementService->createMovement($product, $validated);
             return response()->json($movement->load('product'), 201);
+        } catch (BusinessRuleException $e) {
+            return response()->json([
+                'error' => $e->getUserMessage(),
+                'context' => $e->getContext(),
+            ], 400);
         } catch (\Exception $e) {
-            return response()->json(['error' => $e->getMessage()], 400);
+            return response()->json([
+                'error' => 'An unexpected error occurred while creating the movement. Please try again.',
+                'message' => config('app.debug') ? $e->getMessage() : null,
+            ], 500);
         }
     }
 }

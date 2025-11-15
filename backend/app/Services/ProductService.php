@@ -51,7 +51,11 @@ class ProductService
     {
         // Business rule: A product cannot be deleted if it still has stock
         if (!$product->canDelete()) {
-            throw new \Exception('Cannot delete product with stock remaining.');
+            throw new \App\Exceptions\BusinessRuleException(
+                "Cannot delete product '{$product->name}' because it still has {$product->quantity} item(s) in stock. Please remove all stock before deleting.",
+                "Product {$product->id} cannot be deleted: quantity = {$product->quantity}",
+                ['product_id' => $product->id, 'quantity' => $product->quantity]
+            );
         }
 
         // Delete associated files

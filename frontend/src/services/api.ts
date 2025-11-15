@@ -36,6 +36,20 @@ class ApiClient {
           localStorage.removeItem('auth_token');
           window.location.href = '/login';
         }
+        
+        // Extract user-friendly error message
+        if (error.response?.data) {
+          const data = error.response.data as any;
+          if (data.error) {
+            // Use the user-friendly error message from backend
+            error.message = data.error;
+          } else if (data.message) {
+            error.message = data.message;
+          } else if (typeof data === 'string') {
+            error.message = data;
+          }
+        }
+        
         return Promise.reject(error);
       }
     );

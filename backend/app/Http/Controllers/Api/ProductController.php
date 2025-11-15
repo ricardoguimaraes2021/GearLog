@@ -211,8 +211,16 @@ class ProductController extends Controller
         try {
             $this->productService->deleteProduct($product);
             return response()->json(['message' => 'Product deleted successfully']);
+        } catch (\App\Exceptions\BusinessRuleException $e) {
+            return response()->json([
+                'error' => $e->getUserMessage(),
+                'context' => $e->getContext(),
+            ], 400);
         } catch (\Exception $e) {
-            return response()->json(['error' => $e->getMessage()], 400);
+            return response()->json([
+                'error' => 'An unexpected error occurred while deleting the product. Please try again.',
+                'message' => config('app.debug') ? $e->getMessage() : null,
+            ], 500);
         }
     }
 
