@@ -95,11 +95,7 @@
     - Screen reader support
     - **Status**: ⚠️ Minimal
 
-17. **Internationalization (i18n)**
-    - Multi-language support
-    - **Status**: ❌ Not implemented
-
-18. **Advanced Features**
+17. **Advanced Features**
     - Bulk operations
     - Advanced reports
     - Email notifications
