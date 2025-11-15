@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ArrowLeft, Save } from 'lucide-react';
+import { toast } from '@/utils/toast';
 
 export default function ProductForm() {
   const { id } = useParams<{ id: string }>();
@@ -88,12 +89,14 @@ export default function ProductForm() {
 
       if (isEditing && id) {
         await updateProduct(parseInt(id), formDataToSend);
+        toast.success('Product updated successfully');
       } else {
         await createProduct(formDataToSend);
+        toast.success('Product created successfully');
       }
       navigate('/products');
     } catch (error: any) {
-      alert(error.response?.data?.message || 'Failed to save product');
+      toast.error(error.response?.data?.message || 'Failed to save product');
     }
   };
 

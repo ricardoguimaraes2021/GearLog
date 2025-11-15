@@ -8,6 +8,7 @@ import ProductDetail from './pages/Products/ProductDetail';
 import ProductForm from './pages/Products/ProductForm';
 import Categories from './pages/Categories/Categories';
 import Layout from './components/layout/Layout';
+import { Toaster } from './components/ui/toast';
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { isAuthenticated, isLoading, initialize } = useAuthStore();
@@ -41,8 +42,10 @@ function App() {
   }, [initialize]);
 
   return (
-    <BrowserRouter>
-      <Routes>
+    <>
+      <Toaster />
+      <BrowserRouter>
+        <Routes>
         <Route path="/login" element={<Login />} />
         <Route
           path="/"
@@ -61,7 +64,8 @@ function App() {
           <Route path="categories" element={<Categories />} />
         </Route>
       </Routes>
-    </BrowserRouter>
+      </BrowserRouter>
+    </>
   );
 }
 

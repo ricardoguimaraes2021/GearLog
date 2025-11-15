@@ -7,6 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Plus, Search, Filter, Download } from 'lucide-react';
 import type { Product } from '@/types';
+import { toast } from '@/utils/toast';
 
 export default function Products() {
   const {
@@ -44,8 +45,9 @@ export default function Products() {
     if (window.confirm('Are you sure you want to delete this product?')) {
       try {
         await deleteProduct(id);
+        toast.success('Product deleted successfully');
       } catch (error: any) {
-        alert(error.response?.data?.error || 'Failed to delete product');
+        toast.error(error.response?.data?.error || 'Failed to delete product');
       }
     }
   };
@@ -62,8 +64,9 @@ export default function Products() {
       a.click();
       window.URL.revokeObjectURL(url);
       document.body.removeChild(a);
+      toast.success('Export completed successfully');
     } catch (error) {
-      alert('Export failed');
+      toast.error('Export failed');
     }
   };
 

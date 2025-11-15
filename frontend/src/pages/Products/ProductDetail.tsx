@@ -8,6 +8,7 @@ import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ArrowLeft, Save, Plus, Edit } from 'lucide-react';
 import type { Movement } from '@/types';
+import { toast } from '@/utils/toast';
 
 export default function ProductDetail() {
   const { id } = useParams<{ id: string }>();
@@ -56,8 +57,9 @@ export default function ProductDetail() {
         assigned_to: '',
         notes: '',
       });
+      toast.success('Movement created successfully');
     } catch (error: any) {
-      alert(error.response?.data?.error || 'Failed to create movement');
+      toast.error(error.response?.data?.error || 'Failed to create movement');
     }
   };
 

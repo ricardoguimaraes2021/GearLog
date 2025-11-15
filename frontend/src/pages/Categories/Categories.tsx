@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Plus, Trash2, Edit } from 'lucide-react';
+import { toast } from '@/utils/toast';
 
 export default function Categories() {
   const { categories, isLoading, fetchCategories, createCategory, updateCategory, deleteCategory } =
@@ -27,8 +28,9 @@ export default function Categories() {
       setFormData({ name: '' });
       setShowForm(false);
       setEditingId(null);
+      toast.success(editingId ? 'Category updated successfully' : 'Category created successfully');
     } catch (error: any) {
-      alert(error.response?.data?.message || 'Failed to save category');
+      toast.error(error.response?.data?.message || 'Failed to save category');
     }
   };
 
@@ -42,8 +44,9 @@ export default function Categories() {
     if (window.confirm('Are you sure you want to delete this category?')) {
       try {
         await deleteCategory(id);
+        toast.success('Category deleted successfully');
       } catch (error: any) {
-        alert(error.response?.data?.error || 'Failed to delete category');
+        toast.error(error.response?.data?.error || 'Failed to delete category');
       }
     }
   };

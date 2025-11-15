@@ -4,6 +4,7 @@ import { useAuthStore } from '@/stores/authStore';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { toast } from '@/utils/toast';
 
 export default function Login() {
   const [email, setEmail] = useState('');
@@ -18,9 +19,12 @@ export default function Login() {
 
     try {
       await login(email, password);
+      toast.success('Login successful');
       navigate('/dashboard');
     } catch (err: any) {
-      setError(err.response?.data?.message || 'Invalid credentials');
+      const errorMessage = err.response?.data?.message || 'Invalid credentials';
+      setError(errorMessage);
+      toast.error(errorMessage);
     }
   };
 
