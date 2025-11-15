@@ -11,8 +11,10 @@ use Maatwebsite\Excel\Concerns\FromCollection;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 use Maatwebsite\Excel\Concerns\WithMapping;
 use Barryvdh\DomPDF\Facade\Pdf;
+use OpenApi\Attributes as OA;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
+#[OA\Tag(name: 'Products', description: 'Product management endpoints')]
 class ProductController extends Controller
 {
     public function __construct(
@@ -20,6 +22,21 @@ class ProductController extends Controller
     ) {
     }
 
+    #[OA\Get(
+        path: '/api/v1/products',
+        summary: 'List products',
+        tags: ['Products'],
+        security: [['bearerAuth' => []]],
+        parameters: [
+            new OA\Parameter(name: 'search', in: 'query', required: false, schema: new OA\Schema(type: 'string')),
+            new OA\Parameter(name: 'category_id', in: 'query', required: false, schema: new OA\Schema(type: 'integer')),
+            new OA\Parameter(name: 'status', in: 'query', required: false, schema: new OA\Schema(type: 'string', enum: ['novo', 'usado', 'avariado', 'reparação', 'reservado'])),
+            new OA\Parameter(name: 'page', in: 'query', required: false, schema: new OA\Schema(type: 'integer')),
+        ],
+        responses: [
+            new OA\Response(response: 200, description: 'List of products'),
+        ]
+    )]
     public function index(Request $request)
     {
         $query = Product::with(['category', 'movements']);
@@ -64,12 +81,55 @@ class ProductController extends Controller
         return response()->json($products);
     }
 
+    #[OA\Get(
+        path: '/api/v1/products/{id}',
+        summary: 'Get product details',
+        tags: ['Products'],
+        security: [['bearerAuth' => []]],
+        parameters: [
+            new OA\Parameter(name: 'id', in: 'path', required: true, schema: new OA\Schema(type: 'integer')),
+        ],
+        responses: [
+            new OA\Response(response: 200, description: 'Product details'),
+            new OA\Response(response: 404, description: 'Product not found'),
+        ]
+    )]
     public function show(Product $product)
     {
         $product->load(['category', 'movements']);
         return response()->json($product);
     }
 
+    #[OA\Post(
+        path: '/api/v1/products',
+        summary: 'Create a new product',
+        tags: ['Products'],
+        security: [['bearerAuth' => []]],
+        requestBody: new OA\RequestBody(
+            required: true,
+            content: new OA\MediaType(
+                mediaType: 'multipart/form-data',
+                schema: new OA\Schema(
+                    required: ['name', 'category_id', 'status', 'quantity'],
+                    properties: [
+                        new OA\Property(property: 'name', type: 'string'),
+                        new OA\Property(property: 'category_id', type: 'integer'),
+                        new OA\Property(property: 'brand', type: 'string'),
+                        new OA\Property(property: 'model', type: 'string'),
+                        new OA\Property(property: 'serial_number', type: 'string'),
+                        new OA\Property(property: 'status', type: 'string', enum: ['novo', 'usado', 'avariado', 'reparação', 'reservado']),
+                        new OA\Property(property: 'quantity', type: 'integer'),
+                        new OA\Property(property: 'value', type: 'number'),
+                        new OA\Property(property: 'image', type: 'string', format: 'binary'),
+                    ]
+                )
+            )
+        ),
+        responses: [
+            new OA\Response(response: 201, description: 'Product created'),
+            new OA\Response(response: 422, description: 'Validation error'),
+        ]
+    )]
     public function store(Request $request)
     {
         $validated = $request->validate([
@@ -95,6 +155,19 @@ class ProductController extends Controller
         return response()->json($product->load('category'), 201);
     }
 
+    #[OA\Put(
+        path: '/api/v1/products/{id}',
+        summary: 'Update a product',
+        tags: ['Products'],
+        security: [['bearerAuth' => []]],
+        parameters: [
+            new OA\Parameter(name: 'id', in: 'path', required: true, schema: new OA\Schema(type: 'integer')),
+        ],
+        responses: [
+            new OA\Response(response: 200, description: 'Product updated'),
+            new OA\Response(response: 404, description: 'Product not found'),
+        ]
+    )]
     public function update(Request $request, Product $product)
     {
         $validated = $request->validate([
@@ -120,6 +193,19 @@ class ProductController extends Controller
         return response()->json($product->load('category'));
     }
 
+    #[OA\Delete(
+        path: '/api/v1/products/{id}',
+        summary: 'Delete a product',
+        tags: ['Products'],
+        security: [['bearerAuth' => []]],
+        parameters: [
+            new OA\Parameter(name: 'id', in: 'path', required: true, schema: new OA\Schema(type: 'integer')),
+        ],
+        responses: [
+            new OA\Response(response: 200, description: 'Product deleted'),
+            new OA\Response(response: 400, description: 'Cannot delete product with stock'),
+        ]
+    )]
     public function destroy(Product $product)
     {
         try {
