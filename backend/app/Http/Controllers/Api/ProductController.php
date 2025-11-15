@@ -7,6 +7,10 @@ use App\Models\Product;
 use App\Services\ProductService;
 use Illuminate\Http\Request;
 use Maatwebsite\Excel\Facades\Excel;
+use Maatwebsite\Excel\Concerns\FromCollection;
+use Maatwebsite\Excel\Concerns\WithHeadings;
+use Maatwebsite\Excel\Concerns\WithMapping;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
 class ProductController extends Controller
@@ -196,14 +200,66 @@ class ProductController extends Controller
 
     protected function exportExcel($products)
     {
-        // This would use Laravel Excel - simplified for now
-        return response()->json(['message' => 'Excel export not yet implemented'], 501);
+        $export = new class($products) implements FromCollection, WithHeadings, WithMapping {
+            protected $products;
+
+            public function __construct($products)
+            {
+                $this->products = $products;
+            }
+
+            public function collection()
+            {
+                return $this->products->load('category');
+            }
+
+            public function headings(): array
+            {
+                return [
+                    'ID',
+                    'Name',
+                    'Category',
+                    'Brand',
+                    'Model',
+                    'Serial Number',
+                    'Status',
+                    'Quantity',
+                    'Value',
+                    'Purchase Date',
+                ];
+            }
+
+            public function map($product): array
+            {
+                return [
+                    $product->id,
+                    $product->name,
+                    $product->category->name ?? '',
+                    $product->brand ?? '',
+                    $product->model ?? '',
+                    $product->serial_number ?? '',
+                    $product->status,
+                    $product->quantity,
+                    $product->value ?? '',
+                    $product->purchase_date ?? '',
+                ];
+            }
+        };
+
+        $filename = 'products_' . now()->format('Y-m-d_His') . '.xlsx';
+        return Excel::download($export, $filename);
     }
 
     protected function exportPdf($products)
     {
-        // This would use a PDF library - simplified for now
-        return response()->json(['message' => 'PDF export not yet implemented'], 501);
+        $products = $products->load('category');
+        $pdf = Pdf::loadView('exports.products', [
+            'products' => $products,
+            'date' => now()->format('Y-m-d H:i:s'),
+        ]);
+
+        $filename = 'products_' . now()->format('Y-m-d_His') . '.pdf';
+        return $pdf->download($filename);
     }
 }
 
