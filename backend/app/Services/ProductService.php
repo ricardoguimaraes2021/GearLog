@@ -6,6 +6,7 @@ use App\Models\Product;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
+use Intervention\Image\Laravel\Facades\Image;
 
 class ProductService
 {
@@ -66,8 +67,25 @@ class ProductService
 
     protected function storeImage(UploadedFile $image): string
     {
-        $filename = Str::uuid() . '.' . $image->getClientOriginalExtension();
-        return $image->storeAs('products', $filename, 'public');
+        $filename = Str::uuid() . '.jpg';
+        $path = storage_path('app/public/products/' . $filename);
+        
+        // Ensure directory exists
+        $directory = dirname($path);
+        if (!is_dir($directory)) {
+            mkdir($directory, 0755, true);
+        }
+
+        // Resize and optimize image
+        $img = Image::read($image);
+        
+        // Resize to max 1200px width while maintaining aspect ratio
+        $img->scale(width: 1200);
+        
+        // Save as optimized JPEG (quality 85)
+        $img->toJpeg(85)->save($path);
+
+        return 'products/' . $filename;
     }
 }
 
