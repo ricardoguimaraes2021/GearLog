@@ -8,7 +8,50 @@ This guide explains how to publish the `GearLogSetup.exe` file to GitHub Release
 - Access to the GitHub repository: `ricardoguimaraes2021/GearLog`
 - Git installed and configured
 
+> **Important:** If you're on macOS/Linux, you cannot build a Windows .exe directly. Use **Option 1: GitHub Actions** (recommended) or build on a Windows machine.
+
 ## Step-by-Step Instructions
+
+### Option 1: Build Using GitHub Actions (Recommended for macOS/Linux Users)
+
+This is the easiest way if you're on macOS or Linux:
+
+1. **Push your code to GitHub** (if not already done):
+   ```bash
+   git add .
+   git commit -m "Prepare for release"
+   git push origin main
+   ```
+
+2. **Go to GitHub Actions:**
+   - Visit: `https://github.com/ricardoguimaraes2021/GearLog/actions`
+   - Click on "Build Windows Executable" workflow
+   - Click "Run workflow" (button on the right)
+   - Select branch: `main`
+   - Click "Run workflow" (green button)
+
+3. **Wait for the build to complete:**
+   - The workflow will build the .exe on a Windows machine
+   - Takes about 2-5 minutes
+
+4. **Download the artifact:**
+   - Once complete, click on the workflow run
+   - Scroll down to "Artifacts"
+   - Download `GearLogSetup.exe`
+
+5. **Create a Release:**
+   - Follow Step 2 below to create a release
+   - Upload the downloaded `GearLogSetup.exe`
+
+**OR** - If you create a version tag, the release will be created automatically:
+```bash
+git tag v1.0.0
+git push origin v1.0.0
+```
+
+### Option 2: Build on Windows Machine
+
+If you have access to a Windows machine:
 
 ### Step 1: Build the Executable
 
