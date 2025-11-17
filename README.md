@@ -13,6 +13,8 @@ Download and run the executable:
 - **[Download GearLogSetup.exe](https://github.com/ricardoguimaraes2021/GearLog/releases/latest/download/GearLogSetup.exe)**
 - Double-click to run (no Python required!)
 
+> **Note:** If you get a 404 error, the .exe hasn't been published yet. See `GITHUB_RELEASE_GUIDE.md` for instructions on how to publish it.
+
 #### macOS/Linux Users
 Use the Python script:
 

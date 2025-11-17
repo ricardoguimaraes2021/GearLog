@@ -57,6 +57,7 @@ When building for release, you may want to:
    - Create a new release on GitHub
    - Upload `GearLogSetup.exe` as a release asset
    - Tag the release appropriately
+   - **See `GITHUB_RELEASE_GUIDE.md` for detailed instructions**
 
 ## File Size
 
