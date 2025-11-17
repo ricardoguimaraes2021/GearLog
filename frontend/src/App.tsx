@@ -10,6 +10,7 @@ import Categories from './pages/Categories/Categories';
 import Layout from './components/layout/Layout';
 import { Toaster } from './components/ui/toast';
 import ErrorBoundary from './components/ErrorBoundary';
+import Landing from './pages/Landing/Landing';
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { isAuthenticated, isLoading, initialize } = useAuthStore();
@@ -46,25 +47,26 @@ function App() {
     <ErrorBoundary>
       <Toaster />
       <BrowserRouter>
-        <Routes>
-        <Route path="/login" element={<Login />} />
-        <Route
-          path="/"
-          element={
-            <ProtectedRoute>
-              <Layout />
-            </ProtectedRoute>
-          }
-        >
-          <Route index element={<Navigate to="/dashboard" replace />} />
-          <Route path="dashboard" element={<Dashboard />} />
-          <Route path="products" element={<Products />} />
-          <Route path="products/new" element={<ProductForm />} />
-          <Route path="products/:id" element={<ProductDetail />} />
-          <Route path="products/:id/edit" element={<ProductForm />} />
-          <Route path="categories" element={<Categories />} />
-        </Route>
-      </Routes>
+          <Routes>
+            <Route path="/landing" element={<Landing />} />
+            <Route path="/login" element={<Login />} />
+            <Route
+              path="/"
+              element={
+                <ProtectedRoute>
+                  <Layout />
+                </ProtectedRoute>
+              }
+            >
+              <Route index element={<Navigate to="/dashboard" replace />} />
+              <Route path="dashboard" element={<Dashboard />} />
+              <Route path="products" element={<Products />} />
+              <Route path="products/new" element={<ProductForm />} />
+              <Route path="products/:id" element={<ProductDetail />} />
+              <Route path="products/:id/edit" element={<ProductForm />} />
+              <Route path="categories" element={<Categories />} />
+            </Route>
+          </Routes>
       </BrowserRouter>
     </ErrorBoundary>
   );
