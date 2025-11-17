@@ -1,6 +1,6 @@
 # GitHub Release Guide
 
-Complete guide for creating releases and publishing the Windows executable. - Publishing the .exe
+Complete guide for creating releases and publishing the Windows executable.
 
 This guide explains how to publish the `GearLogSetup.exe` file to GitHub Releases so users can download it.
 

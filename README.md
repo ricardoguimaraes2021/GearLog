@@ -132,20 +132,49 @@ After seeding, you can login with:
 
 ```
 GearLog/
-├── backend/          # Laravel 11 API
-├── frontend/         # React 18 + Vite application
-├── docs/             # Additional documentation
-├── README.md         # This file
-├── PROJECT_PLAN.md   # Detailed architecture
-└── IMPROVEMENTS.md   # Future improvements
+├── backend/                      # Laravel 11 API
+│   ├── app/                      # Application code
+│   ├── database/                 # Migrations, seeders
+│   ├── routes/                   # API routes
+│   └── ...
+├── frontend/                     # React 18 + Vite application
+│   ├── src/                      # Source code
+│   ├── public/                   # Static assets
+│   └── ...
+├── docs/                         # 📚 Documentation
+│   ├── SETUP.md                  # Manual setup guide
+│   └── RELEASE_DESCRIPTION.md    # Release description template
+├── .github/                      # GitHub workflows
+│   └── workflows/
+│       └── build-exe.yml         # Windows .exe build automation
+├── README.md                     # 📖 Main documentation (this file)
+├── PROJECT_PLAN.md               # 🏗️ Architecture & design
+├── IMPROVEMENTS.md               # 🚀 Future roadmap
+├── MANUAL_SETUP_WINDOWS.md       # 🪟 Windows setup guide
+├── FIX_DATABASE.md               # 🔧 Database troubleshooting
+├── BUILD_INSTRUCTIONS.md         # 🛠️ Build .exe instructions
+├── GITHUB_RELEASE_GUIDE.md       # 📤 Release publishing guide
+├── setup.py                      # 🐍 Automated setup (Python)
+├── setup.sh                      # 🐚 Automated setup (Bash)
+├── build_exe.py                  # 🔨 Build Windows .exe
+└── requirements-build.txt        # 📦 Build dependencies
 ```
 
 ## 📚 Documentation
 
+### Essential Guides
 - **[PROJECT_PLAN.md](./PROJECT_PLAN.md)** - Complete architecture, API endpoints, and database schema
 - **[IMPROVEMENTS.md](./IMPROVEMENTS.md)** - Future improvements and feature roadmap
-- **[docs/SETUP.md](./docs/SETUP.md)** - Detailed setup instructions
-- **[docs/](./docs/)** - Additional documentation and guides
+- **[docs/SETUP.md](./docs/SETUP.md)** - Manual setup instructions
+
+### Setup & Troubleshooting
+- **[MANUAL_SETUP_WINDOWS.md](./MANUAL_SETUP_WINDOWS.md)** - Windows-specific setup guide (PHP extensions, MySQL, etc.)
+- **[FIX_DATABASE.md](./FIX_DATABASE.md)** - Database troubleshooting guide
+
+### Build & Release
+- **[BUILD_INSTRUCTIONS.md](./BUILD_INSTRUCTIONS.md)** - Instructions for building the Windows executable
+- **[GITHUB_RELEASE_GUIDE.md](./GITHUB_RELEASE_GUIDE.md)** - Complete guide for creating GitHub releases
+- **[docs/RELEASE_DESCRIPTION.md](./docs/RELEASE_DESCRIPTION.md)** - Release description template
 
 ## 🔧 Development
 
