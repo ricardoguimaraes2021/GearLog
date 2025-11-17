@@ -167,6 +167,39 @@ export default function TicketDashboard() {
     },
   ];
 
+  const slaKpiCards = data.kpis.sla_violated_tickets !== undefined ? [
+    {
+      title: 'SLA Violated',
+      value: data.kpis.sla_violated_tickets || 0,
+      icon: ShieldAlert,
+      color: 'text-red-600',
+    },
+    {
+      title: 'First Response Violated',
+      value: data.kpis.first_response_violated || 0,
+      icon: AlertTriangle,
+      color: 'text-red-600',
+    },
+    {
+      title: 'Resolution Violated',
+      value: data.kpis.resolution_violated || 0,
+      icon: AlertTriangle,
+      color: 'text-red-600',
+    },
+    {
+      title: 'SLA At Risk',
+      value: data.kpis.sla_at_risk || 0,
+      icon: AlertTriangle,
+      color: 'text-orange-600',
+    },
+    {
+      title: 'SLA Compliance',
+      value: `${data.kpis.sla_compliance_rate || 0}%`,
+      icon: CheckCircle2,
+      color: 'text-green-600',
+    },
+  ] : [];
+
   return (
     <div className="space-y-6">
       <div>
@@ -175,7 +208,9 @@ export default function TicketDashboard() {
       </div>
 
       {/* KPIs */}
-      <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
+      <div>
+        <h2 className="text-xl font-semibold text-gray-900 mb-4">Ticket Overview</h2>
+        <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
         {kpiCards.map((kpi) => {
           const Icon = kpi.icon;
           return (
@@ -191,6 +226,30 @@ export default function TicketDashboard() {
           );
         })}
       </div>
+      </div>
+
+      {/* SLA KPIs */}
+      {slaKpiCards.length > 0 && (
+        <div>
+          <h2 className="text-xl font-semibold text-gray-900 mb-4">SLA Metrics</h2>
+          <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-5">
+            {slaKpiCards.map((kpi) => {
+              const Icon = kpi.icon;
+              return (
+                <Card key={kpi.title}>
+                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                    <CardTitle className="text-sm font-medium">{kpi.title}</CardTitle>
+                    <Icon className={`h-4 w-4 ${kpi.color}`} />
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-2xl font-bold">{kpi.value}</div>
+                  </CardContent>
+                </Card>
+              );
+            })}
+          </div>
+        </div>
+      )}
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Tickets by Status */}
