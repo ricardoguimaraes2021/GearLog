@@ -5,8 +5,10 @@ const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000/api/
 
 class ApiClient {
   private client: AxiosInstance;
+  private baseURL: string;
 
   constructor() {
+    this.baseURL = import.meta.env.VITE_API_URL?.replace('/api/v1', '') || 'http://localhost:8000';
     this.client = axios.create({
       baseURL: API_BASE_URL,
       headers: {
@@ -16,13 +18,50 @@ class ApiClient {
       withCredentials: true,
     });
 
-    // Request interceptor to add auth token
+    // Helper to get CSRF token from cookie
+    const getCsrfToken = () => {
+      const value = `; ${document.cookie}`;
+      const parts = value.split(`; XSRF-TOKEN=`);
+      if (parts.length === 2) {
+        const token = parts.pop()?.split(';').shift();
+        return token ? decodeURIComponent(token) : null;
+      }
+      return null;
+    };
+
+    // Request interceptor to add auth token and CSRF token
     this.client.interceptors.request.use(
-      (config) => {
+      async (config) => {
+        // Add auth token
         const token = localStorage.getItem('auth_token');
         if (token) {
           config.headers.Authorization = `Bearer ${token}`;
         }
+
+        // For state-changing requests, ensure CSRF token is available
+        if (['post', 'put', 'patch', 'delete'].includes(config.method?.toLowerCase() || '')) {
+          // Get CSRF token from cookie
+          let csrfToken = getCsrfToken();
+          
+          // If no CSRF token, fetch it first
+          if (!csrfToken) {
+            try {
+              await axios.get(`${this.baseURL}/sanctum/csrf-cookie`, {
+                withCredentials: true,
+                headers: { 'Accept': 'application/json' },
+              });
+              csrfToken = getCsrfToken();
+            } catch (error) {
+              console.warn('Failed to fetch CSRF cookie:', error);
+            }
+          }
+
+          // Add X-XSRF-TOKEN header if token exists
+          if (csrfToken) {
+            config.headers['X-XSRF-TOKEN'] = csrfToken;
+          }
+        }
+
         return config;
       },
       (error) => Promise.reject(error)
@@ -31,7 +70,29 @@ class ApiClient {
     // Response interceptor for error handling
     this.client.interceptors.response.use(
       (response) => response,
-      (error: AxiosError) => {
+      async (error: AxiosError) => {
+        // Handle CSRF token mismatch - retry once after fetching new token
+        if (error.response?.status === 419 || error.response?.status === 403) {
+          const errorData = error.response.data as any;
+          if (errorData?.message?.includes('CSRF') || errorData?.message?.includes('419')) {
+            // Fetch new CSRF token and retry
+            try {
+              await this.ensureCsrfToken();
+              // Retry the original request
+              const config = error.config;
+              if (config) {
+                const csrfToken = this.getCsrfToken();
+                if (csrfToken && config.headers) {
+                  config.headers['X-XSRF-TOKEN'] = csrfToken;
+                }
+                return this.client.request(config);
+              }
+            } catch (retryError) {
+              // If retry fails, continue with original error
+            }
+          }
+        }
+
         if (error.response?.status === 401) {
           localStorage.removeItem('auth_token');
           window.location.href = '/login';
@@ -53,6 +114,24 @@ class ApiClient {
         return Promise.reject(error);
       }
     );
+  }
+
+  // Helper methods for CSRF token management
+  private getCsrfToken(): string | null {
+    const value = `; ${document.cookie}`;
+    const parts = value.split(`; XSRF-TOKEN=`);
+    if (parts.length === 2) {
+      const token = parts.pop()?.split(';').shift();
+      return token ? decodeURIComponent(token) : null;
+    }
+    return null;
+  }
+
+  private async ensureCsrfToken(): Promise<void> {
+    await axios.get(`${this.baseURL}/sanctum/csrf-cookie`, {
+      withCredentials: true,
+      headers: { 'Accept': 'application/json' },
+    });
   }
 
   // Auth
@@ -146,9 +225,20 @@ class ApiClient {
 
   async updateProduct(id: number, data: FormData) {
     data.append('_method', 'PUT');
-    const response = await this.client.post<Product>(`/products/${id}`, data, {
-      headers: { 'Content-Type': 'multipart/form-data' },
-    });
+    
+    // Ensure CSRF token is available
+    const csrfToken = this.getCsrfToken();
+    if (!csrfToken) {
+      await this.ensureCsrfToken();
+    }
+
+    const headers: Record<string, string> = { 'Content-Type': 'multipart/form-data' };
+    const token = this.getCsrfToken();
+    if (token) {
+      headers['X-XSRF-TOKEN'] = token;
+    }
+
+    const response = await this.client.post<Product>(`/products/${id}`, data, { headers });
     return response.data;
   }
 
