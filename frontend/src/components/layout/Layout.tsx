@@ -3,6 +3,7 @@ import { useAuthStore } from '@/stores/authStore';
 import { Button } from '@/components/ui/button';
 import { LayoutDashboard, Package, FolderTree, Ticket, LogOut, Menu, X } from 'lucide-react';
 import { useState } from 'react';
+import NotificationBell from '@/components/notifications/NotificationBell';
 
 export default function Layout() {
   const { user, logout } = useAuthStore();
@@ -76,8 +77,9 @@ export default function Layout() {
                 </Button>
               </div>
             </div>
-            {/* Desktop user info and logout */}
+            {/* Desktop user info, notifications and logout */}
             <div className="hidden sm:flex items-center space-x-4">
+              <NotificationBell />
               <span className="text-sm text-gray-700">{user?.name}</span>
               <Button variant="ghost" size="sm" onClick={handleLogout}>
                 <LogOut className="w-4 h-4 mr-2" />

@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import { api } from '@/services/api';
 import type { User } from '@/types';
+import { useNotificationStore } from './notificationStore';
 
 interface AuthState {
   user: User | null;
@@ -24,6 +25,12 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     try {
       const { user, token } = await api.login(email, password);
       set({ user, token, isAuthenticated: true, isLoading: false });
+      
+      // Initialize Echo for real-time notifications
+      if (token) {
+        useNotificationStore.getState().initializeEcho(token);
+        useNotificationStore.getState().fetchUnreadCount();
+      }
     } catch (error) {
       set({ isLoading: false });
       throw error;
@@ -36,6 +43,9 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     } catch (error) {
       console.error('Logout error:', error);
     } finally {
+      // Disconnect Echo
+      useNotificationStore.getState().disconnectEcho();
+      
       set({ user: null, token: null, isAuthenticated: false });
       localStorage.removeItem('auth_token');
     }
@@ -56,6 +66,12 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     const token = localStorage.getItem('auth_token');
     if (token) {
       await get().fetchUser();
+      
+      // Initialize Echo if user is authenticated
+      if (get().isAuthenticated && token) {
+        useNotificationStore.getState().initializeEcho(token);
+        useNotificationStore.getState().fetchUnreadCount();
+      }
     } else {
       set({ isAuthenticated: false, isLoading: false });
     }
