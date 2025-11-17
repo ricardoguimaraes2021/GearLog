@@ -142,10 +142,20 @@ class ProductController extends Controller
             'quantity' => 'required|integer|min:0',
             'value' => 'nullable|numeric|min:0',
             'purchase_date' => 'nullable|date',
-            'specs' => 'nullable|array',
+            'specs' => 'nullable|json',
             'description' => 'nullable|string',
             'image' => 'nullable|image|max:2048',
         ]);
+
+        // Parse specs if it's a JSON string
+        if (isset($validated['specs']) && is_string($validated['specs'])) {
+            $validated['specs'] = json_decode($validated['specs'], true) ?? [];
+        }
+        
+        // Remove specs if it's empty
+        if (empty($validated['specs'])) {
+            unset($validated['specs']);
+        }
 
         $image = $request->hasFile('image') ? $request->file('image') : null;
         unset($validated['image']);
@@ -180,10 +190,20 @@ class ProductController extends Controller
             'quantity' => 'sometimes|required|integer|min:0',
             'value' => 'nullable|numeric|min:0',
             'purchase_date' => 'nullable|date',
-            'specs' => 'nullable|array',
+            'specs' => 'nullable|json',
             'description' => 'nullable|string',
             'image' => 'nullable|image|max:2048',
         ]);
+
+        // Parse specs if it's a JSON string
+        if (isset($validated['specs']) && is_string($validated['specs'])) {
+            $validated['specs'] = json_decode($validated['specs'], true) ?? [];
+        }
+        
+        // Remove specs if it's empty
+        if (empty($validated['specs'])) {
+            unset($validated['specs']);
+        }
 
         $image = $request->hasFile('image') ? $request->file('image') : null;
         unset($validated['image']);
