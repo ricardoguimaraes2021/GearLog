@@ -154,7 +154,7 @@ class TicketController extends Controller
     {
         $this->authorize('view', $ticket);
         
-        $ticket->load(['product', 'openedBy', 'assignedTo', 'comments.user', 'logs.user']);
+        $ticket->load(['product', 'employee', 'openedBy', 'assignedTo', 'comments.user', 'logs.user']);
         
         // Add SLA information
         $slaInfo = [
