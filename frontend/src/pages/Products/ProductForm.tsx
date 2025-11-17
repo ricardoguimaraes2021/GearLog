@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useProductStore } from '@/stores/productStore';
 import { useCategoryStore } from '@/stores/categoryStore';
+import { api } from '@/services/api';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -59,7 +60,7 @@ export default function ProductForm() {
         specs: currentProduct.specs || undefined,
       });
       if (currentProduct.image_url) {
-        setImagePreview(`http://localhost:8000/storage/${currentProduct.image_url}`);
+        setImagePreview(api.getStorageUrl(currentProduct.image_url) || '');
       }
     }
   }, [currentProduct, isEditing]);

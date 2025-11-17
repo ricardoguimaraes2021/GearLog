@@ -277,12 +277,30 @@ class ApiClient {
     return response.data;
   }
 
-  // Dashboard
-  async getDashboard() {
-    const response = await this.client.get<DashboardData>('/dashboard');
-    return response.data;
-  }
-}
+    // Dashboard
+    async getDashboard() {
+      const response = await this.client.get<DashboardData>('/dashboard');
+      return response.data;
+    }
 
-export const api = new ApiClient();
+    // Helper method to get full URL for storage files
+    getStorageUrl(path: string | null | undefined): string | null {
+      if (!path) return null;
+      
+      // If it's already a full URL, return as is
+      if (path.startsWith('http://') || path.startsWith('https://')) {
+        return path;
+      }
+      
+      // If it starts with /storage, just prepend the base URL
+      if (path.startsWith('/storage')) {
+        return `${this.baseURL}${path}`;
+      }
+      
+      // Otherwise, assume it's a relative path and prepend /storage
+      return `${this.baseURL}/storage/${path}`;
+    }
+  }
+
+  export const api = new ApiClient();
 

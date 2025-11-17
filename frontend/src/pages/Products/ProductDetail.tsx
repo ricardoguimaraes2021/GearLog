@@ -191,7 +191,7 @@ export default function ProductDetail() {
                   <label className="text-sm font-medium text-gray-500">QR Code</label>
                   <div className="mt-2">
                     <img
-                      src={`http://localhost:8000/storage/${currentProduct.qr_code_url}`}
+                      src={api.getStorageUrl(currentProduct.qr_code_url) || ''}
                       alt="QR Code"
                       className="w-32 h-32"
                     />
@@ -324,7 +324,7 @@ export default function ProductDetail() {
               </CardHeader>
               <CardContent>
                 <img
-                  src={`http://localhost:8000/storage/${currentProduct.image_url}`}
+                  src={api.getStorageUrl(currentProduct.image_url) || ''}
                   alt={currentProduct.name}
                   className="w-full rounded-lg"
                 />
