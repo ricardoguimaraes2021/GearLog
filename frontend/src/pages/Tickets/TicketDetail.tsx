@@ -4,7 +4,7 @@ import { useTicketStore, type TicketComment } from '@/stores/ticketStore';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { ArrowLeft, Edit, MessageSquare, Send, User, Clock, Paperclip, X, Download } from 'lucide-react';
+import { ArrowLeft, Edit, MessageSquare, Send, User, Clock, Paperclip, X, Download, AlertCircle, CheckCircle2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Textarea } from '@/components/ui/textarea';
@@ -232,6 +232,94 @@ export default function TicketDetail() {
               </CardHeader>
               <CardContent>
                 <p className="whitespace-pre-wrap">{currentTicket.resolution}</p>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* SLA Information */}
+          {currentTicket.sla && (
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Clock className="w-5 h-5" />
+                  SLA Status
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                {/* First Response SLA */}
+                <div className="border rounded-lg p-4">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="font-medium">First Response</span>
+                    {currentTicket.sla.first_response_violated ? (
+                      <span className="flex items-center gap-1 text-red-600 text-sm font-medium">
+                        <AlertCircle className="w-4 h-4" />
+                        Violated
+                      </span>
+                    ) : currentTicket.sla.sla_at_risk.first_response ? (
+                      <span className="flex items-center gap-1 text-orange-600 text-sm font-medium">
+                        <AlertCircle className="w-4 h-4" />
+                        At Risk
+                      </span>
+                    ) : currentTicket.first_response_at ? (
+                      <span className="flex items-center gap-1 text-green-600 text-sm font-medium">
+                        <CheckCircle2 className="w-4 h-4" />
+                        Responded
+                      </span>
+                    ) : (
+                      <span className="text-gray-600 text-sm">Pending</span>
+                    )}
+                  </div>
+                  {currentTicket.first_response_deadline && (
+                    <div className="text-sm text-gray-600">
+                      <div>Deadline: {new Date(currentTicket.first_response_deadline).toLocaleString()}</div>
+                      {currentTicket.first_response_at && (
+                        <div className="text-green-600 mt-1">
+                          Responded: {new Date(currentTicket.first_response_at).toLocaleString()}
+                        </div>
+                      )}
+                      {currentTicket.sla.time_remaining_first_response !== null && !currentTicket.first_response_at && (
+                        <div className={`mt-1 ${currentTicket.sla.time_remaining_first_response < 60 ? 'text-red-600' : 'text-gray-600'}`}>
+                          Time remaining: {Math.floor(currentTicket.sla.time_remaining_first_response / 60)}h {currentTicket.sla.time_remaining_first_response % 60}m
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
+
+                {/* Resolution SLA */}
+                <div className="border rounded-lg p-4">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="font-medium">Resolution</span>
+                    {currentTicket.sla.resolution_violated ? (
+                      <span className="flex items-center gap-1 text-red-600 text-sm font-medium">
+                        <AlertCircle className="w-4 h-4" />
+                        Violated
+                      </span>
+                    ) : currentTicket.sla.sla_at_risk.resolution ? (
+                      <span className="flex items-center gap-1 text-orange-600 text-sm font-medium">
+                        <AlertCircle className="w-4 h-4" />
+                        At Risk
+                      </span>
+                    ) : ['resolved', 'closed'].includes(currentTicket.status) ? (
+                      <span className="flex items-center gap-1 text-green-600 text-sm font-medium">
+                        <CheckCircle2 className="w-4 h-4" />
+                        Resolved
+                      </span>
+                    ) : (
+                      <span className="text-gray-600 text-sm">In Progress</span>
+                    )}
+                  </div>
+                  {currentTicket.resolution_deadline && (
+                    <div className="text-sm text-gray-600">
+                      <div>Deadline: {new Date(currentTicket.resolution_deadline).toLocaleString()}</div>
+                      {currentTicket.sla.time_remaining_resolution !== null && !['resolved', 'closed'].includes(currentTicket.status) && (
+                        <div className={`mt-1 ${currentTicket.sla.time_remaining_resolution < 120 ? 'text-red-600' : 'text-gray-600'}`}>
+                          Time remaining: {Math.floor(currentTicket.sla.time_remaining_resolution / 60)}h {currentTicket.sla.time_remaining_resolution % 60}m
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
               </CardContent>
             </Card>
           )}

@@ -28,6 +28,20 @@ export interface Ticket {
   description: string;
   resolution?: string;
   attachments?: string[];
+  first_response_deadline?: string;
+  resolution_deadline?: string;
+  first_response_at?: string;
+  sla_violated?: boolean;
+  sla?: {
+    first_response_violated: boolean;
+    resolution_violated: boolean;
+    sla_at_risk: {
+      first_response: boolean;
+      resolution: boolean;
+    };
+    time_remaining_first_response: number | null;
+    time_remaining_resolution: number | null;
+  };
   created_at: string;
   updated_at: string;
   comments?: TicketComment[];

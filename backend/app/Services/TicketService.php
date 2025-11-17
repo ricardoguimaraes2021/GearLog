@@ -10,6 +10,11 @@ use Illuminate\Support\Facades\DB;
 
 class TicketService
 {
+    public function __construct(
+        protected SlaService $slaService
+    ) {
+    }
+
     public function createTicket(array $data, int $userId): Ticket
     {
         return DB::transaction(function () use ($data, $userId) {
@@ -23,6 +28,13 @@ class TicketService
                 'status' => 'open',
                 'description' => $data['description'],
                 'attachments' => $data['attachments'] ?? [],
+            ]);
+
+            // Calculate and set SLA deadlines
+            $deadlines = $this->slaService->calculateDeadlines($ticket);
+            $ticket->update([
+                'first_response_deadline' => $deadlines['first_response_deadline'],
+                'resolution_deadline' => $deadlines['resolution_deadline'],
             ]);
 
             // If ticket is for damage and has a product, mark product as damaged

@@ -6,6 +6,7 @@ use App\Exceptions\BusinessRuleException;
 use App\Http\Controllers\Controller;
 use App\Models\Ticket;
 use App\Services\TicketService;
+use App\Services\SlaService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
@@ -13,7 +14,8 @@ use Illuminate\Support\Facades\Storage;
 class TicketController extends Controller
 {
     public function __construct(
-        protected TicketService $ticketService
+        protected TicketService $ticketService,
+        protected SlaService $slaService
     ) {
     }
 
@@ -122,7 +124,20 @@ class TicketController extends Controller
         $this->authorize('view', $ticket);
         
         $ticket->load(['product', 'openedBy', 'assignedTo', 'comments.user', 'logs.user']);
-        return response()->json($ticket);
+        
+        // Add SLA information
+        $slaInfo = [
+            'first_response_violated' => $this->slaService->isFirstResponseViolated($ticket),
+            'resolution_violated' => $this->slaService->isResolutionViolated($ticket),
+            'sla_at_risk' => $this->slaService->isSlaAtRisk($ticket),
+            'time_remaining_first_response' => $this->slaService->getTimeRemaining($ticket, 'first_response'),
+            'time_remaining_resolution' => $this->slaService->getTimeRemaining($ticket, 'resolution'),
+        ];
+        
+        $ticketData = $ticket->toArray();
+        $ticketData['sla'] = $slaInfo;
+        
+        return response()->json($ticketData);
     }
 
     public function update(Request $request, Ticket $ticket)

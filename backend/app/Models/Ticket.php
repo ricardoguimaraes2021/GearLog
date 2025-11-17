@@ -22,12 +22,20 @@ class Ticket extends Model
         'description',
         'resolution',
         'attachments',
+        'first_response_deadline',
+        'resolution_deadline',
+        'first_response_at',
+        'sla_violated',
     ];
 
     protected $casts = [
         'attachments' => 'array',
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
+        'first_response_deadline' => 'datetime',
+        'resolution_deadline' => 'datetime',
+        'first_response_at' => 'datetime',
+        'sla_violated' => 'boolean',
     ];
 
     public function product(): BelongsTo

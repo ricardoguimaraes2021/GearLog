@@ -6,12 +6,18 @@ use App\Http\Controllers\Controller;
 use App\Models\Ticket;
 use App\Models\TicketComment;
 use App\Models\TicketLog;
+use App\Services\SlaService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 
 class TicketCommentController extends Controller
 {
+    public function __construct(
+        protected SlaService $slaService
+    ) {
+    }
+
     public function index(Ticket $ticket)
     {
         $this->authorize('view', $ticket);
@@ -49,6 +55,11 @@ class TicketCommentController extends Controller
             'message' => $validated['message'],
             'attachments' => $allAttachments,
         ]);
+
+        // Track first response if this is the first comment/response
+        if (!$ticket->first_response_at && $ticket->opened_by !== Auth::id()) {
+            $ticket->update(['first_response_at' => now()]);
+        }
 
         TicketLog::create([
             'ticket_id' => $ticket->id,

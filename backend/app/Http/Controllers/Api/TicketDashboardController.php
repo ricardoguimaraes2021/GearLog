@@ -4,11 +4,17 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\Ticket;
+use App\Services\SlaService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
 class TicketDashboardController extends Controller
 {
+    public function __construct(
+        protected SlaService $slaService
+    ) {
+    }
+
     public function index()
     {
         // Total tickets by status
@@ -92,26 +98,69 @@ class TicketDashboardController extends Controller
             ->limit(10)
             ->get();
 
-        // Tickets by category (for damage tickets)
-        $ticketsByCategory = Ticket::select('categories.name', DB::raw('count(*) as count'))
-            ->join('products', 'tickets.product_id', '=', 'products.id')
-            ->join('categories', 'products.category_id', '=', 'categories.id')
-            ->where('tickets.type', 'damage')
-            ->groupBy('categories.id', 'categories.name')
-            ->orderBy('count', 'desc')
-            ->get();
+            // Tickets by category (for damage tickets)
+            $ticketsByCategory = Ticket::select('categories.name', DB::raw('count(*) as count'))
+                ->join('products', 'tickets.product_id', '=', 'products.id')
+                ->join('categories', 'products.category_id', '=', 'categories.id')
+                ->where('tickets.type', 'damage')
+                ->groupBy('categories.id', 'categories.name')
+                ->orderBy('count', 'desc')
+                ->get();
 
-        return response()->json([
-            'kpis' => [
-                'total_tickets' => $totalTickets,
-                'open_tickets' => $openTickets,
-                'in_progress_tickets' => $inProgressTickets,
-                'critical_tickets' => $criticalTickets,
-                'unassigned_tickets' => $unassignedTickets,
-                'resolved_tickets' => $resolvedCount,
-                'resolution_rate' => $resolutionRate,
-                'average_resolution_time_minutes' => $averageResolutionTime,
-            ],
+            // SLA Metrics
+            $slaViolatedTickets = Ticket::where('sla_violated', true)
+                ->whereIn('status', ['open', 'in_progress', 'waiting_parts'])
+                ->count();
+
+            $firstResponseViolated = Ticket::whereNull('first_response_at')
+                ->whereNotNull('first_response_deadline')
+                ->where('first_response_deadline', '<', now())
+                ->whereIn('status', ['open', 'in_progress', 'waiting_parts'])
+                ->count();
+
+            $resolutionViolated = Ticket::whereNotIn('status', ['resolved', 'closed'])
+                ->whereNotNull('resolution_deadline')
+                ->where('resolution_deadline', '<', now())
+                ->count();
+
+            $slaAtRisk = Ticket::whereIn('status', ['open', 'in_progress', 'waiting_parts'])
+                ->get()
+                ->filter(function ($ticket) {
+                    $risks = $this->slaService->isSlaAtRisk($ticket);
+                    return $risks['first_response'] || $risks['resolution'];
+                })
+                ->count();
+
+            // SLA Compliance Rate (tickets resolved within SLA)
+            $resolvedWithinSla = Ticket::whereIn('status', ['resolved', 'closed'])
+                ->whereNotNull('resolution_deadline')
+                ->get()
+                ->filter(function ($ticket) {
+                    return $ticket->updated_at && $ticket->updated_at->lte($ticket->resolution_deadline);
+                })
+                ->count();
+
+            $totalResolved = Ticket::whereIn('status', ['resolved', 'closed'])->count();
+            $slaComplianceRate = $totalResolved > 0 
+                ? round(($resolvedWithinSla / $totalResolved) * 100, 2) 
+                : 0;
+
+            return response()->json([
+                'kpis' => [
+                    'total_tickets' => $totalTickets,
+                    'open_tickets' => $openTickets,
+                    'in_progress_tickets' => $inProgressTickets,
+                    'critical_tickets' => $criticalTickets,
+                    'unassigned_tickets' => $unassignedTickets,
+                    'resolved_tickets' => $resolvedCount,
+                    'resolution_rate' => $resolutionRate,
+                    'average_resolution_time_minutes' => $averageResolutionTime,
+                    'sla_violated_tickets' => $slaViolatedTickets,
+                    'first_response_violated' => $firstResponseViolated,
+                    'resolution_violated' => $resolutionViolated,
+                    'sla_at_risk' => $slaAtRisk,
+                    'sla_compliance_rate' => $slaComplianceRate,
+                ],
             'by_status' => $ticketsByStatus,
             'by_priority' => $ticketsByPriority,
             'by_type' => $ticketsByType,

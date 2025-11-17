@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Ticket, AlertTriangle, Clock, User, TrendingUp, Package, FolderTree } from 'lucide-react';
+import { Ticket, AlertTriangle, Clock, User, TrendingUp, Package, FolderTree, ShieldAlert, CheckCircle2 } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { api } from '@/services/api';
 import { toast } from 'sonner';
@@ -16,6 +16,11 @@ interface TicketDashboardData {
     resolved_tickets: number;
     resolution_rate: number;
     average_resolution_time_minutes: number;
+    sla_violated_tickets?: number;
+    first_response_violated?: number;
+    resolution_violated?: number;
+    sla_at_risk?: number;
+    sla_compliance_rate?: number;
   };
   by_status: Record<string, number>;
   by_priority: Record<string, number>;
