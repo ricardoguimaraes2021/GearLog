@@ -45,7 +45,21 @@ export default function ProductDetail() {
 
   const handleCreateMovement = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!id) return;
+    if (!id || !currentProduct) return;
+
+    // Validate quantity before submitting
+    if (['saida', 'alocacao'].includes(movementData.type)) {
+      if (movementData.quantity > currentProduct.quantity) {
+        toast.error(
+          `Insufficient stock. Available: ${currentProduct.quantity}, requested: ${movementData.quantity}`
+        );
+        return;
+      }
+      if (movementData.quantity <= 0) {
+        toast.error('Quantity must be greater than 0');
+        return;
+      }
+    }
 
     try {
       await api.createMovement(parseInt(id), movementData);
@@ -223,9 +237,16 @@ export default function ProductDetail() {
                       <label className="block text-sm font-medium mb-1">Type</label>
                       <select
                         value={movementData.type}
-                        onChange={(e) =>
-                          setMovementData({ ...movementData, type: e.target.value as Movement['type'] })
-                        }
+                        onChange={(e) => {
+                          const newType = e.target.value as Movement['type'];
+                          // Reset quantity to 1 when changing movement type
+                          // If changing to exit/allocation and current quantity exceeds available, set to max available
+                          let newQuantity = 1;
+                          if (['saida', 'alocacao'].includes(newType) && currentProduct) {
+                            newQuantity = Math.min(movementData.quantity, currentProduct.quantity) || 1;
+                          }
+                          setMovementData({ ...movementData, type: newType, quantity: newQuantity });
+                        }}
                         className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
                         required
                       >
@@ -236,16 +257,44 @@ export default function ProductDetail() {
                       </select>
                     </div>
                     <div>
-                      <label className="block text-sm font-medium mb-1">Quantity</label>
+                      <label className="block text-sm font-medium mb-1">
+                        Quantity
+                        {['saida', 'alocacao'].includes(movementData.type) && currentProduct && (
+                          <span className="text-xs text-gray-500 ml-2">
+                            (Available: {currentProduct.quantity})
+                          </span>
+                        )}
+                      </label>
                       <Input
                         type="number"
                         min="1"
-                        value={movementData.quantity}
-                        onChange={(e) =>
-                          setMovementData({ ...movementData, quantity: parseInt(e.target.value) })
+                        max={
+                          ['saida', 'alocacao'].includes(movementData.type) && currentProduct
+                            ? currentProduct.quantity
+                            : undefined
                         }
+                        value={movementData.quantity}
+                        onChange={(e) => {
+                          const value = parseInt(e.target.value) || 0;
+                          // Validate max quantity for exit/allocation movements
+                          if (['saida', 'alocacao'].includes(movementData.type) && currentProduct) {
+                            const maxQuantity = currentProduct.quantity;
+                            if (value > maxQuantity) {
+                              toast.error(`Maximum quantity available is ${maxQuantity}`);
+                              return;
+                            }
+                          }
+                          setMovementData({ ...movementData, quantity: value });
+                        }}
                         required
                       />
+                      {['saida', 'alocacao'].includes(movementData.type) &&
+                        currentProduct &&
+                        movementData.quantity > currentProduct.quantity && (
+                          <p className="text-sm text-red-500 mt-1">
+                            Quantity cannot exceed available stock ({currentProduct.quantity})
+                          </p>
+                        )}
                     </div>
                     <div className="col-span-2">
                       <label className="block text-sm font-medium mb-1">Assigned To</label>

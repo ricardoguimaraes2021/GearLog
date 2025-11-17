@@ -13,6 +13,9 @@ class MovementService
     public function createMovement(Product $product, array $data): Movement
     {
         return DB::transaction(function () use ($product, $data) {
+            // Refresh product to get latest quantity (prevent race conditions)
+            $product->refresh();
+
             // Validate business rules
             $this->validateMovement($product, $data);
 
@@ -29,6 +32,7 @@ class MovementService
             $quantityChange = $this->calculateQuantityChange($data['type'], $data['quantity']);
             $newQuantity = $product->quantity + $quantityChange;
 
+            // Double-check before updating (additional safety check)
             if ($newQuantity < 0) {
                 throw new BusinessRuleException(
                     "Insufficient stock. Current stock: {$product->quantity}, requested: {$data['quantity']}. Stock cannot go below zero.",
