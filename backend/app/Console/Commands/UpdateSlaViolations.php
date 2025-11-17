@@ -28,6 +28,16 @@ class UpdateSlaViolations extends Command
             if ($ticket->sla_violated !== $shouldBeViolated) {
                 $ticket->update(['sla_violated' => $shouldBeViolated]);
                 $violated++;
+                
+                // Fire SLA violation events if newly violated
+                if ($shouldBeViolated && !$ticket->sla_violated) {
+                    if ($firstResponseViolated) {
+                        event(new \App\Events\SlaViolated($ticket, 'first_response'));
+                    }
+                    if ($resolutionViolated) {
+                        event(new \App\Events\SlaViolated($ticket, 'resolution'));
+                    }
+                }
             }
         }
 
