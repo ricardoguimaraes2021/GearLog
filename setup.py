@@ -233,6 +233,16 @@ def get_system_info() -> dict:
 # ---------------------------
 # PHP Extensions Helper
 # ---------------------------
+def is_admin_windows() -> bool:
+    """Verifica se o script está rodando como administrador no Windows."""
+    if platform.system() != "Windows":
+        return False
+    try:
+        import ctypes
+        return ctypes.windll.shell32.IsUserAnAdmin() != 0
+    except Exception:
+        return False
+
 def check_php_extension(extension: str) -> bool:
     """Verifica se uma extensão PHP está carregada."""
     ok, out = run_command(["php", "-m"], capture_output=True)
@@ -369,6 +379,33 @@ def check_and_enable_php_extensions() -> Tuple[bool, List[str]]:
         print_success("Todas as extensões PHP necessárias estão habilitadas.")
         return True, []
     
+    # Verificar se tem permissões de administrador no Windows
+    is_admin = is_admin_windows()
+    php_ini_path = get_php_ini_path()
+    
+    if platform.system() == "Windows" and not is_admin and php_ini_path:
+        print_warning("\n" + "="*60)
+        print_warning("PERMISSÕES DE ADMINISTRADOR NECESSÁRIAS")
+        print_warning("="*60)
+        print_warning("Para habilitar as extensões PHP automaticamente, este script precisa")
+        print_warning("ser executado como Administrador no Windows.")
+        print_warning("\nOpções:")
+        print_warning("1. Execute este script como Administrador:")
+        print_warning("   - Clique com botão direito no terminal/PowerShell")
+        print_warning("   - Selecione 'Executar como administrador'")
+        print_warning("   - Execute o script novamente")
+        print_warning("\n2. Ou edite manualmente o php.ini:")
+        print_warning(f"   Arquivo: {php_ini_path}")
+        print_warning("   Procure e descomente (remova o ';' do início) estas linhas:")
+        for ext in missing:
+            print_warning(f"     ;extension={ext}  ->  extension={ext}")
+        print_warning("   Depois, REINICIE O TERMINAL e execute o script novamente.")
+        print_warning("="*60 + "\n")
+        
+        response = input("Deseja continuar mesmo sem permissões de administrador? (y/n) [n]: ").strip().lower()
+        if response != 'y':
+            return False, missing
+    
     print_info(f"Tentando habilitar extensões em falta: {', '.join(missing)}")
     
     # Tentar habilitar automaticamente
@@ -381,27 +418,41 @@ def check_and_enable_php_extensions() -> Tuple[bool, List[str]]:
             if check_php_extension(ext):
                 missing.remove(ext)
             else:
-                print_warning(f"Extensão '{ext}' foi adicionada ao php.ini mas ainda não está carregada. Reinicie o terminal.")
+                print_warning(f"Extensão '{ext}' foi adicionada ao php.ini mas ainda não está carregada.")
+                print_warning("REINICIE O TERMINAL para carregar as extensões e execute o script novamente.")
         else:
             print_warning(f"Extensão '{ext}': {message}")
             failed.append(ext)
     
     if failed:
         php_ini_path = get_php_ini_path()
-        print_error("Não foi possível habilitar automaticamente algumas extensões.")
-        print_info("Por favor, edite manualmente o php.ini:")
+        print_error("\n" + "="*60)
+        print_error("NÃO FOI POSSÍVEL HABILITAR EXTENSÕES AUTOMATICAMENTE")
+        print_error("="*60)
+        print_error("Por favor, edite manualmente o php.ini:")
         if php_ini_path:
-            print_info(f"  Arquivo: {php_ini_path}")
-        print_info("  Procure e descomente (remova o ';' do início) estas linhas:")
+            print_error(f"  Arquivo: {php_ini_path}")
+        print_error("\n  Passos:")
+        print_error("  1. Abra o arquivo php.ini em um editor de texto (como administrador)")
+        print_error("  2. Procure estas linhas e remova o ';' do início:")
         for ext in failed:
-            print_info(f"    extension={ext}")
-        print_info("  Ou adicione estas linhas se não existirem:")
+            print_error(f"     ;extension={ext}  ->  extension={ext}")
+        print_error("  3. Se não encontrar, adicione estas linhas na seção de extensões:")
         for ext in failed:
-            print_info(f"    extension={ext}")
-        print_info("  Depois, reinicie o terminal e execute o script novamente.")
+            print_error(f"     extension={ext}")
+        print_error("  4. Salve o arquivo")
+        print_error("  5. REINICIE O TERMINAL completamente")
+        print_error("  6. Execute o script novamente")
+        print_error("="*60 + "\n")
         return False, failed
     
-    return len(missing) == 0, missing
+    if missing:
+        print_warning("\n⚠ IMPORTANTE: As extensões foram habilitadas no php.ini,")
+        print_warning("mas só serão carregadas quando o PHP for reiniciado.")
+        print_warning("Por favor, REINICIE O TERMINAL e execute o script novamente.\n")
+        return False, missing
+    
+    return True, []
 
 # ---------------------------
 # Dependency installer
@@ -916,24 +967,47 @@ SANCTUM_STATEFUL_DOMAINS=localhost:5173,127.0.0.1:5173
                     
                     if missing:
                         php_ini_path = get_php_ini_path()
-                        print_error("\n" + "="*60)
-                        print_error("AÇÃO NECESSÁRIA:")
-                        print_error("="*60)
-                        print_error("Por favor, edite manualmente o php.ini e habilite as extensões:")
+                        is_admin = is_admin_windows()
+                        
+                        print_error("\n" + "="*70)
+                        print_error("⚠ AÇÃO NECESSÁRIA: HABILITAR EXTENSÕES PHP")
+                        print_error("="*70)
+                        print_error("O composer install falhou porque as extensões PHP não estão habilitadas.")
+                        print_error("\n📝 SOLUÇÃO:")
+                        
+                        if not is_admin and platform.system() == "Windows":
+                            print_error("\n1️⃣  EXECUTE ESTE SCRIPT COMO ADMINISTRADOR:")
+                            print_error("   - Feche este terminal")
+                            print_error("   - Clique com botão direito no PowerShell/Terminal")
+                            print_error("   - Selecione 'Executar como administrador'")
+                            print_error("   - Execute o script novamente")
+                            print_error("\n   OU")
+                        
+                        print_error("\n2️⃣  EDITE MANUALMENTE O PHP.INI:")
                         if php_ini_path:
-                            print_error(f"  Arquivo: {php_ini_path}")
-                        print_error("  Procure estas linhas e remova o ';' do início:")
+                            print_error(f"   Arquivo: {php_ini_path}")
+                        print_error("\n   Passos:")
+                        print_error("   a) Abra o arquivo php.ini em um editor de texto")
+                        if not is_admin:
+                            print_error("      (pode precisar executar o editor como administrador)")
+                        print_error("   b) Procure estas linhas e remova o ';' do início:")
                         for ext in missing:
-                            print_error(f"    ;extension={ext}  ->  extension={ext}")
-                        print_error("  Ou adicione estas linhas se não existirem:")
+                            print_error(f"      ;extension={ext}  →  extension={ext}")
+                        print_error("   c) Se não encontrar, adicione estas linhas na seção de extensões:")
                         for ext in missing:
-                            print_error(f"    extension={ext}")
-                        print_error("  Depois, REINICIE O TERMINAL e execute o script novamente.")
-                        print_error("="*60 + "\n")
+                            print_error(f"      extension={ext}")
+                        print_error("   d) Salve o arquivo")
+                        print_error("   e) REINICIE O TERMINAL completamente")
+                        print_error("   f) Execute o script novamente")
+                        print_error("\n" + "="*70 + "\n")
                         return False
                     else:
-                        print_info("Extensões habilitadas. Por favor, REINICIE O TERMINAL e execute o script novamente.")
-                        print_info("As extensões PHP só são carregadas quando o PHP é iniciado.")
+                        print_warning("\n⚠ IMPORTANTE:")
+                        print_warning("As extensões foram habilitadas no php.ini,")
+                        print_warning("mas só serão carregadas quando o PHP for reiniciado.")
+                        print_warning("\nPor favor:")
+                        print_warning("1. REINICIE O TERMINAL completamente")
+                        print_warning("2. Execute o script novamente\n")
                         return False
                 
                 print_error("composer install FALHOU. Não é possível continuar sem as dependências PHP.")
