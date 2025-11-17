@@ -30,6 +30,9 @@ import shutil
 import logging
 import traceback
 import re
+import time
+import webbrowser
+import threading
 from pathlib import Path
 from typing import Optional, Tuple, List
 
@@ -1084,6 +1087,7 @@ SANCTUM_STATEFUL_DOMAINS=localhost:5173,127.0.0.1:5173
             except Exception:
                 content = ""
             
+            # Função helper para substituir variáveis de ambiente
             def replace_env_var(content: str, key: str, value: str) -> str:
                 pattern = rf"^{re.escape(key)}=.*$"
                 repl = f"{key}={value}"
@@ -1297,21 +1301,16 @@ def main():
                 pass
         
         installer = DependencyInstaller(sys_info)
-        print_info("Vou tentar instalar automaticamente as dependências necessárias (PHP, Composer, MySQL, Node).")
-        resp_install = input("Continuar com tentativas de instalação automática? (y/n) [y]: ").strip().lower() or "y"
+        print_info("Verificando e instalando dependências necessárias (PHP, Composer, MySQL, Node)...")
+        ok_all = installer.install_all()
+        if not ok_all:
+            print_warning("Algumas dependências não foram instaladas automaticamente. Verifica o log e as mensagens acima.")
+            if installer.failed:
+                print_warning("Falharam: " + ", ".join(installer.failed))
         
-        if resp_install == "y":
-            ok_all = installer.install_all()
-            if not ok_all:
-                print_warning("Algumas dependências não foram instaladas automaticamente. Verifica o log e as mensagens acima.")
-                if installer.failed:
-                    print_warning("Falharam: " + ", ".join(installer.failed))
-        else:
-            print_info("Ignorando instalação automática. Assume que tens dependências instaladas manualmente.")
-        
-        # Project setup
-        project_dir_input = input(f"Caminho para o projecto (enter usa '{sys_info['desktop']}/GearLog'): ").strip()
-        project_dir = Path(project_dir_input) if project_dir_input else Path(sys_info["desktop"]) / "GearLog"
+        # Project setup (usar default, minimizar interação)
+        project_dir = Path(sys_info["desktop"]) / "GearLog"
+        print_info(f"Usando diretório padrão: {project_dir}")
         
         setup = ProjectSetup(sys_info, project_dir=project_dir, repo_url="https://github.com/ricardoguimaraes2021/GearLog.git")
         
@@ -1336,8 +1335,26 @@ def main():
         else:
             print_warning("Diretório frontend não existe. Saltando setup frontend.")
         
-        setup.print_final_instructions()
+        # Tentar iniciar servidores automaticamente se setup foi bem-sucedido
+        servers_started = False
+        if (setup.project_dir / "backend").exists() and (setup.project_dir / "frontend").exists():
+            print()
+            response = input("Deseja iniciar os servidores automaticamente e abrir a landing page? (y/n) [y]: ").strip().lower() or "y"
+            if response == "y":
+                backend_ok, frontend_ok = setup.start_servers()
+                servers_started = backend_ok and frontend_ok
+                
+                if frontend_ok:
+                    setup.open_browser("http://localhost:5173")
+        
+        setup.print_final_instructions(servers_started=servers_started)
         print_success(f"Log completo guardado em: {LOG_FILE}")
+        
+        if servers_started:
+            print()
+            print_warning("⚠ IMPORTANTE: Os servidores estão rodando em segundo plano.")
+            print_warning("Para parar os servidores, feche este terminal ou pressione Ctrl+C.")
+            print_warning("Para reiniciar, execute este script novamente ou inicie manualmente.")
         
     except KeyboardInterrupt:
         logger.warning("Interrupção pelo utilizador (KeyboardInterrupt).")
