@@ -73,8 +73,8 @@ export default function Landing() {
     },
     {
       icon: History,
-      title: 'Movement Tracking',
-      description: 'Track all product movements (entry, exit, allocation, return) with assigned users and notes. Prevent negative stock with real-time validation. Complete movement history.',
+      title: 'Asset Assignment & Movement Tracking',
+      description: 'Assign assets to employees with checkout/check-in system. Track all product movements (entry, exit, allocation, return) with assigned users and notes. Prevent negative stock with real-time validation. Complete assignment and movement history.',
     },
     {
       icon: Image,

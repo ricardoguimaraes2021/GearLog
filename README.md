@@ -29,6 +29,7 @@ GearLog is a modern, feature-rich inventory management solution that combines po
 
 ### 🎫 Ticket System
 - **Complete Ticket Management** - Create, assign, and track support tickets
+- **Employee Integration** - Link tickets to employees for better tracking
 - **SLA (Service Level Agreement)** - Automated SLA tracking with:
   - Configurable response and resolution times by priority
   - Real-time SLA violation detection
@@ -40,7 +41,7 @@ GearLog is a modern, feature-rich inventory management solution that combines po
 - **Status Workflow** - Open → In Progress → Waiting Parts → Resolved → Closed
 - **File Attachments** - Attach images, PDFs, and documents to tickets and comments
 - **Comments & Collaboration** - Add comments with attachments for team communication
-- **Assignment System** - Assign tickets to technicians
+- **Assignment System** - Assign tickets to technicians (users) and link to employees
 - **Activity Logs** - Complete audit trail of all ticket actions
 - **Ticket Dashboard** - Dedicated dashboard with:
   - Ticket KPIs (total, open, in progress, critical, unassigned)
@@ -49,12 +50,38 @@ GearLog is a modern, feature-rich inventory management solution that combines po
   - Recent and urgent tickets
   - SLA compliance metrics and trends
 
+### 👥 Employee Management
+- **Employee Directory** - Complete employee management with personal and corporate information
+- **Employee Profiles** - View employee details, assigned assets, associated tickets, and activity logs
+- **Status Management** - Track active and inactive employees
+- **Department Assignment** - Link employees to departments
+- **Employee Export** - Export employee data to CSV, Excel, or PDF formats
+- **Activity Logs** - Complete audit trail of all employee-related actions
+
+### 🏢 Department Management
+- **Department Directory** - Create and manage organizational departments
+- **Department Profiles** - View department details, employees, assigned assets, and active tickets
+- **Manager Assignment** - Assign department managers
+- **Cost Center Tracking** - Track cost centers for departments
+- **Usage Analytics** - View asset usage and ticket statistics by department
+- **Department Dashboard** - Monitor total employees, assigned assets, total value, and active tickets
+
+### 📦 Asset Assignment
+- **Checkout System** - Assign assets to employees with validation
+- **Check-in System** - Return assets with condition tracking
+- **Assignment History** - Complete history of all asset assignments
+- **Status Validation** - Only assignable products can be assigned (new, used, repair status)
+- **Employee Validation** - Only active employees can receive assets
+- **Automatic Status Updates** - Product status automatically updated on assignment/return
+- **Recent Activities** - Asset assignments displayed in dashboard recent activities
+
 ### 📈 Movement Tracking
 - **Movement Types** - Entry, exit, allocation, and return movements
 - **Stock Validation** - Prevent negative stock with real-time validation
 - **Assigned To Tracking** - Track who products are assigned to
 - **Movement History** - Complete history grouped by purchase date
 - **Notes & Documentation** - Add notes to movements for context
+- **Recent Activities** - Combined view of movements and asset assignments
 
 ### 🔍 Search & Filtering
 - **Advanced Search** - Search products by name, description, or serial number
@@ -63,6 +90,8 @@ GearLog is a modern, feature-rich inventory management solution that combines po
 
 ### 📤 Export & Reporting
 - **Multiple Formats** - Export to CSV, Excel (XLSX), or PDF
+- **Product Exports** - Export product inventory with all details
+- **Employee Exports** - Export employee directory with department information
 - **Filtered Exports** - Export only filtered/search results
 - **Professional Reports** - Formatted PDF reports with company branding
 
