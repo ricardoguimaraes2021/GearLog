@@ -48,6 +48,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       
       set({ user: null, token: null, isAuthenticated: false });
       localStorage.removeItem('auth_token');
+      localStorage.removeItem('auth_user');
     }
   },
 
@@ -56,9 +57,15 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     try {
       const user = await api.getCurrentUser();
       set({ user, isAuthenticated: true, isLoading: false });
+      
+      // Store user in localStorage for Echo initialization
+      if (user) {
+        localStorage.setItem('auth_user', JSON.stringify(user));
+      }
     } catch (error) {
       set({ user: null, isAuthenticated: false, isLoading: false });
       localStorage.removeItem('auth_token');
+      localStorage.removeItem('auth_user');
     }
   },
 

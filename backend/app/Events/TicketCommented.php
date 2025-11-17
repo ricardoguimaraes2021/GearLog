@@ -28,8 +28,9 @@ class TicketCommented
     /**
      * Handle the event.
      */
-    public function handle(NotificationService $notificationService): void
+    public function handle(): void
     {
+        $notificationService = app(\App\Services\NotificationService::class);
         $commenter = $this->comment->user;
         $usersToNotify = collect();
 

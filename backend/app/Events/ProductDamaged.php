@@ -25,8 +25,9 @@ class ProductDamaged
     /**
      * Handle the event.
      */
-    public function handle(NotificationService $notificationService): void
+    public function handle(): void
     {
+        $notificationService = app(\App\Services\NotificationService::class);
         $notificationService->notifyByRole(
             'admin',
             'product_damaged',

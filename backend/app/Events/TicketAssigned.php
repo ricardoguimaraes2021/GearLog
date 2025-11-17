@@ -28,9 +28,10 @@ class TicketAssigned
     /**
      * Handle the event.
      */
-    public function handle(NotificationService $notificationService): void
+    public function handle(): void
     {
         if ($this->assignedTo) {
+            $notificationService = app(\App\Services\NotificationService::class);
             $notificationService->createNotification(
                 $this->assignedTo,
                 'ticket_assigned',

@@ -27,8 +27,9 @@ class SlaViolated
     /**
      * Handle the event.
      */
-    public function handle(NotificationService $notificationService): void
+    public function handle(): void
     {
+        $notificationService = app(\App\Services\NotificationService::class);
         $usersToNotify = collect();
 
         // Notify admins and managers
