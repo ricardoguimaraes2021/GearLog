@@ -85,26 +85,12 @@ export default function Employees() {
           <h1 className="text-3xl font-bold text-gray-900">Employees</h1>
           <p className="mt-1 text-sm text-gray-500">Manage your employee directory</p>
         </div>
-        <div className="flex gap-2">
-          <Button
-            variant="outline"
-            onClick={() => {
-              const format = window.prompt('Export format (csv/excel/pdf):', 'excel');
-              if (format && ['csv', 'excel', 'pdf'].includes(format.toLowerCase())) {
-                handleExport(format.toLowerCase() as 'csv' | 'excel' | 'pdf');
-              }
-            }}
-          >
-            <Download className="w-4 h-4 mr-2" />
-            Export
+        <Link to="/employees/new">
+          <Button>
+            <Plus className="w-4 h-4 mr-2" />
+            Add Employee
           </Button>
-          <Link to="/employees/new">
-            <Button>
-              <Plus className="w-4 h-4 mr-2" />
-              Add Employee
-            </Button>
-          </Link>
-        </div>
+        </Link>
       </div>
 
       {/* Search and Filters */}
@@ -176,6 +162,33 @@ export default function Employees() {
                       </option>
                     ))}
                   </select>
+                </div>
+
+                <div className="flex items-end gap-1">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => handleExport('csv')}
+                    title="Export as CSV"
+                  >
+                    <Download className="w-4 h-4" />
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => handleExport('excel')}
+                    title="Export as Excel"
+                  >
+                    Excel
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => handleExport('pdf')}
+                    title="Export as PDF"
+                  >
+                    PDF
+                  </Button>
                 </div>
               </div>
             )}

@@ -440,6 +440,11 @@ class ApiClient {
       await this.client.delete(`/departments/${id}`);
     }
 
+    async getDepartmentUsageStats() {
+      const response = await this.client.get('/departments/stats/usage');
+      return response.data;
+    }
+
     // Assignments
     async checkoutAsset(data: { product_id: number; employee_id: number; notes?: string }) {
       const response = await this.client.post<AssetAssignment>('/assignments/checkout', data);

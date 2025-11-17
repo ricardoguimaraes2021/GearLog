@@ -7,19 +7,37 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ArrowLeft, Edit, Building2, Users, Package, Ticket, DollarSign, User, Mail, Phone, Briefcase } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { toast } from 'sonner';
+import { api } from '@/services/api';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
 
 export default function DepartmentDetail() {
   const { id } = useParams<{ id: string }>();
   const { currentDepartment, fetchDepartment, isLoading } = useDepartmentStore();
   const { employees, fetchEmployees } = useEmployeeStore();
-  const [activeTab, setActiveTab] = useState<'overview' | 'employees' | 'assets'>('overview');
+  const [activeTab, setActiveTab] = useState<'overview' | 'employees' | 'assets' | 'analytics'>('overview');
+  const [usageStats, setUsageStats] = useState<any>(null);
+  const [loadingStats, setLoadingStats] = useState(false);
 
   useEffect(() => {
     if (id) {
       fetchDepartment(parseInt(id));
       fetchEmployees(1);
+      fetchUsageStats();
     }
   }, [id, fetchDepartment, fetchEmployees]);
+
+  const fetchUsageStats = async () => {
+    setLoadingStats(true);
+    try {
+      const stats = await api.getDepartmentUsageStats();
+      setUsageStats(stats);
+    } catch (error: any) {
+      toast.error('Failed to load usage statistics');
+      console.error(error);
+    } finally {
+      setLoadingStats(false);
+    }
+  };
 
   const departmentEmployees = employees.filter(
     (emp) => emp.department_id === currentDepartment?.id
@@ -163,6 +181,16 @@ export default function DepartmentDetail() {
             }`}
           >
             Assets ({currentDepartment.total_assigned_assets || 0})
+          </button>
+          <button
+            onClick={() => setActiveTab('analytics')}
+            className={`py-4 px-1 border-b-2 font-medium text-sm ${
+              activeTab === 'analytics'
+                ? 'border-blue-500 text-blue-600'
+                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+            }`}
+          >
+            Analytics
           </button>
         </nav>
       </div>

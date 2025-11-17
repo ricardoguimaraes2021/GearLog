@@ -10,6 +10,12 @@ export interface Ticket {
     id: number;
     name: string;
   };
+  employee_id?: number;
+  employee?: {
+    id: number;
+    name: string;
+    employee_code: string;
+  };
   opened_by: number;
   openedBy?: {
     id: number;
@@ -84,6 +90,7 @@ interface TicketFilters {
   type?: string;
   assigned_to?: number;
   product_id?: number;
+  employee_id?: number;
   search?: string;
 }
 

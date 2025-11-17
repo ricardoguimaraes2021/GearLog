@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useTicketStore } from '@/stores/ticketStore';
 import { useProductStore } from '@/stores/productStore';
+import { useEmployeeStore } from '@/stores/employeeStore';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -18,10 +19,12 @@ export default function TicketForm() {
   const isEditing = !!id;
   const { currentTicket, fetchTicket, createTicket, updateTicket, isLoading } = useTicketStore();
   const { products, fetchProducts } = useProductStore();
+  const { employees, fetchEmployees } = useEmployeeStore();
 
   const [formData, setFormData] = useState({
     title: '',
     product_id: '',
+    employee_id: '',
     priority: 'medium' as const,
     type: 'other' as const,
     description: '',
@@ -32,16 +35,18 @@ export default function TicketForm() {
 
   useEffect(() => {
     fetchProducts(1);
+    fetchEmployees(1);
     if (isEditing && id) {
       fetchTicket(parseInt(id));
     }
-  }, [id, isEditing]);
+  }, [id, isEditing, fetchProducts, fetchEmployees]);
 
   useEffect(() => {
     if (isEditing && currentTicket) {
       setFormData({
         title: currentTicket.title,
         product_id: currentTicket.product_id?.toString() || '',
+        employee_id: (currentTicket as any).employee_id?.toString() || '',
         priority: currentTicket.priority,
         type: currentTicket.type,
         description: currentTicket.description,
@@ -107,6 +112,9 @@ export default function TicketForm() {
       
       if (formData.product_id) {
         formDataToSend.append('product_id', formData.product_id);
+      }
+      if (formData.employee_id) {
+        formDataToSend.append('employee_id', formData.employee_id);
       }
 
       // Add existing attachments
@@ -242,6 +250,23 @@ export default function TicketForm() {
                 {products.map((product) => (
                   <option key={product.id} value={product.id}>
                     {product.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div>
+              <Label htmlFor="employee_id">Employee (Optional)</Label>
+              <select
+                id="employee_id"
+                value={formData.employee_id}
+                onChange={(e) => setFormData({ ...formData, employee_id: e.target.value })}
+                className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+              >
+                <option value="">No employee selected</option>
+                {employees.filter(emp => emp.status === 'active').map((employee) => (
+                  <option key={employee.id} value={employee.id}>
+                    {employee.name} ({employee.employee_code})
                   </option>
                 ))}
               </select>

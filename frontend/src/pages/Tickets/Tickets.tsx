@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useTicketStore } from '@/stores/ticketStore';
+import { useEmployeeStore } from '@/stores/employeeStore';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -20,8 +21,13 @@ export default function Tickets() {
     resetFilters,
     deleteTicket,
   } = useTicketStore();
+  const { employees, fetchEmployees } = useEmployeeStore();
   const [showFilters, setShowFilters] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
+
+  useEffect(() => {
+    fetchEmployees(1);
+  }, [fetchEmployees]);
 
   useEffect(() => {
     fetchTickets(currentPage);

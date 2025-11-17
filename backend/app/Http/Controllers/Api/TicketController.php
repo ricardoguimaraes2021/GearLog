@@ -49,6 +49,11 @@ class TicketController extends Controller
             $query->where('product_id', $request->product_id);
         }
 
+        // Filter by employee_id
+        if ($request->has('employee_id')) {
+            $query->where('employee_id', $request->get('employee_id'));
+        }
+
         // Role-based filtering
         $user = Auth::user();
         if ($user && $user->hasRole('tecnico')) {
