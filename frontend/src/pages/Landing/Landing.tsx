@@ -345,7 +345,7 @@ export default function Landing() {
                 <Button 
                   size="lg" 
                   variant="outline" 
-                  className="text-lg px-8 border-white text-white hover:bg-white/10"
+                  className="text-lg px-8 border-white !text-white hover:bg-white/10 !bg-transparent hover:!text-white"
                 >
                   View Source Code
                   <ArrowRight className="ml-2 h-5 w-5" />
