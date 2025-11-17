@@ -82,4 +82,35 @@ class NotificationController extends Controller
 
         return response()->json(['message' => 'Notification deleted']);
     }
+
+    /**
+     * Create a test notification (for testing purposes)
+     */
+    public function test()
+    {
+        $user = Auth::user();
+        
+        $notification = \App\Models\Notification::create([
+            'user_id' => $user->id,
+            'type' => 'test',
+            'title' => '🧪 Test Notification',
+            'message' => 'This is a test notification to verify the notification system is working correctly.',
+            'data' => [
+                'test' => true,
+                'timestamp' => now()->toISOString(),
+            ],
+        ]);
+
+        // Try to broadcast if Pusher is configured
+        try {
+            event(new \App\Events\NotificationCreated($notification));
+        } catch (\Exception $e) {
+            // Ignore if Pusher is not configured
+        }
+
+        return response()->json([
+            'message' => 'Test notification created successfully',
+            'notification' => $notification,
+        ], 201);
+    }
 }

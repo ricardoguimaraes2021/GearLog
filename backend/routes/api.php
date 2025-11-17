@@ -53,6 +53,7 @@ Route::prefix('v1')->middleware('throttle:60,1')->group(function () {
         Route::get('/notifications/unread-count', [NotificationController::class, 'unreadCount']);
         Route::post('/notifications/{notification}/read', [NotificationController::class, 'markAsRead']);
         Route::post('/notifications/read-all', [NotificationController::class, 'markAllAsRead']);
+        Route::post('/notifications/test', [NotificationController::class, 'test']);
         Route::delete('/notifications/{notification}', [NotificationController::class, 'destroy']);
     });
 });
