@@ -101,6 +101,8 @@ export default function TicketDetail() {
   const handleAssign = async () => {
     if (!id) return;
     await assignTicket(parseInt(id), selectedUserId);
+    // Force refresh the ticket to show updated assignment
+    await fetchTicket(parseInt(id));
     setShowAssignForm(false);
     setSelectedUserId(null);
   };
@@ -108,6 +110,8 @@ export default function TicketDetail() {
   const handleUnassign = async () => {
     if (!id) return;
     await assignTicket(parseInt(id), null);
+    // Force refresh the ticket to show updated assignment
+    await fetchTicket(parseInt(id));
   };
 
   const canEdit = currentTicket && currentTicket.status !== 'closed';
