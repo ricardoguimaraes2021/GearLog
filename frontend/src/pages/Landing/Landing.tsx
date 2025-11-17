@@ -12,11 +12,27 @@ import {
   ArrowRight,
   Zap,
   Lock,
-  TrendingUp
+  TrendingUp,
+  Download,
+  Terminal,
+  Code,
+  PlayCircle
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 export default function Landing() {
+  const handleDownloadSetupScript = () => {
+    // Create a download link for the setup script
+    const scriptUrl = 'https://raw.githubusercontent.com/ricardoguimaraes2021/GearLog/main/setup.py';
+    const link = document.createElement('a');
+    link.href = scriptUrl;
+    link.download = 'setup.py';
+    link.target = '_blank';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
   const features = [
     {
       icon: Package,
@@ -124,9 +140,95 @@ export default function Landing() {
                 <ArrowRight className="ml-2 h-5 w-5" />
               </Button>
             </Link>
-            <Button size="lg" variant="outline" className="text-lg px-8">
-              View Demo
+            <Button 
+              size="lg" 
+              variant="outline" 
+              className="text-lg px-8"
+              onClick={handleDownloadSetupScript}
+            >
+              <Download className="mr-2 h-5 w-5" />
+              Download Setup Script
             </Button>
+          </div>
+        </div>
+      </section>
+
+      {/* Quick Setup Section */}
+      <section className="bg-gradient-to-r from-blue-600 to-blue-700 text-white py-16">
+        <div className="container mx-auto px-4">
+          <div className="max-w-4xl mx-auto">
+            <div className="flex flex-col md:flex-row items-center gap-8">
+              <div className="flex-1 text-center md:text-left">
+                <div className="inline-flex items-center gap-2 px-3 py-1 bg-white/20 rounded-full text-sm font-medium mb-4">
+                  <Terminal className="h-4 w-4" />
+                  Automated Setup Available
+                </div>
+                <h2 className="text-3xl md:text-4xl font-bold mb-4">
+                  Get Started in Minutes
+                </h2>
+                <p className="text-lg text-blue-100 mb-6">
+                  Our automated setup script handles everything for you. It installs all dependencies, 
+                  configures the project, and sets up the database automatically. No manual configuration needed!
+                </p>
+                <div className="flex flex-col sm:flex-row gap-4">
+                  <Button
+                    size="lg"
+                    variant="secondary"
+                    className="text-lg px-6 bg-white text-blue-600 hover:bg-gray-100"
+                    onClick={handleDownloadSetupScript}
+                  >
+                    <Download className="mr-2 h-5 w-5" />
+                    Download Setup Script
+                  </Button>
+                  <a
+                    href="https://github.com/ricardoguimaraes2021/GearLog#-quick-start"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    <Button
+                      size="lg"
+                      variant="outline"
+                      className="text-lg px-6 border-white text-white hover:bg-white/10"
+                    >
+                      <Code className="mr-2 h-5 w-5" />
+                      View Instructions
+                    </Button>
+                  </a>
+                </div>
+              </div>
+              <div className="flex-1">
+                <Card className="bg-white/10 backdrop-blur-sm border-white/20 text-white">
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <PlayCircle className="h-5 w-5" />
+                      Quick Start
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-3 font-mono text-sm">
+                      <div className="flex items-start gap-2">
+                        <span className="text-blue-300">$</span>
+                        <span>chmod +x setup.py</span>
+                      </div>
+                      <div className="flex items-start gap-2">
+                        <span className="text-blue-300">$</span>
+                        <span>python3 setup.py</span>
+                      </div>
+                      <div className="mt-4 pt-4 border-t border-white/20 text-xs text-blue-100">
+                        The script will automatically:
+                      </div>
+                      <ul className="space-y-1 text-xs text-blue-100 ml-4 list-disc">
+                        <li>Install PHP, Composer, MySQL, Node.js</li>
+                        <li>Clone the repository</li>
+                        <li>Configure backend & frontend</li>
+                        <li>Set up the database</li>
+                        <li>Run migrations</li>
+                      </ul>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+            </div>
           </div>
         </div>
       </section>
