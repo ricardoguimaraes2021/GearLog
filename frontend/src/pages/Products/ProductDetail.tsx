@@ -242,6 +242,30 @@ export default function ProductDetail() {
                 )}
               </div>
 
+              {/* Specifications */}
+              {currentProduct.specs && Object.keys(currentProduct.specs).length > 0 && (
+                <div className="mt-6 pt-6 border-t">
+                  <label className="text-sm font-medium text-gray-500 mb-3 block">
+                    Specifications
+                  </label>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    {Object.entries(currentProduct.specs).map(([key, value]) => (
+                      <div
+                        key={key}
+                        className="flex justify-between items-start p-3 bg-gray-50 rounded-lg"
+                      >
+                        <span className="text-sm font-medium text-gray-700 capitalize">
+                          {key.replace(/_/g, ' ')}:
+                        </span>
+                        <span className="text-sm text-gray-900 ml-4 text-right">
+                          {String(value)}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
               {/* Purchase Dates by Entry Movements */}
               {(() => {
                 // Group entry movements by date
