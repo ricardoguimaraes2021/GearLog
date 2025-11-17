@@ -4,6 +4,15 @@ This directory contains technical documentation for the GearLog project.
 
 ## 📚 Available Documentation
 
+### [API_REFERENCE.md](./API_REFERENCE.md)
+Complete API reference for developers, including:
+- All endpoints organized by feature
+- Request/response structures
+- Authentication and permissions
+- Error handling
+- Practical examples
+- Rate limiting information
+
 ### [NOTIFICATIONS.md](./NOTIFICATIONS.md)
 Complete guide to the real-time notifications system, including:
 - Setup and configuration
