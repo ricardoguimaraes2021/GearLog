@@ -68,6 +68,25 @@ class ApiClient {
       },
     });
 
+    // Get CSRF token from cookie (Laravel stores it as XSRF-TOKEN)
+    const getCookie = (name: string) => {
+      const value = `; ${document.cookie}`;
+      const parts = value.split(`; ${name}=`);
+      if (parts.length === 2) return parts.pop()?.split(';').shift();
+      return null;
+    };
+    
+    const csrfToken = getCookie('XSRF-TOKEN');
+    const headers: Record<string, string> = {
+      'Content-Type': 'application/json',
+      'Accept': 'application/json',
+    };
+    
+    // Add X-XSRF-TOKEN header if CSRF token exists
+    if (csrfToken) {
+      headers['X-XSRF-TOKEN'] = decodeURIComponent(csrfToken);
+    }
+
     // Then make the login request with the same base URL to ensure cookies are sent
     const response = await axios.post<{ user: User; token: string }>(
       `${baseURL}/api/v1/login`,
@@ -77,10 +96,7 @@ class ApiClient {
       },
       {
         withCredentials: true,
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json',
-        },
+        headers,
       }
     );
     
