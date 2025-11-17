@@ -11,6 +11,8 @@ Route::get('/', function () {
     ]);
 });
 
-// Broadcasting authentication
-Broadcast::routes(['middleware' => ['auth:sanctum']]);
+// Broadcasting authentication (only if Pusher is configured)
+if (env('BROADCAST_DRIVER') === 'pusher' && env('PUSHER_APP_KEY')) {
+    Broadcast::routes(['middleware' => ['auth:sanctum']]);
+}
 

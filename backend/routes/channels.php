@@ -13,7 +13,10 @@ use Illuminate\Support\Facades\Broadcast;
 |
 */
 
-Broadcast::channel('user.{userId}', function ($user, $userId) {
-    return (int) $user->id === (int) $userId;
-});
+// Only register channels if broadcasting is enabled
+if (config('broadcasting.default') !== 'log') {
+    Broadcast::channel('user.{userId}', function ($user, $userId) {
+        return (int) $user->id === (int) $userId;
+    });
+}
 
