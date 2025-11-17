@@ -5,6 +5,8 @@ use App\Http\Controllers\Api\CategoryController;
 use App\Http\Controllers\Api\DashboardController;
 use App\Http\Controllers\Api\MovementController;
 use App\Http\Controllers\Api\ProductController;
+use App\Http\Controllers\Api\TicketController;
+use App\Http\Controllers\Api\TicketCommentController;
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('v1')->middleware('throttle:60,1')->group(function () {
@@ -28,6 +30,16 @@ Route::prefix('v1')->middleware('throttle:60,1')->group(function () {
 
         // Dashboard
         Route::get('/dashboard', [DashboardController::class, 'index']);
+
+        // Tickets
+        Route::apiResource('tickets', TicketController::class);
+        Route::post('/tickets/{ticket}/assign', [TicketController::class, 'assign']);
+        Route::post('/tickets/{ticket}/status', [TicketController::class, 'updateStatus']);
+        Route::post('/tickets/{ticket}/resolve', [TicketController::class, 'resolve']);
+        Route::post('/tickets/{ticket}/close', [TicketController::class, 'close']);
+        Route::get('/tickets/{ticket}/logs', [TicketController::class, 'logs']);
+        Route::get('/tickets/{ticket}/comments', [TicketCommentController::class, 'index']);
+        Route::post('/tickets/{ticket}/comments', [TicketCommentController::class, 'store']);
     });
 });
 

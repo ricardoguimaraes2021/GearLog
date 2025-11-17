@@ -45,6 +45,11 @@ class Product extends Model
         return $this->hasMany(Movement::class)->orderBy('created_at', 'desc');
     }
 
+    public function tickets(): HasMany
+    {
+        return $this->hasMany(Ticket::class)->orderBy('created_at', 'desc');
+    }
+
     public function canDelete(): bool
     {
         return $this->quantity === 0;
