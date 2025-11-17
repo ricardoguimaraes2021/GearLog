@@ -17,6 +17,8 @@ class DepartmentController extends Controller
 
     public function index(Request $request)
     {
+        $request->user()->can('departments.manage') || abort(403, 'Unauthorized');
+
         $query = Department::with(['manager', 'employees']);
 
         // Search
@@ -41,6 +43,8 @@ class DepartmentController extends Controller
 
     public function store(Request $request)
     {
+        $request->user()->can('departments.manage') || abort(403, 'Unauthorized');
+
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'description' => 'nullable|string',
@@ -59,8 +63,10 @@ class DepartmentController extends Controller
         }
     }
 
-    public function show(Department $department)
+    public function show(Request $request, Department $department)
     {
+        $request->user()->can('departments.manage') || abort(403, 'Unauthorized');
+
         $department->load([
             'manager',
             'employees' => function ($query) {
@@ -77,6 +83,8 @@ class DepartmentController extends Controller
 
     public function update(Request $request, Department $department)
     {
+        $request->user()->can('departments.manage') || abort(403, 'Unauthorized');
+
         $validated = $request->validate([
             'name' => 'sometimes|required|string|max:255',
             'description' => 'nullable|string',
@@ -95,8 +103,10 @@ class DepartmentController extends Controller
         }
     }
 
-    public function destroy(Department $department)
+    public function destroy(Request $request, Department $department)
     {
+        $request->user()->can('departments.manage') || abort(403, 'Unauthorized');
+
         try {
             $this->departmentService->deleteDepartment($department);
             return response()->json(['message' => 'Department deleted successfully']);

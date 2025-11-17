@@ -87,6 +87,11 @@ export interface DashboardData {
     assigned_to: string | null;
     created_at: string;
   }>;
+  employees?: {
+    total_employees: number;
+    active_employees: number;
+    total_assignments: number;
+  };
   alerts: {
     low_stock: number;
     low_stock_products?: Array<{
@@ -121,5 +126,69 @@ export interface PaginatedResponse<T> {
   last_page: number;
   per_page: number;
   total: number;
+}
+
+export interface Department {
+  id: number;
+  name: string;
+  description?: string;
+  manager_employee_id?: number;
+  manager?: Employee;
+  cost_center?: string;
+  employees?: Employee[];
+  total_assigned_assets?: number;
+  total_asset_value?: number;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface Employee {
+  id: number;
+  employee_code: string;
+  name: string;
+  email: string;
+  phone?: string;
+  department_id?: number;
+  department?: Department;
+  position: string;
+  status: 'active' | 'inactive';
+  notes?: string;
+  active_assignments?: AssetAssignment[];
+  assignments?: AssetAssignment[];
+  logs?: EmployeeLog[];
+  created_at: string;
+  updated_at: string;
+}
+
+export interface AssetAssignment {
+  id: number;
+  product_id: number;
+  product?: Product;
+  employee_id: number;
+  employee?: Employee;
+  assigned_by: number;
+  assignedBy?: User;
+  returned_by?: number;
+  returnedBy?: User;
+  assigned_at: string;
+  returned_at?: string;
+  condition_on_return?: string;
+  notes?: string;
+  duration?: number;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface EmployeeLog {
+  id: number;
+  employee_id: number;
+  employee?: Employee;
+  user_id: number;
+  user?: User;
+  action: string;
+  old_value?: Record<string, any>;
+  new_value?: Record<string, any>;
+  created_at: string;
+  updated_at: string;
 }
 

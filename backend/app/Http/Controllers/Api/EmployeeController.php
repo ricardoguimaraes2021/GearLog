@@ -17,6 +17,8 @@ class EmployeeController extends Controller
 
     public function index(Request $request)
     {
+        $request->user()->can('employees.view') || abort(403, 'Unauthorized');
+
         $query = Employee::with(['department']);
 
         // Search
@@ -54,6 +56,8 @@ class EmployeeController extends Controller
 
     public function store(Request $request)
     {
+        $request->user()->can('employees.create') || abort(403, 'Unauthorized');
+
         $validated = $request->validate([
             'employee_code' => 'nullable|string|unique:employees,employee_code',
             'name' => 'required|string|max:255',
@@ -81,8 +85,10 @@ class EmployeeController extends Controller
         }
     }
 
-    public function show(Employee $employee)
+    public function show(Request $request, Employee $employee)
     {
+        $request->user()->can('employees.view') || abort(403, 'Unauthorized');
+
         $employee->load([
             'department',
             'activeAssignments.product.category',
@@ -97,6 +103,8 @@ class EmployeeController extends Controller
 
     public function update(Request $request, Employee $employee)
     {
+        $request->user()->can('employees.update') || abort(403, 'Unauthorized');
+
         $validated = $request->validate([
             'name' => 'sometimes|required|string|max:255',
             'email' => 'sometimes|required|email|unique:employees,email,' . $employee->id,
@@ -123,8 +131,10 @@ class EmployeeController extends Controller
         }
     }
 
-    public function destroy(Employee $employee)
+    public function destroy(Request $request, Employee $employee)
     {
+        $request->user()->can('employees.delete') || abort(403, 'Unauthorized');
+
         try {
             $this->employeeService->deleteEmployee($employee);
             return response()->json(['message' => 'Employee deleted successfully']);

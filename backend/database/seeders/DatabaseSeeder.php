@@ -25,6 +25,15 @@ class DatabaseSeeder extends Seeder
             'movements.view',
             'dashboard.view',
             'exports.generate',
+            // Employee management permissions
+            'employees.view',
+            'employees.create',
+            'employees.update',
+            'employees.delete',
+            'departments.manage',
+            'assignments.create',
+            'assignments.view',
+            'assignments.return',
         ];
 
         foreach ($permissions as $permission) {
@@ -50,6 +59,13 @@ class DatabaseSeeder extends Seeder
             'movements.view',
             'dashboard.view',
             'exports.generate',
+            'employees.view',
+            'employees.create',
+            'employees.update',
+            'departments.manage',
+            'assignments.create',
+            'assignments.view',
+            'assignments.return',
         ]);
 
         $tecnicoRole->givePermissionTo([
@@ -57,6 +73,10 @@ class DatabaseSeeder extends Seeder
             'movements.create',
             'movements.view',
             'dashboard.view',
+            'employees.view',
+            'assignments.create',
+            'assignments.view',
+            'assignments.return',
         ]);
 
         $consultaRole->givePermissionTo([
@@ -107,6 +127,12 @@ class DatabaseSeeder extends Seeder
         foreach ($categories as $categoryData) {
             Category::firstOrCreate(['name' => $categoryData['name']]);
         }
+
+        // Seed departments and employees
+        $this->call([
+            DepartmentSeeder::class,
+            EmployeeSeeder::class,
+        ]);
     }
 }
 

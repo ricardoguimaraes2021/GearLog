@@ -19,6 +19,8 @@ class AssignmentController extends Controller
 
     public function checkout(Request $request)
     {
+        $request->user()->can('assignments.create') || abort(403, 'Unauthorized');
+
         $validated = $request->validate([
             'product_id' => 'required|exists:products,id',
             'employee_id' => 'required|exists:employees,id',
@@ -46,6 +48,8 @@ class AssignmentController extends Controller
 
     public function checkin(Request $request, AssetAssignment $assignment)
     {
+        $request->user()->can('assignments.return') || abort(403, 'Unauthorized');
+
         $validated = $request->validate([
             'condition_on_return' => 'nullable|string',
             'product_status' => 'nullable|in:new,used,damaged,repair,reserved',
@@ -68,8 +72,10 @@ class AssignmentController extends Controller
         }
     }
 
-    public function historyByEmployee(Employee $employee)
+    public function historyByEmployee(Request $request, Employee $employee)
     {
+        $request->user()->can('assignments.view') || abort(403, 'Unauthorized');
+
         $assignments = AssetAssignment::where('employee_id', $employee->id)
             ->with(['product.category', 'assignedBy', 'returnedBy'])
             ->orderBy('assigned_at', 'desc')
@@ -78,8 +84,10 @@ class AssignmentController extends Controller
         return response()->json($assignments);
     }
 
-    public function historyByAsset(Product $product)
+    public function historyByAsset(Request $request, Product $product)
     {
+        $request->user()->can('assignments.view') || abort(403, 'Unauthorized');
+
         $assignments = AssetAssignment::where('product_id', $product->id)
             ->with(['employee.department', 'assignedBy', 'returnedBy'])
             ->orderBy('assigned_at', 'desc')
