@@ -15,12 +15,20 @@ interface AuthState {
   initialize: () => Promise<void>;
 }
 
-export const useAuthStore = create<AuthState>((set, get) => ({
-  user: null,
-  token: localStorage.getItem('auth_token'),
-  isLoading: false,
-  isAuthenticated: false,
-  isInitializing: false,
+export const useAuthStore = create<AuthState>((set, get) => {
+  // Listen for token expiration events from API interceptor
+  if (typeof window !== 'undefined') {
+    window.addEventListener('auth:token-expired', () => {
+      set({ user: null, token: null, isAuthenticated: false });
+    });
+  }
+
+  return {
+    user: null,
+    token: localStorage.getItem('auth_token'),
+    isLoading: false,
+    isAuthenticated: false,
+    isInitializing: false,
 
   login: async (email: string, password: string) => {
     // Prevent multiple simultaneous login attempts
@@ -106,12 +114,26 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 
     const token = localStorage.getItem('auth_token');
     if (!token) {
-      set({ isAuthenticated: false, isLoading: false, isInitializing: false });
+      set({ isAuthenticated: false, isLoading: false, isInitializing: false, token: null, user: null });
       return;
     }
 
+    // Set token immediately so API calls can use it
     set({ isInitializing: true, isLoading: true, token });
+    
     try {
+      // Try to restore user from localStorage first for faster UI
+      const storedUser = localStorage.getItem('auth_user');
+      if (storedUser) {
+        try {
+          const user = JSON.parse(storedUser);
+          set({ user, isAuthenticated: true });
+        } catch (e) {
+          // Invalid stored user, will fetch fresh
+        }
+      }
+
+      // Validate token by fetching current user
       await get().fetchUser();
       
       // Initialize Echo if user is authenticated
@@ -126,14 +148,22 @@ export const useAuthStore = create<AuthState>((set, get) => ({
           console.warn('Failed to initialize Echo:', error);
         }
       }
-    } catch (error) {
-      // If fetchUser fails, clear auth state
-      set({ user: null, token: null, isAuthenticated: false, isLoading: false, isInitializing: false });
-      localStorage.removeItem('auth_token');
-      localStorage.removeItem('auth_user');
+    } catch (error: any) {
+      // If fetchUser fails (401, network error, etc.), clear auth state
+      // Only clear if it's an authentication error (401)
+      if (error.response?.status === 401) {
+        set({ user: null, token: null, isAuthenticated: false, isLoading: false, isInitializing: false });
+        localStorage.removeItem('auth_token');
+        localStorage.removeItem('auth_user');
+      } else {
+        // For other errors (network, etc.), keep the token but mark as not initialized
+        // This allows retry on next page load
+        set({ isLoading: false, isInitializing: false });
+      }
     } finally {
       set({ isInitializing: false });
     }
   },
-}));
+  };
+});
 

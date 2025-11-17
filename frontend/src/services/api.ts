@@ -101,13 +101,15 @@ class ApiClient {
 
         if (error.response?.status === 401) {
           // Only clear auth if we're not already on login page
-          // and if the error is not from a protected route check
+          // Let authStore handle the cleanup to ensure state consistency
           const token = localStorage.getItem('auth_token');
           if (token && !window.location.pathname.includes('/login')) {
-            // Token might be expired, let authStore handle it
-            // Don't immediately redirect, let the app handle auth state
+            // Token is expired or invalid - clear it
+            // The authStore will handle state updates on next API call
             localStorage.removeItem('auth_token');
             localStorage.removeItem('auth_user');
+            // Dispatch a custom event that authStore can listen to if needed
+            window.dispatchEvent(new CustomEvent('auth:token-expired'));
           }
         }
         

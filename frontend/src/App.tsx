@@ -26,9 +26,10 @@ import ErrorBoundary from './components/ErrorBoundary';
 import Landing from './pages/Landing/Landing';
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
-  const { isAuthenticated, isLoading } = useAuthStore();
+  const { isAuthenticated, isLoading, isInitializing } = useAuthStore();
 
-  if (isLoading) {
+  // Wait for initialization to complete before checking authentication
+  if (isLoading || isInitializing) {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="text-lg">Loading...</div>
