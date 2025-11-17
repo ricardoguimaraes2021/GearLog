@@ -24,13 +24,14 @@ class UpdateSlaViolations extends Command
             $resolutionViolated = $slaService->isResolutionViolated($ticket);
             
             $shouldBeViolated = $firstResponseViolated || $resolutionViolated;
+            $wasViolated = $ticket->sla_violated;
             
-            if ($ticket->sla_violated !== $shouldBeViolated) {
+            if ($wasViolated !== $shouldBeViolated) {
                 $ticket->update(['sla_violated' => $shouldBeViolated]);
                 $violated++;
                 
                 // Fire SLA violation events if newly violated
-                if ($shouldBeViolated && !$ticket->sla_violated) {
+                if ($shouldBeViolated && !$wasViolated) {
                     if ($firstResponseViolated) {
                         event(new \App\Events\SlaViolated($ticket, 'first_response'));
                     }
