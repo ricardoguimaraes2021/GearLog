@@ -22,26 +22,39 @@ class TicketCommentController extends Controller
 
     public function store(Request $request, Ticket $ticket)
     {
-        $this->authorize('view', $ticket);
+        // Authorization for creating comments is handled by TicketPolicy@update
+        $this->authorize('update', $ticket);
 
         $validated = $request->validate([
             'message' => 'required|string',
             'attachments' => 'nullable|array',
+            'attachment_files' => 'nullable|array',
+            'attachment_files.*' => 'file|max:10240|mimes:jpg,jpeg,png,gif,pdf,doc,docx,txt',
         ]);
 
-        $comment = TicketComment::create([
-            'ticket_id' => $ticket->id,
+        // Handle file uploads
+        $attachmentPaths = [];
+        if ($request->hasFile('attachment_files')) {
+            foreach ($request->file('attachment_files') as $file) {
+                $path = $file->store('tickets/comments', 'public');
+                $attachmentPaths[] = $path;
+            }
+        }
+
+        // Merge uploaded file paths with existing attachments
+        $allAttachments = array_merge($validated['attachments'] ?? [], $attachmentPaths);
+
+        $comment = $ticket->comments()->create([
             'user_id' => Auth::id(),
             'message' => $validated['message'],
-            'attachments' => $validated['attachments'] ?? [],
+            'attachments' => $allAttachments,
         ]);
 
-        // Create log entry
         TicketLog::create([
             'ticket_id' => $ticket->id,
             'user_id' => Auth::id(),
             'action' => 'comment_added',
-            'new_value' => ['comment_id' => $comment->id],
+            'new_value' => ['comment_id' => $comment->id, 'message' => $comment->message],
         ]);
 
         return response()->json($comment->load('user'), 201);
