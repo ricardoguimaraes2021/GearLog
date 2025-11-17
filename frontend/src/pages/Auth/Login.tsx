@@ -12,11 +12,18 @@ export default function Login() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const { login, isLoading } = useAuthStore();
   const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Prevent double submission
+    if (isSubmitting || isLoading) {
+      return;
+    }
+
     setError('');
 
     // Validate
@@ -31,14 +38,17 @@ export default function Login() {
       }
     }
 
+    setIsSubmitting(true);
     try {
       await login(email, password);
       toast.success('Login successful');
       navigate('/dashboard');
     } catch (err: any) {
-      const errorMessage = err.response?.data?.message || 'Invalid credentials';
+      const errorMessage = err.response?.data?.message || err.response?.data?.error || 'Invalid credentials';
       setError(errorMessage);
       toast.error(errorMessage);
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -90,8 +100,8 @@ export default function Login() {
                 className="mt-1"
               />
             </div>
-            <Button type="submit" className="w-full" disabled={isLoading}>
-              {isLoading ? 'Signing in...' : 'Sign in'}
+            <Button type="submit" className="w-full" disabled={isLoading || isSubmitting}>
+              {isLoading || isSubmitting ? 'Signing in...' : 'Sign in'}
             </Button>
           </form>
           <div className="mt-4 text-sm text-gray-600">

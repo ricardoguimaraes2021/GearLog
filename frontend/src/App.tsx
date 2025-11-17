@@ -22,13 +22,7 @@ import ErrorBoundary from './components/ErrorBoundary';
 import Landing from './pages/Landing/Landing';
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
-  const { isAuthenticated, isLoading, initialize } = useAuthStore();
-
-  useEffect(() => {
-    if (!isAuthenticated && !isLoading) {
-      initialize();
-    }
-  }, [isAuthenticated, isLoading, initialize]);
+  const { isAuthenticated, isLoading } = useAuthStore();
 
   if (isLoading) {
     return (

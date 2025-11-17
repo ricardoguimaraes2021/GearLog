@@ -196,14 +196,14 @@ export default function EmployeeForm() {
               <div>
                 <Label htmlFor="department_id">Department</Label>
                 <Select
-                  value={formData.department_id}
-                  onValueChange={(value) => setFormData({ ...formData, department_id: value })}
+                  value={formData.department_id || undefined}
+                  onValueChange={(value) => setFormData({ ...formData, department_id: value === 'none' ? '' : value })}
                 >
                   <SelectTrigger>
                     <SelectValue placeholder="Select a department" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">No Department</SelectItem>
+                    <SelectItem value="none">No Department</SelectItem>
                     {departments.map((dept) => (
                       <SelectItem key={dept.id} value={dept.id.toString()}>
                         {dept.name}

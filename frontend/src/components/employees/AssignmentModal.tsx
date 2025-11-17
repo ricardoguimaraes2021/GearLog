@@ -79,9 +79,9 @@ export default function AssignmentModal({ employeeId, onClose, onSuccess }: Assi
                 </SelectTrigger>
                 <SelectContent>
                   {assignableProducts.length === 0 ? (
-                    <SelectItem value="" disabled>
+                    <div className="px-2 py-1.5 text-sm text-gray-500">
                       No assignable products available
-                    </SelectItem>
+                    </div>
                   ) : (
                     assignableProducts.map((product) => (
                       <SelectItem key={product.id} value={product.id.toString()}>

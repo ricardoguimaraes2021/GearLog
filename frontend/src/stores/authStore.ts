@@ -8,6 +8,7 @@ interface AuthState {
   token: string | null;
   isLoading: boolean;
   isAuthenticated: boolean;
+  isInitializing: boolean;
   login: (email: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
   fetchUser: () => Promise<void>;
@@ -19,8 +20,14 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   token: localStorage.getItem('auth_token'),
   isLoading: false,
   isAuthenticated: false,
+  isInitializing: false,
 
   login: async (email: string, password: string) => {
+    // Prevent multiple simultaneous login attempts
+    if (get().isLoading) {
+      return;
+    }
+
     set({ isLoading: true });
     try {
       const { user, token } = await api.login(email, password);
@@ -35,7 +42,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         localStorage.setItem('auth_user', JSON.stringify(user));
       }
       
-      set({ user, token, isAuthenticated: true, isLoading: false });
+      set({ user, token, isAuthenticated: true, isLoading: false, isInitializing: false });
       
       // Initialize Echo for real-time notifications (non-blocking)
       if (token) {
@@ -72,7 +79,6 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   },
 
   fetchUser: async () => {
-    set({ isLoading: true });
     try {
       const user = await api.getCurrentUser();
       set({ user, isAuthenticated: true, isLoading: false });
@@ -85,21 +91,45 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       set({ user: null, isAuthenticated: false, isLoading: false });
       localStorage.removeItem('auth_token');
       localStorage.removeItem('auth_user');
+      throw error; // Re-throw to let initialize handle it
     }
   },
 
   initialize: async () => {
+    // Prevent multiple simultaneous initializations
+    if (get().isInitializing || get().isLoading) {
+      return;
+    }
+
     const token = localStorage.getItem('auth_token');
-    if (token) {
+    if (!token) {
+      set({ isAuthenticated: false, isLoading: false, isInitializing: false });
+      return;
+    }
+
+    set({ isInitializing: true, isLoading: true, token });
+    try {
       await get().fetchUser();
       
       // Initialize Echo if user is authenticated
       if (get().isAuthenticated && token) {
-        useNotificationStore.getState().initializeEcho(token);
-        useNotificationStore.getState().fetchUnreadCount();
+        try {
+          useNotificationStore.getState().initializeEcho(token);
+          useNotificationStore.getState().fetchUnreadCount().catch(() => {
+            // Ignore errors
+          });
+        } catch (error) {
+          // Ignore Echo initialization errors
+          console.warn('Failed to initialize Echo:', error);
+        }
       }
-    } else {
-      set({ isAuthenticated: false, isLoading: false });
+    } catch (error) {
+      // If fetchUser fails, clear auth state
+      set({ user: null, token: null, isAuthenticated: false, isLoading: false, isInitializing: false });
+      localStorage.removeItem('auth_token');
+      localStorage.removeItem('auth_user');
+    } finally {
+      set({ isInitializing: false });
     }
   },
 }));
