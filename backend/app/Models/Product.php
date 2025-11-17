@@ -50,6 +50,32 @@ class Product extends Model
         return $this->hasMany(Ticket::class)->orderBy('created_at', 'desc');
     }
 
+    public function assignments(): HasMany
+    {
+        return $this->hasMany(AssetAssignment::class)->orderBy('assigned_at', 'desc');
+    }
+
+    public function activeAssignment(): ?AssetAssignment
+    {
+        return $this->assignments()->whereNull('returned_at')->first();
+    }
+
+    public function canBeAssigned(): bool
+    {
+        // Only items with status: new, used, repair can be assigned
+        // Items marked as damaged, broken, under repair, or reserved cannot be assigned
+        $assignableStatuses = ['new', 'used', 'repair'];
+        $unassignableStatuses = ['damaged', 'reserved'];
+        
+        if (in_array($this->status, $unassignableStatuses)) {
+            return false;
+        }
+        
+        return in_array($this->status, $assignableStatuses) 
+            && $this->quantity > 0 
+            && $this->activeAssignment() === null;
+    }
+
     public function canDelete(): bool
     {
         return $this->quantity === 0;

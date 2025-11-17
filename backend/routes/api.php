@@ -10,6 +10,9 @@ use App\Http\Controllers\Api\TicketCommentController;
 use App\Http\Controllers\Api\UserController;
 use App\Http\Controllers\Api\TicketDashboardController;
 use App\Http\Controllers\Api\NotificationController;
+use App\Http\Controllers\Api\EmployeeController;
+use App\Http\Controllers\Api\DepartmentController;
+use App\Http\Controllers\Api\AssignmentController;
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('v1')->middleware('throttle:60,1')->group(function () {
@@ -48,13 +51,27 @@ Route::prefix('v1')->middleware('throttle:60,1')->group(function () {
         Route::get('/tickets/{ticket}/comments', [TicketCommentController::class, 'index']);
         Route::post('/tickets/{ticket}/comments', [TicketCommentController::class, 'store']);
 
-        // Notifications
-        Route::get('/notifications', [NotificationController::class, 'index']);
-        Route::get('/notifications/unread-count', [NotificationController::class, 'unreadCount']);
-        Route::post('/notifications/{notification}/read', [NotificationController::class, 'markAsRead']);
-        Route::post('/notifications/read-all', [NotificationController::class, 'markAllAsRead']);
-        Route::post('/notifications/test', [NotificationController::class, 'test']);
-        Route::delete('/notifications/{notification}', [NotificationController::class, 'destroy']);
+            // Notifications
+            Route::get('/notifications', [NotificationController::class, 'index']);
+            Route::get('/notifications/unread-count', [NotificationController::class, 'unreadCount']);
+            Route::post('/notifications/{notification}/read', [NotificationController::class, 'markAsRead']);
+            Route::post('/notifications/read-all', [NotificationController::class, 'markAllAsRead']);
+            Route::post('/notifications/test', [NotificationController::class, 'test']);
+            Route::delete('/notifications/{notification}', [NotificationController::class, 'destroy']);
+
+            // Employees
+            Route::apiResource('employees', EmployeeController::class);
+            Route::post('/employees/{employee}/deactivate', [EmployeeController::class, 'deactivate']);
+            Route::post('/employees/{employee}/reactivate', [EmployeeController::class, 'reactivate']);
+
+            // Departments
+            Route::apiResource('departments', DepartmentController::class);
+
+            // Assignments
+            Route::post('/assignments/checkout', [AssignmentController::class, 'checkout']);
+            Route::post('/assignments/{assignment}/checkin', [AssignmentController::class, 'checkin']);
+            Route::get('/assignments/history/employee/{employee}', [AssignmentController::class, 'historyByEmployee']);
+            Route::get('/assignments/history/asset/{product}', [AssignmentController::class, 'historyByAsset']);
+        });
     });
-});
 
