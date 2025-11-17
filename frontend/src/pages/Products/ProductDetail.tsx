@@ -6,7 +6,7 @@ import { api } from '@/services/api';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { ArrowLeft, Save, Plus, Edit } from 'lucide-react';
+import { ArrowLeft, Save, Plus, Edit, AlertTriangle } from 'lucide-react';
 import type { Movement } from '@/types';
 import { toast } from '@/utils/toast';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -14,7 +14,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 export default function ProductDetail() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { currentProduct, fetchProduct, isLoading } = useProductStore();
+  const { currentProduct, fetchProduct, updateProduct, isLoading } = useProductStore();
   const { categories, fetchCategories } = useCategoryStore();
   const [movements, setMovements] = useState<Movement[]>([]);
   const [showMovementForm, setShowMovementForm] = useState(false);
@@ -24,6 +24,7 @@ export default function ProductDetail() {
     assigned_to: '',
     notes: '',
   });
+  const [isUpdatingStatus, setIsUpdatingStatus] = useState(false);
 
   useEffect(() => {
     if (id) {
