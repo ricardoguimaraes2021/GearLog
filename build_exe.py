@@ -10,6 +10,31 @@ import subprocess
 import shutil
 from pathlib import Path
 
+def print_success(text: str):
+    """Print success message with fallback for Windows encoding issues."""
+    try:
+        print(f"[OK] {text}")
+    except UnicodeEncodeError:
+        print(f"[OK] {text}")
+
+def print_error(text: str):
+    """Print error message with fallback for Windows encoding issues."""
+    try:
+        print(f"[ERROR] {text}")
+    except UnicodeEncodeError:
+        print(f"[ERROR] {text}")
+
+def print_warning(text: str):
+    """Print warning message with fallback for Windows encoding issues."""
+    try:
+        print(f"[WARNING] {text}")
+    except UnicodeEncodeError:
+        print(f"[WARNING] {text}")
+
+def print_info(text: str):
+    """Print info message."""
+    print(f"[INFO] {text}")
+
 def check_pyinstaller():
     """Check if PyInstaller is installed."""
     try:
