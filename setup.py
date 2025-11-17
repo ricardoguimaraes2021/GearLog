@@ -141,11 +141,12 @@ def resolve_command_path(cmd: str) -> Optional[str]:
     
     return None
 
-def run_command(cmd: List[str], check: bool=True, capture_output: bool=False, env=None, shell: Optional[bool]=None) -> Tuple[bool, str]:
+def run_command(cmd: List[str], check: bool=True, capture_output: bool=False, env=None, shell: Optional[bool]=None, timeout: Optional[int]=None) -> Tuple[bool, str]:
     """
     Executa um comando e devolve (success, output).
     - capture_output: tenta devolver stdout (ou stderr em caso de erro).
     - shell: se None, detecta automaticamente se deve usar shell (Windows para .bat/.cmd).
+    - timeout: timeout em segundos (None = sem timeout, útil para comandos longos como composer install).
     """
     is_windows = platform.system() == "Windows"
     
@@ -165,7 +166,14 @@ def run_command(cmd: List[str], check: bool=True, capture_output: bool=False, en
             cmd = [resolved] + cmd[1:]
             logger.debug("Comando resolvido: %s -> %s", cmd[0] if len(cmd) > 0 else "", resolved)
     
-    logger.debug("Executando comando: %s (shell=%s)", " ".join(cmd) if isinstance(cmd, list) else str(cmd), shell)
+    # Timeout padrão para comandos longos
+    if timeout is None:
+        if cmd and cmd[0].lower() in ['composer', 'npm']:
+            timeout = 600  # 10 minutos para composer/npm install
+        else:
+            timeout = 300  # 5 minutos para outros comandos
+    
+    logger.debug("Executando comando: %s (shell=%s, timeout=%s)", " ".join(cmd) if isinstance(cmd, list) else str(cmd), shell, timeout)
     
     try:
         if capture_output:
@@ -178,7 +186,8 @@ def run_command(cmd: List[str], check: bool=True, capture_output: bool=False, en
                 encoding='utf-8',
                 errors='replace',
                 env=env, 
-                shell=shell
+                shell=shell,
+                timeout=timeout
             )
             out = proc.stdout.strip()
             err = proc.stderr.strip()
@@ -189,8 +198,12 @@ def run_command(cmd: List[str], check: bool=True, capture_output: bool=False, en
                 logger.error("Comando retornou código %s. Stderr: %s", proc.returncode, err)
                 return False, err or out
         else:
-            proc = subprocess.run(cmd, check=check, env=env, shell=shell, encoding='utf-8', errors='replace')
+            proc = subprocess.run(cmd, check=check, env=env, shell=shell, encoding='utf-8', errors='replace', timeout=timeout)
             return True, ""
+    except subprocess.TimeoutExpired as e:
+        error_msg = f"Comando excedeu o timeout de {timeout} segundos. O processo pode estar travado ou demorando muito."
+        logger.error("TimeoutExpired: %s", error_msg)
+        return False, error_msg
     except subprocess.CalledProcessError as e:
         out = e.stdout or ""
         err = e.stderr or str(e)
@@ -954,7 +967,8 @@ SANCTUM_STATEFUL_DOMAINS=localhost:5173,127.0.0.1:5173
                 return False
             
             print_info("Executando composer install...")
-            ok, out = run_command(["composer", "install", "--no-interaction"], check=False, capture_output=True)
+            print_info("Isso pode levar alguns minutos. Por favor, aguarde...")
+            ok, out = run_command(["composer", "install", "--no-interaction", "--prefer-dist", "--no-progress"], check=False, capture_output=True, timeout=600)
             if not ok:
                 # Verificar se o erro é relacionado a extensões PHP
                 if "ext-" in out and "missing from your system" in out:
@@ -1174,7 +1188,8 @@ SANCTUM_STATEFUL_DOMAINS=localhost:5173,127.0.0.1:5173
                 return False
             
             print_info("Executando npm install...")
-            ok, out = run_command(["npm", "install"], check=False, capture_output=True)
+            print_info("Isso pode levar alguns minutos. Por favor, aguarde...")
+            ok, out = run_command(["npm", "install", "--no-progress"], check=False, capture_output=True, timeout=600)
             if not ok:
                 print_error("npm install FALHOU. Não é possível continuar sem as dependências do frontend.")
                 print_error(f"Erro: {out[:500] if out else 'Sem detalhes'}")
