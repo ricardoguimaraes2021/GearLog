@@ -316,14 +316,25 @@ export default function Landing() {
             </h2>
             <p className="text-xl text-blue-100 mb-8 max-w-2xl mx-auto">
               Join teams who are already using GearLog to streamline their IT equipment tracking.
-              Get started in minutes, no credit card required.
+              Get started in minutes with our automated setup script, no credit card required.
             </p>
-            <Link to="/login">
-              <Button size="lg" variant="secondary" className="text-lg px-8">
-                Start Free Trial
-                <ArrowRight className="ml-2 h-5 w-5" />
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <Link to="/login">
+                <Button size="lg" variant="secondary" className="text-lg px-8 bg-white text-blue-600 hover:bg-gray-100">
+                  Start Free Trial
+                  <ArrowRight className="ml-2 h-5 w-5" />
+                </Button>
+              </Link>
+              <Button 
+                size="lg" 
+                variant="outline" 
+                className="text-lg px-8 border-white text-white hover:bg-white/10"
+                onClick={handleDownloadSetupScript}
+              >
+                <Download className="mr-2 h-5 w-5" />
+                Download Setup Script
               </Button>
-            </Link>
+            </div>
           </CardContent>
         </Card>
       </section>
