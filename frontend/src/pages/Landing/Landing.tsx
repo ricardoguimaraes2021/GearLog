@@ -13,69 +13,103 @@ import {
   Zap,
   Lock,
   TrendingUp,
-  Download,
-  Terminal,
-  Code,
-  PlayCircle
+  Ticket,
+  Clock,
+  AlertTriangle,
+  Image,
+  Download as DownloadIcon,
+  Filter,
+  History,
+  Eye,
+  FileCheck,
+  MessageSquare,
+  Paperclip,
+  Target,
+  Activity
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 export default function Landing() {
-  const handleDownloadSetupScript = () => {
-    // Create a download link for the setup script
-    const scriptUrl = 'https://raw.githubusercontent.com/ricardoguimaraes2021/GearLog/main/setup.py';
-    const link = document.createElement('a');
-    link.href = scriptUrl;
-    link.download = 'setup.py';
-    link.target = '_blank';
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-  };
-
-  const handleDownloadExe = () => {
-    // Create a download link for the Windows executable
-    // Note: This will need to be updated with the actual release URL once the .exe is built and uploaded
-    const exeUrl = 'https://github.com/ricardoguimaraes2021/GearLog/releases/latest/download/GearLogSetup.exe';
-    const link = document.createElement('a');
-    link.href = exeUrl;
-    link.download = 'GearLogSetup.exe';
-    link.target = '_blank';
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-  };
-
   const features = [
     {
       icon: Package,
       title: 'Complete Inventory Management',
-      description: 'Track all your IT equipment with detailed information including brand, model, serial numbers, and specifications.',
+      description: 'Track all your IT equipment with detailed information including brand, model, serial numbers, specifications, and purchase dates. Full CRUD operations with status management.',
     },
     {
       icon: QrCode,
-      title: 'QR Code Generation',
-      description: 'Automatically generate QR codes for each product, making it easy to scan and track equipment quickly.',
+      title: 'QR Code Generation & Scanning',
+      description: 'Automatically generate QR codes for each product. Scan codes to access public product pages without login. Perfect for quick asset identification in the field.',
     },
     {
       icon: BarChart3,
-      title: 'Real-time Dashboard',
-      description: 'Monitor your inventory with comprehensive KPIs, alerts for low stock, and visual analytics.',
+      title: 'Real-time Dashboard & Analytics',
+      description: 'Monitor your inventory with comprehensive KPIs, visual analytics, and smart alerts. Track products by category, view recent activity, and get insights at a glance.',
+    },
+    {
+      icon: Ticket,
+      title: 'Ticket System with SLA',
+      description: 'Complete support ticket management with automated SLA tracking. Monitor compliance rates, track violations, and view historical trends. Support for multiple ticket types and priorities.',
+    },
+    {
+      icon: Clock,
+      title: 'SLA Compliance Tracking',
+      description: 'Automated Service Level Agreement tracking with configurable response and resolution times. Real-time violation detection, at-risk warnings, and compliance trend charts.',
     },
     {
       icon: Shield,
       title: 'Role-Based Access Control',
-      description: 'Secure your data with granular permissions. Admin, Manager, and Technician roles with different access levels.',
+      description: 'Secure your data with granular permissions. Admin, Manager, Technician, and Read-only roles with different access levels. Built on Spatie Permissions.',
     },
     {
       icon: Search,
       title: 'Advanced Search & Filters',
-      description: 'Find products instantly with powerful search and filtering options by category, status, and more.',
+      description: 'Find products instantly with powerful search and filtering options. Filter by category, status, and custom criteria. Real-time search results as you type.',
     },
     {
       icon: FileText,
       title: 'Export & Reports',
-      description: 'Export your inventory data in multiple formats: CSV, Excel, or PDF for reporting and analysis.',
+      description: 'Export your inventory data in multiple formats: CSV, Excel (XLSX), or PDF. Export filtered results for targeted reporting and analysis.',
+    },
+    {
+      icon: History,
+      title: 'Movement Tracking',
+      description: 'Track all product movements (entry, exit, allocation, return) with assigned users and notes. Prevent negative stock with real-time validation. Complete movement history.',
+    },
+    {
+      icon: Image,
+      title: 'Image Upload & Optimization',
+      description: 'Upload product images with automatic optimization. Support for multiple image formats. Images are automatically resized and optimized for web delivery.',
+    },
+    {
+      icon: Paperclip,
+      title: 'File Attachments',
+      description: 'Attach files to tickets and comments. Support for images, PDFs, and documents. Track attachments with download links and file management.',
+    },
+    {
+      icon: MessageSquare,
+      title: 'Comments & Collaboration',
+      description: 'Add comments to tickets with file attachments. Complete activity logs for all ticket actions. Team collaboration with real-time updates.',
+    },
+    {
+      icon: AlertTriangle,
+      title: 'Smart Alerts',
+      description: 'Receive alerts for low stock, damaged products, and inactive items. Expandable alerts showing specific products that need attention.',
+    },
+    {
+      icon: Eye,
+      title: 'Public Product View',
+      description: 'Shareable public product pages accessible via QR code scanning. View product details without authentication. Perfect for field technicians.',
+    },
+    {
+      icon: Target,
+      title: 'Ticket Assignment',
+      description: 'Assign tickets to technicians. Track assignment history. Filter tickets by assigned user. Monitor workload distribution.',
+    },
+    {
+      icon: Activity,
+      title: 'Activity Logs',
+      description: 'Complete audit trail of all actions. Track ticket status changes, assignments, comments, and product movements. Full history for compliance.',
     },
   ];
 
@@ -83,22 +117,33 @@ export default function Landing() {
     {
       icon: Zap,
       title: 'Save Time',
-      description: 'Automate inventory tracking and reduce manual work with smart features.',
+      description: 'Automate inventory tracking and reduce manual work with smart features like QR codes, automated alerts, and bulk operations.',
     },
     {
       icon: Lock,
       title: 'Secure & Reliable',
-      description: 'Built with security best practices and reliable data storage.',
+      description: 'Built with security best practices, role-based access control, and reliable data storage. Your data is protected and backed up.',
     },
     {
       icon: TrendingUp,
       title: 'Make Better Decisions',
-      description: 'Get insights from your inventory data to optimize your IT asset management.',
+      description: 'Get insights from your inventory data and ticket metrics to optimize your IT asset management and support operations.',
     },
     {
       icon: Users,
       title: 'Team Collaboration',
-      description: 'Multiple users can work together with proper access controls and activity logs.',
+      description: 'Multiple users can work together with proper access controls, ticket assignments, comments, and activity logs.',
+    },
+  ];
+
+  const techStack = [
+    {
+      category: 'Backend',
+      items: ['Laravel 11', 'PHP 8.3+', 'MySQL 8', 'Laravel Sanctum', 'Spatie Permissions', 'Laravel Excel', 'DomPDF', 'Intervention Image', 'Simple QR Code'],
+    },
+    {
+      category: 'Frontend',
+      items: ['React 18', 'TypeScript', 'Vite', 'TailwindCSS', 'shadcn/ui', 'Zustand', 'Axios', 'React Router', 'Recharts', 'Zod'],
     },
   ];
 
@@ -144,7 +189,7 @@ export default function Landing() {
           </h1>
           <p className="text-xl text-gray-600 mb-8 max-w-2xl mx-auto">
             GearLog is a comprehensive inventory management system designed specifically for IT teams. 
-            Track, manage, and optimize your equipment with ease.
+            Track equipment, manage support tickets with SLA tracking, and optimize your operations with powerful analytics.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link to="/login">
@@ -153,103 +198,16 @@ export default function Landing() {
                 <ArrowRight className="ml-2 h-5 w-5" />
               </Button>
             </Link>
-            <Button 
-              size="lg" 
-              variant="outline" 
-              className="text-lg px-8"
-              onClick={handleDownloadSetupScript}
+            <a
+              href="https://github.com/ricardoguimaraes2021/GearLog"
+              target="_blank"
+              rel="noopener noreferrer"
             >
-              <Download className="mr-2 h-5 w-5" />
-              Download Setup Script
-            </Button>
-          </div>
-        </div>
-      </section>
-
-      {/* Quick Setup Section */}
-      <section className="bg-gradient-to-r from-blue-600 to-blue-700 text-white py-16">
-        <div className="container mx-auto px-4">
-          <div className="max-w-4xl mx-auto">
-            <div className="flex flex-col md:flex-row items-center gap-8">
-              <div className="flex-1 text-center md:text-left">
-                <div className="inline-flex items-center gap-2 px-3 py-1 bg-white/20 rounded-full text-sm font-medium mb-4">
-                  <Terminal className="h-4 w-4" />
-                  Automated Setup Available
-                </div>
-                <h2 className="text-3xl md:text-4xl font-bold mb-4">
-                  Get Started in Minutes
-                </h2>
-                <p className="text-lg text-blue-100 mb-6">
-                  Our automated setup script handles everything for you. It installs all dependencies, 
-                  configures the project, and sets up the database automatically. No manual configuration needed!
-                </p>
-                <div className="flex flex-col sm:flex-row gap-4">
-                  <Button
-                    size="lg"
-                    variant="secondary"
-                    className="text-lg px-6 bg-white text-blue-600 hover:bg-gray-100"
-                    onClick={handleDownloadExe}
-                  >
-                    <Download className="mr-2 h-5 w-5" />
-                    Download for Windows (.exe)
-                  </Button>
-                  <Button
-                    size="lg"
-                    variant="outline"
-                    className="text-lg px-6 border-white text-white hover:bg-white/10"
-                    onClick={handleDownloadSetupScript}
-                  >
-                    <Code className="mr-2 h-5 w-5" />
-                    Download Python Script
-                  </Button>
-                  <a
-                    href="https://github.com/ricardoguimaraes2021/GearLog#-quick-start"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    <Button
-                      size="lg"
-                      variant="outline"
-                      className="text-lg px-6 border-white text-white hover:bg-white/10"
-                    >
-                      View Instructions
-                    </Button>
-                  </a>
-                </div>
-              </div>
-              <div className="flex-1">
-                <Card className="bg-white/10 backdrop-blur-sm border-white/20 text-white">
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                      <PlayCircle className="h-5 w-5" />
-                      Quick Start
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-3 font-mono text-sm">
-                      <div className="flex items-start gap-2">
-                        <span className="text-blue-300">$</span>
-                        <span>chmod +x setup.py</span>
-                      </div>
-                      <div className="flex items-start gap-2">
-                        <span className="text-blue-300">$</span>
-                        <span>python3 setup.py</span>
-                      </div>
-                      <div className="mt-4 pt-4 border-t border-white/20 text-xs text-blue-100">
-                        The script will automatically:
-                      </div>
-                      <ul className="space-y-1 text-xs text-blue-100 ml-4 list-disc">
-                        <li>Install PHP, Composer, MySQL, Node.js</li>
-                        <li>Clone the repository</li>
-                        <li>Configure backend & frontend</li>
-                        <li>Set up the database</li>
-                        <li>Run migrations</li>
-                      </ul>
-                    </div>
-                  </CardContent>
-                </Card>
-              </div>
-            </div>
+              <Button size="lg" variant="outline" className="text-lg px-8">
+                View on GitHub
+                <ArrowRight className="ml-2 h-5 w-5" />
+              </Button>
+            </a>
           </div>
         </div>
       </section>
@@ -275,7 +233,7 @@ export default function Landing() {
             Everything You Need to Manage IT Inventory
           </h2>
           <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-            Powerful features designed to make inventory management simple and efficient
+            Powerful features designed to make inventory management and support ticket handling simple and efficient
           </p>
         </div>
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
@@ -300,31 +258,64 @@ export default function Landing() {
         </div>
       </section>
 
-      {/* Benefits Section */}
+      {/* Tech Stack Section */}
       <section className="bg-gray-50 py-20">
         <div className="container mx-auto px-4">
           <div className="text-center mb-16">
             <h2 className="text-4xl font-bold text-gray-900 mb-4">
-              Why Choose GearLog?
+              Built with Modern Technology
             </h2>
             <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-              Built for modern IT teams who need reliable, efficient inventory management
+              Leveraging the best tools and frameworks for performance, security, and developer experience
             </p>
           </div>
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
-            {benefits.map((benefit, index) => {
-              const Icon = benefit.icon;
-              return (
-                <div key={index} className="text-center">
-                  <div className="h-16 w-16 bg-blue-600 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <Icon className="h-8 w-8 text-white" />
+          <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+            {techStack.map((stack, index) => (
+              <Card key={index}>
+                <CardHeader>
+                  <CardTitle className="text-2xl">{stack.category}</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="flex flex-wrap gap-2">
+                    {stack.items.map((item, itemIndex) => (
+                      <span
+                        key={itemIndex}
+                        className="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-sm font-medium"
+                      >
+                        {item}
+                      </span>
+                    ))}
                   </div>
-                  <h3 className="text-xl font-semibold text-gray-900 mb-2">{benefit.title}</h3>
-                  <p className="text-gray-600">{benefit.description}</p>
-                </div>
-              );
-            })}
+                </CardContent>
+              </Card>
+            ))}
           </div>
+        </div>
+      </section>
+
+      {/* Benefits Section */}
+      <section className="container mx-auto px-4 py-20">
+        <div className="text-center mb-16">
+          <h2 className="text-4xl font-bold text-gray-900 mb-4">
+            Why Choose GearLog?
+          </h2>
+          <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+            Built for modern IT teams who need reliable, efficient inventory management
+          </p>
+        </div>
+        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
+          {benefits.map((benefit, index) => {
+            const Icon = benefit.icon;
+            return (
+              <div key={index} className="text-center">
+                <div className="h-16 w-16 bg-blue-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <Icon className="h-8 w-8 text-white" />
+                </div>
+                <h3 className="text-xl font-semibold text-gray-900 mb-2">{benefit.title}</h3>
+                <p className="text-gray-600">{benefit.description}</p>
+              </div>
+            );
+          })}
         </div>
       </section>
 
@@ -336,25 +327,30 @@ export default function Landing() {
               Ready to Transform Your IT Inventory Management?
             </h2>
             <p className="text-xl text-blue-100 mb-8 max-w-2xl mx-auto">
-              Join teams who are already using GearLog to streamline their IT equipment tracking.
-              Get started in minutes with our automated setup script, no credit card required.
+              Join teams who are already using GearLog to streamline their IT equipment tracking and support operations.
+              Get started today with our easy setup process.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link to="/login">
                 <Button size="lg" variant="secondary" className="text-lg px-8 bg-white text-blue-600 hover:bg-gray-100">
-                  Start Free Trial
+                  Get Started
                   <ArrowRight className="ml-2 h-5 w-5" />
                 </Button>
               </Link>
-              <Button 
-                size="lg" 
-                variant="outline" 
-                className="text-lg px-8 border-white text-white hover:bg-white/10"
-                onClick={handleDownloadSetupScript}
+              <a
+                href="https://github.com/ricardoguimaraes2021/GearLog"
+                target="_blank"
+                rel="noopener noreferrer"
               >
-                <Download className="mr-2 h-5 w-5" />
-                Download Setup Script
-              </Button>
+                <Button 
+                  size="lg" 
+                  variant="outline" 
+                  className="text-lg px-8 border-white text-white hover:bg-white/10"
+                >
+                  View Source Code
+                  <ArrowRight className="ml-2 h-5 w-5" />
+                </Button>
+              </a>
             </div>
           </CardContent>
         </Card>
@@ -370,31 +366,30 @@ export default function Landing() {
                 <span className="text-xl font-bold text-gray-900">GearLog</span>
               </div>
               <p className="text-gray-600">
-                Open source IT equipment inventory management system.
+                Open source IT equipment inventory management system with ticket support and SLA tracking.
               </p>
             </div>
             <div>
               <h4 className="font-semibold text-gray-900 mb-4">Product</h4>
               <ul className="space-y-2 text-gray-600">
                 <li><a href="#features" className="hover:text-blue-600">Features</a></li>
-                <li><a href="#pricing" className="hover:text-blue-600">Pricing</a></li>
-                <li><a href="#docs" className="hover:text-blue-600">Documentation</a></li>
+                <li><a href="#tech-stack" className="hover:text-blue-600">Technology</a></li>
+                <li><a href="https://github.com/ricardoguimaraes2021/GearLog" target="_blank" rel="noopener noreferrer" className="hover:text-blue-600">Documentation</a></li>
               </ul>
             </div>
             <div>
               <h4 className="font-semibold text-gray-900 mb-4">Resources</h4>
               <ul className="space-y-2 text-gray-600">
                 <li><a href="https://github.com/ricardoguimaraes2021/GearLog" target="_blank" rel="noopener noreferrer" className="hover:text-blue-600">GitHub</a></li>
-                <li><a href="#support" className="hover:text-blue-600">Support</a></li>
-                <li><a href="#blog" className="hover:text-blue-600">Blog</a></li>
+                <li><a href="https://github.com/ricardoguimaraes2021/GearLog/issues" target="_blank" rel="noopener noreferrer" className="hover:text-blue-600">Support</a></li>
+                <li><a href="https://github.com/ricardoguimaraes2021/GearLog/blob/main/README.md" target="_blank" rel="noopener noreferrer" className="hover:text-blue-600">Quick Start</a></li>
               </ul>
             </div>
             <div>
               <h4 className="font-semibold text-gray-900 mb-4">Legal</h4>
               <ul className="space-y-2 text-gray-600">
-                <li><a href="#privacy" className="hover:text-blue-600">Privacy</a></li>
-                <li><a href="#terms" className="hover:text-blue-600">Terms</a></li>
-                <li><a href="#license" className="hover:text-blue-600">License</a></li>
+                <li><a href="https://github.com/ricardoguimaraes2021/GearLog/blob/main/LICENSE" target="_blank" rel="noopener noreferrer" className="hover:text-blue-600">License</a></li>
+                <li><a href="https://github.com/ricardoguimaraes2021/GearLog" target="_blank" rel="noopener noreferrer" className="hover:text-blue-600">Contributing</a></li>
               </ul>
             </div>
           </div>
@@ -406,4 +401,3 @@ export default function Landing() {
     </div>
   );
 }
-

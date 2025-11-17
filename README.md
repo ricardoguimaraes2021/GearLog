@@ -1,248 +1,297 @@
 # GearLog - IT Equipment Inventory Management System
 
-A full-stack inventory management system for tracking IT equipment, built with Laravel 11 and React 18.
+A comprehensive, full-stack inventory management system designed specifically for IT teams to track, manage, and optimize their equipment efficiently.
+
+## 🎯 Overview
+
+GearLog is a modern, feature-rich inventory management solution that combines powerful backend capabilities with an intuitive, responsive frontend interface. Built with Laravel 11 and React 18, it provides everything you need to manage IT equipment from a single, unified platform.
+
+## ✨ Key Features
+
+### 📦 Product Management
+- **Complete CRUD Operations** - Create, read, update, and delete products with ease
+- **Detailed Product Information** - Track brand, model, serial numbers, specifications, and purchase dates
+- **Image Upload & Optimization** - Upload product images with automatic optimization
+- **QR Code Generation** - Automatically generate QR codes for each product
+- **Public Product View** - Shareable public pages accessible via QR code scanning
+- **Status Management** - Track product status (new, used, damaged, repair, reserved)
+- **Purchase Date Tracking** - Monitor when products were purchased with validation
+
+### 📊 Dashboard & Analytics
+- **Real-time KPIs** - Monitor total products, total value, damaged products, and low stock
+- **Visual Analytics** - Products by category breakdown
+- **Recent Activity** - Track recent movements and ticket activity
+- **Smart Alerts** - Expandable alerts showing specific products with:
+  - Low stock warnings
+  - Damaged products
+  - Inactive products (no movement in 30+ days)
+- **Ticket Metrics Integration** - View ticket KPIs directly on main dashboard
+
+### 🎫 Ticket System
+- **Complete Ticket Management** - Create, assign, and track support tickets
+- **SLA (Service Level Agreement)** - Automated SLA tracking with:
+  - Configurable response and resolution times by priority
+  - Real-time SLA violation detection
+  - SLA at-risk warnings (80% time elapsed)
+  - Compliance rate tracking
+  - Historical compliance trend charts
+- **Ticket Types** - Support for damage, maintenance, update, audit, and other ticket types
+- **Priority Levels** - Low, medium, high, and critical priorities
+- **Status Workflow** - Open → In Progress → Waiting Parts → Resolved → Closed
+- **File Attachments** - Attach images, PDFs, and documents to tickets and comments
+- **Comments & Collaboration** - Add comments with attachments for team communication
+- **Assignment System** - Assign tickets to technicians
+- **Activity Logs** - Complete audit trail of all ticket actions
+- **Ticket Dashboard** - Dedicated dashboard with:
+  - Ticket KPIs (total, open, in progress, critical, unassigned)
+  - Tickets by status, priority, type, technician
+  - Most reported products and categories
+  - Recent and urgent tickets
+  - SLA compliance metrics and trends
+
+### 📈 Movement Tracking
+- **Movement Types** - Entry, exit, allocation, and return movements
+- **Stock Validation** - Prevent negative stock with real-time validation
+- **Assigned To Tracking** - Track who products are assigned to
+- **Movement History** - Complete history grouped by purchase date
+- **Notes & Documentation** - Add notes to movements for context
+
+### 🔍 Search & Filtering
+- **Advanced Search** - Search products by name, description, or serial number
+- **Multi-filter Support** - Filter by category, status, and custom criteria
+- **Real-time Results** - Instant search results as you type
+
+### 📤 Export & Reporting
+- **Multiple Formats** - Export to CSV, Excel (XLSX), or PDF
+- **Filtered Exports** - Export only filtered/search results
+- **Professional Reports** - Formatted PDF reports with company branding
+
+### 🔐 Security & Access Control
+- **Role-Based Access Control (RBAC)** - Granular permissions with Spatie Permissions
+- **User Roles**:
+  - **Admin** - Full system access
+  - **Manager (Gestor)** - Manage products, categories, movements, and tickets
+  - **Technician (Tecnico)** - View and create movements, manage assigned tickets
+  - **Read-only (Consulta)** - View-only access
+- **Laravel Sanctum Authentication** - Secure API authentication
+- **CSRF Protection** - Built-in CSRF token protection
+- **API Rate Limiting** - Protect against abuse with configurable rate limits
+
+### 🎨 User Experience
+- **Modern UI** - Built with shadcn/ui components and TailwindCSS
+- **Responsive Design** - Fully responsive, works on desktop, tablet, and mobile
+- **Mobile Navigation** - Hamburger menu for mobile devices
+- **Toast Notifications** - User-friendly toast notifications (no browser alerts)
+- **Loading States** - Skeleton loaders for better perceived performance
+- **Error Handling** - Comprehensive error boundaries and user-friendly error messages
+- **Form Validation** - Client-side validation with Zod schemas
+
+### 📱 Public Access
+- **QR Code Scanning** - Scan QR codes to view product details without login
+- **Public Product Pages** - Shareable product information pages
+- **Mobile-Friendly** - Optimized for mobile QR code scanning
+
+## 🛠️ Technology Stack
+
+### Backend
+- **Framework**: Laravel 11
+- **Language**: PHP 8.3+
+- **Database**: MySQL 8
+- **Authentication**: Laravel Sanctum
+- **Authorization**: Spatie Permissions (RBAC)
+- **File Storage**: Local filesystem with public storage
+- **Image Processing**: Intervention Image
+- **QR Code Generation**: Simple QR Code
+- **Export Libraries**:
+  - Laravel Excel (CSV/Excel exports)
+  - DomPDF (PDF generation)
+- **API Documentation**: L5-Swagger (OpenAPI/Swagger)
+
+### Frontend
+- **Framework**: React 18
+- **Language**: TypeScript
+- **Build Tool**: Vite
+- **Styling**: TailwindCSS
+- **UI Components**: shadcn/ui
+- **State Management**: Zustand
+- **HTTP Client**: Axios
+- **Routing**: React Router v6
+- **Icons**: Lucide React
+- **Notifications**: Sonner (Toast notifications)
+- **Charts**: Recharts (for SLA compliance trends)
+- **Form Validation**: Zod + React Hook Form
+
+## 📋 Requirements
+
+### System Requirements
+- **PHP**: 8.3 or higher
+- **Composer**: Latest version
+- **Node.js**: 18 or higher
+- **npm**: Included with Node.js
+- **MySQL**: 8.0 or higher
+
+### PHP Extensions
+- `ext-fileinfo` - File type detection
+- `ext-gd` - Image processing
+- `ext-zip` - Excel export support
+- `ext-mbstring` - String handling
+- `ext-xml` - XML processing
+- `ext-curl` - HTTP requests
 
 ## 🚀 Quick Start
 
-### Automated Setup (Recommended)
-
-We provide automated setup tools that handle everything for you:
-
-#### Windows Users
-Download and run the executable:
-- **[Download GearLogSetup.exe](https://github.com/ricardoguimaraes2021/GearLog/releases/latest/download/GearLogSetup.exe)**
-- Double-click to run (no Python required!)
-
-> **Note:** If you get a 404 error, the .exe hasn't been published yet. See `GITHUB_RELEASE_GUIDE.md` for instructions on how to publish it.
-
-#### macOS/Linux Users
-Use the Python script:
-
+### 1. Clone the Repository
 ```bash
-# Make the script executable
-chmod +x setup.py
-
-# Run the automated setup
-python3 setup.py
+git clone https://github.com/ricardoguimaraes2021/GearLog.git
+cd GearLog
 ```
 
-#### What the setup does:
-- ✅ Install all required dependencies (PHP, Composer, MySQL, Node.js)
-- ✅ Clone the repository to your Desktop
-- ✅ Configure backend and frontend
-- ✅ Set up the database
-- ✅ Run migrations and seeders
+### 2. Backend Setup
+```bash
+cd backend
+composer install
+cp .env.example .env
+php artisan key:generate
 
-**Note:** The Python script works on macOS and Linux. Windows users can use the .exe executable.
+# Configure your database in .env
+# DB_CONNECTION=mysql
+# DB_HOST=127.0.0.1
+# DB_PORT=3306
+# DB_DATABASE=gearlog
+# DB_USERNAME=root
+# DB_PASSWORD=your_password
 
-### Manual Installation
+php artisan migrate --seed
+php artisan storage:link
+php artisan serve
+```
 
-#### Prerequisites
+Backend will run on: **http://localhost:8000**
 
-- PHP 8.3+
-- Composer
-- Node.js 18+
-- MySQL 8
-- npm or yarn
+### 3. Frontend Setup
+```bash
+cd frontend
+npm install
+npm run dev
+```
 
-#### Installation Steps
+Frontend will run on: **http://localhost:5173**
 
-1. **Clone the repository**
-   ```bash
-   git clone https://github.com/ricardoguimaraes2021/GearLog.git
-   cd GearLog
-   ```
-
-2. **Backend Setup**
-   ```bash
-   cd backend
-   composer install
-   cp .env.example .env  # Copy example environment file
-   php artisan key:generate
-   
-   # Configure database in .env
-   # DB_CONNECTION=mysql
-   # DB_HOST=127.0.0.1
-   # DB_PORT=3306
-   # DB_DATABASE=gearlog
-   # DB_USERNAME=root
-   # DB_PASSWORD=
-   
-   php artisan migrate --seed
-   php artisan storage:link
-   php artisan serve
-   ```
-   Backend runs on: **http://localhost:8000**
-
-3. **Frontend Setup**
-   ```bash
-   cd frontend
-   npm install
-   npm run dev
-   ```
-   Frontend runs on: **http://localhost:5173**
+### 4. Access the Application
+- **Frontend**: http://localhost:5173
+- **API Documentation**: http://localhost:8000/api/documentation
+- **Landing Page**: http://localhost:5173/landing
 
 ## 🔑 Default Credentials
 
-After seeding, you can login with:
+After running migrations with seeders, you can login with:
 
 - **Admin**: `admin@gearlog.local` / `password`
 - **Manager**: `gestor@gearlog.local` / `password`
 - **Technician**: `tecnico@gearlog.local` / `password`
-
-## ✨ Features
-
-- ✅ Complete product inventory management
-- ✅ Category organization
-- ✅ Movement tracking (entrada, saída, alocação, devolução)
-- ✅ QR code generation for products
-- ✅ Image uploads with optimization
-- ✅ Real-time dashboard with KPIs
-- ✅ Advanced search and filtering
-- ✅ Export to CSV, Excel, and PDF
-- ✅ Role-based access control (RBAC)
-- ✅ Public product view via QR code
-- ✅ Low stock alerts
-- ✅ Purchase date tracking
-
-## 🛠️ Tech Stack
-
-**Backend:**
-- Laravel 11
-- PHP 8.3+
-- MySQL 8
-- Laravel Sanctum (Authentication)
-- Spatie Permissions (RBAC)
-- Laravel Excel (Exports)
-- DomPDF (PDF generation)
-- Simple QR Code (QR code generation)
-- Intervention Image (Image optimization)
-
-**Frontend:**
-- React 18
-- TypeScript
-- Vite
-- TailwindCSS
-- shadcn/ui
-- Zustand (State management)
-- Axios (HTTP client)
-- React Router (Routing)
+- **Read-only**: `consulta@gearlog.local` / `password`
 
 ## 📁 Project Structure
 
 ```
 GearLog/
 ├── backend/                      # Laravel 11 API
-│   ├── app/                      # Application code
-│   ├── database/                 # Migrations, seeders
-│   ├── routes/                   # API routes
-│   └── ...
+│   ├── app/
+│   │   ├── Console/Commands/     # Artisan commands
+│   │   ├── Exceptions/           # Custom exceptions
+│   │   ├── Http/
+│   │   │   ├── Controllers/Api/  # API controllers
+│   │   │   └── Middleware/       # Custom middleware
+│   │   ├── Models/               # Eloquent models
+│   │   ├── Policies/             # Authorization policies
+│   │   └── Services/             # Business logic services
+│   ├── database/
+│   │   ├── migrations/           # Database migrations
+│   │   └── seeders/              # Database seeders
+│   ├── routes/
+│   │   └── api.php               # API routes
+│   └── storage/                  # File storage
+│       └── app/public/           # Public files (images, QR codes)
 ├── frontend/                     # React 18 + Vite application
-│   ├── src/                      # Source code
-│   ├── public/                   # Static assets
-│   └── ...
-├── docs/                         # 📚 Documentation
-│   ├── SETUP.md                  # Manual setup guide
-│   └── RELEASE_DESCRIPTION.md    # Release description template
+│   ├── src/
+│   │   ├── components/           # Reusable UI components
+│   │   ├── pages/                # Page components
+│   │   ├── services/             # API client
+│   │   ├── stores/               # Zustand state stores
+│   │   ├── types/                # TypeScript types
+│   │   └── utils/                # Utility functions
+│   └── public/                   # Static assets
+├── docs/                         # Documentation
+│   └── TICKET_SYSTEM_ROADMAP.md  # Ticket system documentation
 ├── .github/                      # GitHub workflows
-│   └── workflows/
-│       └── build-exe.yml         # Windows .exe build automation
-├── README.md                     # 📖 Main documentation (this file)
-├── PROJECT_PLAN.md               # 🏗️ Architecture & design
-├── IMPROVEMENTS.md               # 🚀 Future roadmap
-├── MANUAL_SETUP_WINDOWS.md       # 🪟 Windows setup guide
-├── FIX_DATABASE.md               # 🔧 Database troubleshooting
-├── BUILD_INSTRUCTIONS.md         # 🛠️ Build .exe instructions
-├── GITHUB_RELEASE_GUIDE.md       # 📤 Release publishing guide
-├── setup.py                      # 🐍 Automated setup (Python)
-├── setup.sh                      # 🐚 Automated setup (Bash)
-├── build_exe.py                  # 🔨 Build Windows .exe
-└── requirements-build.txt        # 📦 Build dependencies
+├── README.md                     # This file
+├── PROJECT_PLAN.md               # Architecture & design
+└── IMPROVEMENTS.md               # Future roadmap
 ```
-
-## 📚 Documentation
-
-### Essential Guides
-- **[PROJECT_PLAN.md](./PROJECT_PLAN.md)** - Complete architecture, API endpoints, and database schema
-- **[IMPROVEMENTS.md](./IMPROVEMENTS.md)** - Future improvements and feature roadmap
-- **[docs/SETUP.md](./docs/SETUP.md)** - Manual setup instructions
-
-### Setup & Troubleshooting
-- **[MANUAL_SETUP_WINDOWS.md](./MANUAL_SETUP_WINDOWS.md)** - Windows-specific setup guide (PHP extensions, MySQL, etc.)
-- **[FIX_DATABASE.md](./FIX_DATABASE.md)** - Database troubleshooting guide
-
-### Build & Release
-- **[BUILD_INSTRUCTIONS.md](./BUILD_INSTRUCTIONS.md)** - Instructions for building the Windows executable
-- **[GITHUB_RELEASE_GUIDE.md](./GITHUB_RELEASE_GUIDE.md)** - Complete guide for creating GitHub releases
-- **[docs/RELEASE_DESCRIPTION.md](./docs/RELEASE_DESCRIPTION.md)** - Release description template
 
 ## 🔧 Development
 
-### Running the Application
-
-**Backend:**
-```bash
-cd backend
-php artisan serve
-```
-
-**Frontend:**
-```bash
-cd frontend
-npm run dev
-```
-
-### API Documentation
-
-Once the backend is running, access the interactive API documentation at:
-- **Swagger UI**: http://localhost:8000/api/documentation
-
-### Useful Commands
-
-**Backend:**
+### Backend Commands
 ```bash
 php artisan migrate              # Run migrations
 php artisan migrate:fresh --seed # Reset database with seeders
 php artisan storage:link         # Create storage symlink
 php artisan rate-limit:clear     # Clear rate limiting cache
 php artisan l5-swagger:generate  # Regenerate API docs
+php artisan tickets:update-sla-violations  # Update SLA violations
 ```
 
-**Frontend:**
+### Frontend Commands
 ```bash
 npm run dev      # Start development server
 npm run build    # Build for production
 npm run preview  # Preview production build
+npm run lint     # Run ESLint
 ```
 
-## 🐛 Troubleshooting
+## 📚 API Documentation
 
-### Rate Limit Issues
-If you get "Too Many Attempts" error:
-```bash
-cd backend
-php artisan rate-limit:clear
-```
+Interactive API documentation is available at:
+- **Swagger UI**: http://localhost:8000/api/documentation
 
-### Storage Issues
-If images/QR codes don't display:
-```bash
-cd backend
-php artisan storage:link
-chmod -R 775 storage
-```
+The API follows RESTful conventions and uses Laravel Sanctum for authentication.
 
-### Database Issues
-```bash
-# Check MySQL is running
-brew services list
+## 🎯 Use Cases
 
-# Start MySQL
-brew services start mysql
+### IT Asset Management
+- Track all IT equipment in one centralized system
+- Monitor equipment status and location
+- Generate QR codes for quick asset identification
+- Export inventory reports for audits
 
-# Reset database
-php artisan migrate:fresh --seed
-```
+### Support Ticket Management
+- Create tickets for equipment issues
+- Assign tickets to technicians
+- Track SLA compliance
+- Monitor resolution times and trends
+- Attach files and collaborate via comments
+
+### Inventory Control
+- Track stock levels in real-time
+- Receive alerts for low stock
+- Monitor product movements
+- Prevent negative stock with validation
+
+### Reporting & Analytics
+- Export data in multiple formats
+- View dashboard KPIs
+- Track SLA compliance trends
+- Analyze ticket metrics
+
+## 🔒 Security Features
+
+- **Authentication**: Laravel Sanctum token-based authentication
+- **Authorization**: Role-based access control with Spatie Permissions
+- **CSRF Protection**: Built-in CSRF token validation
+- **Rate Limiting**: API rate limiting to prevent abuse
+- **Input Validation**: Server-side validation on all inputs
+- **File Upload Security**: Validated file types and sizes
+- **SQL Injection Protection**: Eloquent ORM with parameter binding
 
 ## 📄 License
 
@@ -254,4 +303,4 @@ Contributions are welcome! Please feel free to submit a Pull Request.
 
 ## 📧 Support
 
-For issues and questions, please open an issue on GitHub.
+For issues and questions, please open an issue on [GitHub](https://github.com/ricardoguimaraes2021/GearLog/issues).

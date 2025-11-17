@@ -1,0 +1,212 @@
+2025-11-17 17:03:15,159 - INFO - === GearLog Multi-Platform Setup iniciado ===
+2025-11-17 17:03:15,159 - INFO - Python version: 3.14.0 (tags/v3.14.0:ebf955d, Oct  7 2025, 10:15:03) [MSC v.1944 64 bit (AMD64)]
+2025-11-17 17:03:15,206 - INFO - Platform: Windows-11-10.0.26100-SP0
+2025-11-17 17:03:15,206 - INFO - Log file: C:\Users\Ricardo\Desktop\GearLog_Setup_Log.txt
+2025-11-17 17:03:15,207 - INFO - INFO: Log file location: C:\Users\Ricardo\Desktop\GearLog_Setup_Log.txt
+2025-11-17 17:03:15,207 - INFO - Sistema detectado: Windows
+2025-11-17 17:03:15,207 - INFO - INFO: Sistema detectado: Windows
+2025-11-17 17:03:15,208 - INFO - INFO: Verificando e instalando dependências necessárias (PHP, Composer, MySQL, Node)...
+2025-11-17 17:03:15,208 - INFO - INFO: Verificando PHP...
+2025-11-17 17:03:15,210 - DEBUG - which(php) -> C:\Program Files\php\php.EXE
+2025-11-17 17:03:15,212 - DEBUG - Comando resolvido: C:\Program Files\php\php.EXE -> C:\Program Files\php\php.EXE
+2025-11-17 17:03:15,212 - DEBUG - Executando comando: C:\Program Files\php\php.EXE -v (shell=True, timeout=300)
+2025-11-17 17:03:15,261 - DEBUG - Comando saiu com sucesso. Saída (primeiros 1000 chars): PHP 8.4.14 (cli) (built: Oct 21 2025 19:37:18) (ZTS Visual C++ 2022 x64)
+Copyright (c) The PHP Group
+Zend Engine v4.4.14, Copyright (c) Zend Technologies
+2025-11-17 17:03:15,262 - DEBUG - php -v -> PHP 8.4.14 (cli) (built: Oct 21 2025 19:37:18) (ZTS Visual C++ 2022 x64)
+2025-11-17 17:03:15,263 - INFO - SUCCESS: PHP ok (versão 8.4)
+2025-11-17 17:03:15,263 - INFO - INFO: Verificando Composer...
+2025-11-17 17:03:15,265 - DEBUG - which(composer) -> C:\ProgramData\ComposerSetup\bin\composer.BAT
+2025-11-17 17:03:15,265 - INFO - SUCCESS: Composer já instalado.
+2025-11-17 17:03:15,265 - INFO - INFO: Verificando MySQL client/server...
+2025-11-17 17:03:15,268 - DEBUG - which(mysql) -> C:\Program Files\MySQL\MySQL Server 8.4\bin\mysql.EXE
+2025-11-17 17:03:15,268 - INFO - SUCCESS: MySQL client já disponível.
+2025-11-17 17:03:15,268 - INFO - INFO: Verificando Node.js...
+2025-11-17 17:03:15,270 - DEBUG - which(node) -> C:\Program Files\nodejs\node.EXE
+2025-11-17 17:03:15,271 - DEBUG - Comando resolvido: C:\Program Files\nodejs\node.EXE -> C:\Program Files\nodejs\node.EXE
+2025-11-17 17:03:15,272 - DEBUG - Executando comando: C:\Program Files\nodejs\node.EXE -v (shell=False, timeout=300)
+2025-11-17 17:03:15,290 - DEBUG - Comando saiu com sucesso. Saída (primeiros 1000 chars): v24.11.1
+2025-11-17 17:03:15,291 - INFO - SUCCESS: Node.js ok (versão 24.11.1)
+2025-11-17 17:03:15,291 - INFO - INFO: Usando diretório padrão: C:\Users\Ricardo\Desktop\GearLog
+2025-11-17 17:03:15,292 - INFO - INFO: Clonando https://github.com/ricardoguimaraes2021/GearLog.git para C:\Users\Ricardo\Desktop\GearLog ...
+2025-11-17 17:03:15,294 - DEBUG - Comando resolvido: C:\Program Files\Git\cmd\git.EXE -> C:\Program Files\Git\cmd\git.EXE
+2025-11-17 17:03:15,295 - DEBUG - Executando comando: C:\Program Files\Git\cmd\git.EXE clone https://github.com/ricardoguimaraes2021/GearLog.git C:\Users\Ricardo\Desktop\GearLog (shell=True, timeout=300)
+2025-11-17 17:03:16,251 - DEBUG - Comando saiu com sucesso. Saída (primeiros 1000 chars): 
+2025-11-17 17:03:16,252 - INFO - SUCCESS: Repositório clonado com sucesso.
+2025-11-17 17:03:16,255 - DEBUG - which(php) -> C:\Program Files\php\php.EXE
+2025-11-17 17:03:16,255 - INFO - INFO: Verificando extensões PHP necessárias...
+2025-11-17 17:03:16,257 - DEBUG - Comando resolvido: C:\Program Files\php\php.EXE -> C:\Program Files\php\php.EXE
+2025-11-17 17:03:16,257 - DEBUG - Executando comando: C:\Program Files\php\php.EXE -m (shell=True, timeout=300)
+2025-11-17 17:03:16,302 - DEBUG - Comando saiu com sucesso. Saída (primeiros 1000 chars): [PHP Modules]
+bcmath
+calendar
+Core
+ctype
+curl
+date
+dom
+fileinfo
+filter
+gd
+hash
+iconv
+json
+libxml
+mbstring
+mysqlnd
+openssl
+pcre
+PDO
+Phar
+random
+readline
+Reflection
+session
+SimpleXML
+SPL
+standard
+tokenizer
+xml
+xmlreader
+xmlwriter
+zip
+zlib
+
+[Zend Modules]
+2025-11-17 17:03:16,305 - DEBUG - Comando resolvido: C:\Program Files\php\php.EXE -> C:\Program Files\php\php.EXE
+2025-11-17 17:03:16,305 - DEBUG - Executando comando: C:\Program Files\php\php.EXE -m (shell=True, timeout=300)
+2025-11-17 17:03:16,347 - DEBUG - Comando saiu com sucesso. Saída (primeiros 1000 chars): [PHP Modules]
+bcmath
+calendar
+Core
+ctype
+curl
+date
+dom
+fileinfo
+filter
+gd
+hash
+iconv
+json
+libxml
+mbstring
+mysqlnd
+openssl
+pcre
+PDO
+Phar
+random
+readline
+Reflection
+session
+SimpleXML
+SPL
+standard
+tokenizer
+xml
+xmlreader
+xmlwriter
+zip
+zlib
+
+[Zend Modules]
+2025-11-17 17:03:16,349 - DEBUG - Comando resolvido: C:\Program Files\php\php.EXE -> C:\Program Files\php\php.EXE
+2025-11-17 17:03:16,350 - DEBUG - Executando comando: C:\Program Files\php\php.EXE -m (shell=True, timeout=300)
+2025-11-17 17:03:16,392 - DEBUG - Comando saiu com sucesso. Saída (primeiros 1000 chars): [PHP Modules]
+bcmath
+calendar
+Core
+ctype
+curl
+date
+dom
+fileinfo
+filter
+gd
+hash
+iconv
+json
+libxml
+mbstring
+mysqlnd
+openssl
+pcre
+PDO
+Phar
+random
+readline
+Reflection
+session
+SimpleXML
+SPL
+standard
+tokenizer
+xml
+xmlreader
+xmlwriter
+zip
+zlib
+
+[Zend Modules]
+2025-11-17 17:03:16,395 - INFO - SUCCESS: Todas as extensões PHP necessárias estão habilitadas.
+2025-11-17 17:03:16,397 - DEBUG - which(composer) -> C:\ProgramData\ComposerSetup\bin\composer.BAT
+2025-11-17 17:03:16,397 - INFO - INFO: Executando composer install...
+2025-11-17 17:03:16,397 - INFO - INFO: Isso pode levar alguns minutos. Por favor, aguarde...
+2025-11-17 17:03:16,399 - DEBUG - Comando resolvido: C:\ProgramData\ComposerSetup\bin\composer.BAT -> C:\ProgramData\ComposerSetup\bin\composer.BAT
+2025-11-17 17:03:16,399 - DEBUG - Executando comando: C:\ProgramData\ComposerSetup\bin\composer.BAT install --no-interaction --prefer-dist --no-progress (shell=True, timeout=600)
+2025-11-17 17:05:40,935 - DEBUG - Comando saiu com sucesso. Saída (primeiros 1000 chars): [37;44m INFO [39;49m Discovering packages.  
+
+  barryvdh/laravel-dompdf [90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[
+2025-11-17 17:05:40,938 - INFO - SUCCESS: Dependências PHP instaladas (composer).
+2025-11-17 17:05:40,946 - INFO - SUCCESS: .env copiado de .env.example
+2025-11-17 17:05:40,947 - INFO - INFO: Configuração da base de dados (usando valores padrão).
+2025-11-17 17:05:40,947 - INFO - INFO:   Database: gearlog
+2025-11-17 17:05:40,947 - INFO - INFO:   Username: root
+2025-11-17 17:05:40,947 - INFO - INFO:   Password: (vazio)
+2025-11-17 17:05:40,947 - INFO - INFO: (Para personalizar, edite o arquivo .env manualmente após o setup)
+2025-11-17 17:05:40,948 - ERROR - Erro durante setup do backend
+Traceback (most recent call last):
+  File "C:\Users\Ricardo\Desktop\gearlog_setup.py", line 1104, in setup_backend
+    content = replace_env_var(content, "DB_DATABASE", db_name)
+  File "C:\Users\Ricardo\Desktop\gearlog_setup.py", line 1096, in replace_env_var
+    pattern = rf"^{re.escape(key)}=.*$"
+                   ^^
+NameError: cannot access free variable 're' where it is not associated with a value in enclosing scope. Did you forget to import 're'?
+2025-11-17 17:05:40,949 - ERROR - ERROR: Erro durante setup do backend: cannot access free variable 're' where it is not associated with a value in enclosing scope
+2025-11-17 17:05:40,950 - WARNING - WARNING: Setup do backend encontrou problemas. Continua-se para frontend.
+2025-11-17 17:05:40,952 - DEBUG - which(npm) -> C:\Program Files\nodejs\npm.CMD
+2025-11-17 17:05:40,953 - INFO - INFO: Executando npm install...
+2025-11-17 17:05:40,953 - INFO - INFO: Isso pode levar alguns minutos. Por favor, aguarde...
+2025-11-17 17:05:40,954 - DEBUG - Comando resolvido: C:\Program Files\nodejs\npm.CMD -> C:\Program Files\nodejs\npm.CMD
+2025-11-17 17:05:40,955 - DEBUG - Executando comando: C:\Program Files\nodejs\npm.CMD install --no-progress (shell=True, timeout=600)
+2025-11-17 17:05:46,269 - DEBUG - Comando saiu com sucesso. Saída (primeiros 1000 chars): added 312 packages, and audited 313 packages in 5s
+
+76 packages are looking for funding
+  run `npm fund` for details
+
+2 moderate severity vulnerabilities
+
+To address all issues (including breaking changes), run:
+  npm audit fix --force
+
+Run `npm audit` for details.
+2025-11-17 17:05:46,270 - INFO - SUCCESS: Dependências npm instaladas.
+2025-11-17 17:05:46,279 - INFO - SUCCESS: Frontend .env criado a partir de .env.example
+2025-11-17 17:05:49,928 - INFO - INFO: Verificando MySQL...
+2025-11-17 17:05:49,932 - DEBUG - which(mysql) -> C:\Program Files\MySQL\MySQL Server 8.4\bin\mysql.EXE
+2025-11-17 17:05:49,934 - DEBUG - Comando resolvido: C:\Program Files\MySQL\MySQL Server 8.4\bin\mysql.EXE -> C:\Program Files\MySQL\MySQL Server 8.4\bin\mysql.EXE
+2025-11-17 17:05:49,934 - DEBUG - Executando comando: C:\Program Files\MySQL\MySQL Server 8.4\bin\mysql.EXE -u root -e SELECT 1 (shell=False, timeout=5)
+2025-11-17 17:05:49,955 - DEBUG - Comando saiu com sucesso. Saída (primeiros 1000 chars): 1
+1
+2025-11-17 17:05:49,956 - INFO - INFO: Iniciando servidor backend (Laravel)...
+2025-11-17 17:05:52,961 - INFO - SUCCESS: Backend iniciado em http://localhost:8000
+2025-11-17 17:05:52,963 - INFO - INFO: Iniciando servidor frontend (React/Vite)...
+2025-11-17 17:05:57,971 - INFO - SUCCESS: Frontend iniciado em http://localhost:5173
+2025-11-17 17:05:57,976 - INFO - INFO: Abrindo navegador em http://localhost:5173...
+2025-11-17 17:06:00,026 - INFO - SUCCESS: Navegador aberto!
+2025-11-17 17:06:00,028 - INFO - SUCCESS: ✅ Servidores iniciados automaticamente!
+2025-11-17 17:06:00,029 - INFO - SUCCESS: Log completo guardado em: C:\Users\Ricardo\Desktop\GearLog_Setup_Log.txt
+2025-11-17 17:06:00,029 - WARNING - WARNING: ⚠ IMPORTANTE: Os servidores estão rodando em segundo plano.
+2025-11-17 17:06:00,030 - WARNING - WARNING: Para parar os servidores, feche este terminal ou pressione Ctrl+C.
+2025-11-17 17:06:00,030 - WARNING - WARNING: Para reiniciar, execute este script novamente ou inicie manualmente.

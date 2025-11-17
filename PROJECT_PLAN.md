@@ -33,6 +33,11 @@ GearLog is a full-stack inventory management system for IT equipment, running en
 GearLog/
 ├── backend/                 # Laravel 11 application
 │   ├── app/
+│   │   ├── Console/Commands/
+│   │   │   ├── UpdateSlaViolations.php
+│   │   │   └── ClearRateLimit.php
+│   │   ├── Exceptions/
+│   │   │   └── BusinessRuleException.php
 │   │   ├── Http/
 │   │   │   ├── Controllers/
 │   │   │   │   ├── Api/
@@ -40,19 +45,29 @@ GearLog/
 │   │   │   │   │   ├── ProductController.php
 │   │   │   │   │   ├── CategoryController.php
 │   │   │   │   │   ├── MovementController.php
-│   │   │   │   │   └── DashboardController.php
+│   │   │   │   │   ├── DashboardController.php
+│   │   │   │   │   ├── TicketController.php
+│   │   │   │   │   ├── TicketCommentController.php
+│   │   │   │   │   ├── TicketDashboardController.php
+│   │   │   │   │   └── UserController.php
 │   │   │   ├── Middleware/
 │   │   │   └── Requests/
 │   │   ├── Models/
 │   │   │   ├── Product.php
 │   │   │   ├── Category.php
 │   │   │   ├── Movement.php
+│   │   │   ├── Ticket.php
+│   │   │   ├── TicketComment.php
+│   │   │   ├── TicketLog.php
 │   │   │   └── User.php
 │   │   ├── Services/
 │   │   │   ├── QRCodeService.php
 │   │   │   ├── ProductService.php
-│   │   │   └── MovementService.php
+│   │   │   ├── MovementService.php
+│   │   │   ├── TicketService.php
+│   │   │   └── SlaService.php
 │   │   └── Policies/
+│   │       └── TicketPolicy.php
 │   ├── database/
 │   │   ├── migrations/
 │   │   ├── seeders/
