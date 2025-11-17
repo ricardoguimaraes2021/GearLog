@@ -155,9 +155,19 @@ export const useNotificationStore = create<NotificationStore>((set, get) => ({
       return;
     }
 
+    // Check if Pusher is configured
+    const pusherKey = import.meta.env.VITE_PUSHER_APP_KEY;
+    if (!pusherKey) {
+      console.warn('Pusher not configured. Real-time notifications will not work.');
+      return;
+    }
+
     try {
       const echo = initializeEcho(token);
-      const userId = JSON.parse(atob(token.split('.')[1])).sub || null;
+      
+      // Get user ID from localStorage (stored during login)
+      const authState = JSON.parse(localStorage.getItem('auth_user') || '{}');
+      const userId = authState?.id || null;
 
       if (userId) {
         // Listen to private user channel
@@ -171,6 +181,7 @@ export const useNotificationStore = create<NotificationStore>((set, get) => ({
       set({ echoInitialized: true });
     } catch (error) {
       console.error('Failed to initialize Echo:', error);
+      // Don't throw - allow app to work without real-time notifications
     }
   },
 
