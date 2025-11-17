@@ -72,8 +72,29 @@ export interface DashboardData {
   recent_movements: Movement[];
   alerts: {
     low_stock: number;
+    low_stock_products?: Array<{
+      id: number;
+      name: string;
+      category: string | null;
+      quantity: number;
+      status: string;
+    }>;
     damaged: number;
+    damaged_products?: Array<{
+      id: number;
+      name: string;
+      category: string | null;
+      quantity: number;
+      status: string;
+    }>;
     inactive: number;
+    inactive_products?: Array<{
+      id: number;
+      name: string;
+      category: string | null;
+      quantity: number;
+      status: string;
+    }>;
   };
 }
 

@@ -30,15 +30,61 @@ class DashboardController extends Controller
             ->get();
 
         // Products without movement in last 30 days
-        $inactiveProducts = Product::whereDoesntHave('movements', function ($query) {
+        $inactiveProductsQuery = Product::whereDoesntHave('movements', function ($query) {
             $query->where('created_at', '>=', now()->subDays(30));
-        })->count();
+        });
+        $inactiveProducts = $inactiveProductsQuery->count();
+        $inactiveProductsList = $inactiveProductsQuery->with('category')
+            ->select('id', 'name', 'category_id', 'quantity', 'status')
+            ->get()
+            ->map(function ($product) {
+                return [
+                    'id' => $product->id,
+                    'name' => $product->name,
+                    'category' => $product->category ? $product->category->name : null,
+                    'quantity' => $product->quantity,
+                    'status' => $product->status,
+                ];
+            });
+
+        // Low stock products list
+        $lowStockProductsList = Product::where('quantity', '<', 1)
+            ->with('category')
+            ->select('id', 'name', 'category_id', 'quantity', 'status')
+            ->get()
+            ->map(function ($product) {
+                return [
+                    'id' => $product->id,
+                    'name' => $product->name,
+                    'category' => $product->category ? $product->category->name : null,
+                    'quantity' => $product->quantity,
+                    'status' => $product->status,
+                ];
+            });
+
+        // Damaged products list
+        $damagedProductsList = Product::where('status', 'avariado')
+            ->with('category')
+            ->select('id', 'name', 'category_id', 'quantity', 'status')
+            ->get()
+            ->map(function ($product) {
+                return [
+                    'id' => $product->id,
+                    'name' => $product->name,
+                    'category' => $product->category ? $product->category->name : null,
+                    'quantity' => $product->quantity,
+                    'status' => $product->status,
+                ];
+            });
 
         // Alerts
         $alerts = [
             'low_stock' => $lowStockProducts,
+            'low_stock_products' => $lowStockProductsList,
             'damaged' => $damagedProducts,
+            'damaged_products' => $damagedProductsList,
             'inactive' => $inactiveProducts,
+            'inactive_products' => $inactiveProductsList,
         ];
 
         return response()->json([
