@@ -24,12 +24,31 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     set({ isLoading: true });
     try {
       const { user, token } = await api.login(email, password);
+      
+      // Store token in localStorage first
+      if (token) {
+        localStorage.setItem('auth_token', token);
+      }
+      
+      // Store user in localStorage for Echo initialization
+      if (user) {
+        localStorage.setItem('auth_user', JSON.stringify(user));
+      }
+      
       set({ user, token, isAuthenticated: true, isLoading: false });
       
-      // Initialize Echo for real-time notifications
+      // Initialize Echo for real-time notifications (non-blocking)
       if (token) {
-        useNotificationStore.getState().initializeEcho(token);
-        useNotificationStore.getState().fetchUnreadCount();
+        try {
+          useNotificationStore.getState().initializeEcho(token);
+          // Fetch unread count in background, don't wait for it
+          useNotificationStore.getState().fetchUnreadCount().catch(err => {
+            console.warn('Failed to fetch unread count:', err);
+          });
+        } catch (echoError) {
+          // Don't fail login if Echo fails (e.g., Pusher not configured)
+          console.warn('Failed to initialize Echo:', echoError);
+        }
       }
     } catch (error) {
       set({ isLoading: false });

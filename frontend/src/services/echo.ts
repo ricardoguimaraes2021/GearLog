@@ -18,13 +18,21 @@ export const initializeEcho = (token: string): Echo => {
     return echoInstance;
   }
 
+  const pusherKey = import.meta.env.VITE_PUSHER_APP_KEY;
+  if (!pusherKey) {
+    throw new Error('Pusher APP_KEY not configured. Please set VITE_PUSHER_APP_KEY in your .env file.');
+  }
+
+  const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:8000/api/v1';
+  const baseUrl = apiUrl.replace('/api/v1', '');
+
   echoInstance = new Echo({
     broadcaster: 'pusher',
-    key: import.meta.env.VITE_PUSHER_APP_KEY || '',
+    key: pusherKey,
     cluster: import.meta.env.VITE_PUSHER_APP_CLUSTER || 'mt1',
     forceTLS: true,
     encrypted: true,
-    authEndpoint: `${import.meta.env.VITE_API_URL}/broadcasting/auth`,
+    authEndpoint: `${baseUrl}/broadcasting/auth`,
     auth: {
       headers: {
         Authorization: `Bearer ${token}`,
