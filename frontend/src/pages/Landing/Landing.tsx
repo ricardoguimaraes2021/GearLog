@@ -69,7 +69,7 @@ export default function Landing() {
     {
       icon: FileText,
       title: 'Export & Reports',
-      description: 'Export your inventory data in multiple formats: CSV, Excel (XLSX), or PDF. Export filtered results for targeted reporting and analysis.',
+      description: 'Export your inventory and employee data in multiple formats: CSV, Excel (XLSX), or PDF. Export products and employees with filtered results for targeted reporting and analysis.',
     },
     {
       icon: History,
@@ -131,8 +131,8 @@ export default function Landing() {
     },
     {
       icon: Users,
-      title: 'Team Collaboration',
-      description: 'Multiple users can work together with proper access controls, ticket assignments, comments, and activity logs.',
+      title: 'Employee & Department Management',
+      description: 'Complete employee directory with department management. Track employee assignments, view department analytics, and manage organizational structure. Export employee data in multiple formats.',
     },
   ];
 
