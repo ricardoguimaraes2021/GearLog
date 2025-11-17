@@ -111,13 +111,62 @@ def print_info(text: str):
 # ---------------------------
 # Helpers para comandos
 # ---------------------------
-def run_command(cmd: List[str], check: bool=True, capture_output: bool=False, env=None, shell: bool=False) -> Tuple[bool, str]:
+def resolve_command_path(cmd: str) -> Optional[str]:
+    """Resolve o caminho completo de um comando, incluindo extensões .bat, .cmd, .exe no Windows."""
+    system = platform.system()
+    
+    # Primeiro tenta shutil.which (padrão)
+    path = shutil.which(cmd)
+    if path:
+        return path
+    
+    # No Windows, tenta extensões específicas
+    if system == "Windows":
+        extensions = ['.bat', '.cmd', '.exe']
+        for ext in extensions:
+            path = shutil.which(cmd + ext)
+            if path:
+                return path
+        
+        # Tenta localizar composer.bat em locais comuns do Windows
+        if cmd == "composer":
+            common_paths = [
+                Path("C:/ProgramData/ComposerSetup/bin/composer.bat"),
+                Path("C:/Program Files/Composer/composer.bat"),
+                Path.home() / "AppData/Roaming/Composer/vendor/bin/composer.bat",
+            ]
+            for path in common_paths:
+                if path.exists():
+                    return str(path)
+    
+    return None
+
+def run_command(cmd: List[str], check: bool=True, capture_output: bool=False, env=None, shell: Optional[bool]=None) -> Tuple[bool, str]:
     """
     Executa um comando e devolve (success, output).
     - capture_output: tenta devolver stdout (ou stderr em caso de erro).
-    - shell: se True, executa via shell (útil em Windows para comandos complexos).
+    - shell: se None, detecta automaticamente se deve usar shell (Windows para .bat/.cmd).
     """
+    is_windows = platform.system() == "Windows"
+    
+    # Auto-detect shell=True no Windows para comandos que podem ser .bat/.cmd
+    if shell is None:
+        if is_windows and cmd:
+            # Comandos que no Windows são tipicamente .bat/.cmd
+            cmd_needs_shell = cmd[0].lower() in ['composer', 'npm', 'npx', 'php', 'artisan', 'git']
+            shell = cmd_needs_shell
+        else:
+            shell = False
+    
+    # Resolve caminho completo do comando no Windows
+    if is_windows and cmd and not Path(cmd[0]).is_absolute():
+        resolved = resolve_command_path(cmd[0])
+        if resolved:
+            cmd = [resolved] + cmd[1:]
+            logger.debug("Comando resolvido: %s -> %s", cmd[0] if len(cmd) > 0 else "", resolved)
+    
     logger.debug("Executando comando: %s (shell=%s)", " ".join(cmd) if isinstance(cmd, list) else str(cmd), shell)
+    
     try:
         if capture_output:
             proc = subprocess.run(
@@ -148,15 +197,21 @@ def run_command(cmd: List[str], check: bool=True, capture_output: bool=False, en
         logger.error("CalledProcessError: %s", err)
         return False, err
     except FileNotFoundError as e:
-        logger.error("FileNotFoundError: %s", e)
-        return False, str(e)
+        error_msg = str(e)
+        if is_windows and "[WinError 2]" in error_msg:
+            cmd_name = cmd[0] if cmd else "comando desconhecido"
+            error_msg = f"Comando '{cmd_name}' não encontrado. No Windows, certifique-se de que está no PATH ou reinicie o terminal após instalar. Erro: {error_msg}"
+            logger.error("FileNotFoundError (Windows): %s", error_msg)
+        else:
+            logger.error("FileNotFoundError: %s", error_msg)
+        return False, error_msg
     except Exception as e:
         logger.exception("Erro inesperado ao executar comando")
         return False, str(e)
 
 def which(cmd: str) -> Optional[str]:
-    """Cross-platform wrapper for shutil.which"""
-    path = shutil.which(cmd)
+    """Cross-platform wrapper for shutil.which, com suporte para extensões Windows."""
+    path = resolve_command_path(cmd)
     logger.debug("which(%s) -> %s", cmd, path)
     return path
 
@@ -650,21 +705,38 @@ SANCTUM_STATEFUL_DOMAINS=localhost:5173,127.0.0.1:5173
             print_error(f"Diretório backend não encontrado: {self.backend_dir}")
             return False
         
+        # Verificar se composer.json existe
+        composer_json = self.backend_dir / "composer.json"
+        if not composer_json.exists():
+            print_error(f"composer.json não encontrado em {self.backend_dir}")
+            return False
+        
         cwd = os.getcwd()
         os.chdir(self.backend_dir)
         
         try:
-            # composer install
-            if which("composer"):
-                print_info("Executando composer install...")
-                ok, out = run_command(["composer", "install", "--no-interaction"], check=False, capture_output=True)
-                if ok:
-                    print_success("Dependências PHP instaladas (composer).")
-                else:
-                    print_warning("composer install falhou ou retornou warnings. Continua-se o setup.")
-                    logger.debug("Composer output: %s", out[:2000] if out else "sem output")
-            else:
-                print_warning("Composer não encontrado. Skipping composer install.")
+            # composer install - CRÍTICO: deve funcionar antes de continuar
+            composer_path = which("composer")
+            if not composer_path:
+                print_error("Composer não encontrado no PATH. Por favor, instale o Composer primeiro.")
+                print_info("No Windows, pode ser necessário reiniciar o terminal após instalar o Composer.")
+                return False
+            
+            print_info("Executando composer install...")
+            ok, out = run_command(["composer", "install", "--no-interaction"], check=False, capture_output=True)
+            if not ok:
+                print_error("composer install FALHOU. Não é possível continuar sem as dependências PHP.")
+                print_error(f"Erro: {out[:500] if out else 'Sem detalhes'}")
+                logger.error("Composer install failed: %s", out[:2000] if out else "sem output")
+                return False
+            
+            # Verificar se vendor/autoload.php foi criado
+            vendor_autoload = self.backend_dir / "vendor" / "autoload.php"
+            if not vendor_autoload.exists():
+                print_error("vendor/autoload.php não foi criado. composer install pode ter falhado silenciosamente.")
+                return False
+            
+            print_success("Dependências PHP instaladas (composer).")
             
             # .env handling
             env_example = self.backend_dir / ".env.example"
@@ -708,16 +780,20 @@ SANCTUM_STATEFUL_DOMAINS=localhost:5173,127.0.0.1:5173
             
             print_success(".env atualizado com as credenciais da BD (mínimas).")
             
+            # Verificar se PHP está disponível antes de continuar
+            php_path = which("php")
+            if not php_path:
+                print_error("PHP não encontrado no PATH. Não é possível executar artisan.")
+                return False
+            
             # Gerar app key
-            if which("php"):
-                print_info("Gerando application key (php artisan key:generate)...")
-                ok, out = run_command(["php", "artisan", "key:generate", "--force"], check=False, capture_output=True)
-                if ok:
-                    print_success("Application key gerada.")
-                else:
-                    print_warning(f"Não foi possível gerar application key automaticamente: {out[:200]}")
+            print_info("Gerando application key (php artisan key:generate)...")
+            ok, out = run_command(["php", "artisan", "key:generate", "--force"], check=False, capture_output=True)
+            if not ok:
+                print_warning(f"Não foi possível gerar application key automaticamente: {out[:200]}")
+                logger.warning("Key generation failed: %s", out[:500] if out else "sem output")
             else:
-                print_warning("PHP não encontrado; não é possível executar artisan.")
+                print_success("Application key gerada.")
             
             # Criar base de dados (tentativa)
             print_info(f"Tentando criar base de dados '{db_name}' (se não existir)...")
@@ -742,22 +818,18 @@ SANCTUM_STATEFUL_DOMAINS=localhost:5173,127.0.0.1:5173
                 print_warning("Cliente MySQL não encontrado, salta criação automática da BD.")
             
             # Migrations
-            if which("php"):
-                print_info("Executando migrations (php artisan migrate --seed)...")
-                ok, out = run_command(["php", "artisan", "migrate", "--seed", "--force"], check=False, capture_output=True)
-                if ok:
-                    print_success("Migrations executadas com sucesso.")
-                else:
-                    print_warning("Migrations falharam ou foram parcialmente executadas. Verifica logs.")
-                    logger.error("Migration failed: %s", out[:2000] if out else "sem output")
-                    print_error(f"Erro detalhado: {out[:500] if out else 'Sem detalhes'}")
+            print_info("Executando migrations (php artisan migrate --seed)...")
+            ok, out = run_command(["php", "artisan", "migrate", "--seed", "--force"], check=False, capture_output=True)
+            if ok:
+                print_success("Migrations executadas com sucesso.")
             else:
-                print_warning("PHP não disponível, não é possível correr migrations.")
+                print_warning("Migrations falharam ou foram parcialmente executadas. Verifica logs.")
+                logger.error("Migration failed: %s", out[:2000] if out else "sem output")
+                print_error(f"Erro detalhado: {out[:500] if out else 'Sem detalhes'}")
             
             # Storage link
-            if which("php"):
-                run_command(["php", "artisan", "storage:link"], check=False)
-                print_success("storage:link executado (se aplicável).")
+            run_command(["php", "artisan", "storage:link"], check=False)
+            print_success("storage:link executado (se aplicável).")
             
             return True
         
@@ -777,21 +849,37 @@ SANCTUM_STATEFUL_DOMAINS=localhost:5173,127.0.0.1:5173
             print_error(f"Diretório frontend não encontrado: {self.frontend_dir}")
             return False
         
+        # Verificar se package.json existe
+        package_json = self.frontend_dir / "package.json"
+        if not package_json.exists():
+            print_error(f"package.json não encontrado em {self.frontend_dir}")
+            return False
+        
         cwd = os.getcwd()
         os.chdir(self.frontend_dir)
         
         try:
-            if which("npm"):
-                print_info("Executando npm install...")
-                ok, out = run_command(["npm", "install"], check=False, capture_output=True)
-                if ok:
-                    print_success("Dependências npm instaladas.")
-                else:
-                    print_warning("npm install retornou erro ou warnings. Verifica a saída.")
-                    logger.debug("npm install output: %s", out[:2000] if out else "sem output")
-            else:
-                print_warning("npm não encontrado; por favor instala Node.js (que inclui npm).")
+            npm_path = which("npm")
+            if not npm_path:
+                print_error("npm não encontrado no PATH. Por favor, instale Node.js (que inclui npm).")
+                print_info("No Windows, pode ser necessário reiniciar o terminal após instalar o Node.js.")
                 return False
+            
+            print_info("Executando npm install...")
+            ok, out = run_command(["npm", "install"], check=False, capture_output=True)
+            if not ok:
+                print_error("npm install FALHOU. Não é possível continuar sem as dependências do frontend.")
+                print_error(f"Erro: {out[:500] if out else 'Sem detalhes'}")
+                logger.error("npm install failed: %s", out[:2000] if out else "sem output")
+                return False
+            
+            # Verificar se node_modules foi criado
+            node_modules = self.frontend_dir / "node_modules"
+            if not node_modules.exists() or not any(node_modules.iterdir()):
+                print_warning("node_modules não foi criado ou está vazio. npm install pode ter falhado silenciosamente.")
+                logger.warning("node_modules check failed")
+            else:
+                print_success("Dependências npm instaladas.")
             
             # copiar .env.example se existir
             env_example = self.frontend_dir / ".env.example"
