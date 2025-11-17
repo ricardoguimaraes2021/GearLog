@@ -8,7 +8,7 @@ import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ArrowLeft, Save, Plus, Edit, AlertTriangle } from 'lucide-react';
 import type { Movement } from '@/types';
-import { toast } from '@/utils/toast';
+import { toast } from 'sonner';
 import { Skeleton } from '@/components/ui/skeleton';
 
 export default function ProductDetail() {
@@ -179,7 +179,40 @@ export default function ProductDetail() {
                 </div>
                 <div>
                   <label className="text-sm font-medium text-gray-500">Status</label>
-                  <p className="mt-1 capitalize">{currentProduct.status}</p>
+                  <div className="mt-1 flex items-center gap-2">
+                    <span className="capitalize">{currentProduct.status}</span>
+                    <select
+                      value={currentProduct.status}
+                      onChange={async (e) => {
+                        if (!id || !currentProduct) return;
+                        const newStatus = e.target.value;
+                        if (newStatus === currentProduct.status) return;
+                        
+                        setIsUpdatingStatus(true);
+                        try {
+                          const formData = new FormData();
+                          formData.append('status', newStatus);
+                          await updateProduct(parseInt(id), formData);
+                          toast.success('Product status updated successfully');
+                        } catch (error: any) {
+                          toast.error(error.response?.data?.error || 'Failed to update status');
+                        } finally {
+                          setIsUpdatingStatus(false);
+                        }
+                      }}
+                      disabled={isUpdatingStatus}
+                      className="ml-2 text-sm rounded-md border border-input bg-background px-2 py-1 disabled:opacity-50"
+                    >
+                      <option value="new">New</option>
+                      <option value="used">Used</option>
+                      <option value="damaged">Damaged</option>
+                      <option value="repair">Repair</option>
+                      <option value="reserved">Reserved</option>
+                    </select>
+                    {isUpdatingStatus && (
+                      <span className="text-xs text-gray-500">Updating...</span>
+                    )}
+                  </div>
                 </div>
                 <div>
                   <label className="text-sm font-medium text-gray-500">Quantity</label>
