@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { useParams, Link, useNavigate } from 'react-router-dom';
+import { useParams, Link } from 'react-router-dom';
 import { useEmployeeStore } from '@/stores/employeeStore';
 import { useAssignmentStore } from '@/stores/assignmentStore';
 import { Button } from '@/components/ui/button';
@@ -12,7 +12,6 @@ import ReturnModal from '@/components/employees/ReturnModal';
 
 export default function EmployeeDetail() {
   const { id } = useParams<{ id: string }>();
-  const navigate = useNavigate();
   const { currentEmployee, fetchEmployee, isLoading, deactivateEmployee, reactivateEmployee } = useEmployeeStore();
   const { fetchHistoryByEmployee, assignments, pagination } = useAssignmentStore();
   const [showAssignmentModal, setShowAssignmentModal] = useState(false);
