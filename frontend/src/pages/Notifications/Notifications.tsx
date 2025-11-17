@@ -40,7 +40,7 @@ export default function Notifications() {
       return `/tickets/${notification.data.ticket_id}`;
     }
     if (notification.data?.product_id) {
-      return `/products/${notification.data.product_id}`;
+      return `/inventory/products/${notification.data.product_id}`;
     }
     return null;
   };

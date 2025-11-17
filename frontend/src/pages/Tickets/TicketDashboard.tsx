@@ -493,7 +493,7 @@ export default function TicketDashboard() {
               {data.by_product.map((product) => (
                 <Link
                   key={product.id}
-                  to={`/products/${product.id}`}
+                  to={`/inventory/products/${product.id}`}
                   className="flex items-center justify-between p-3 rounded-md hover:bg-gray-50"
                 >
                   <span className="text-sm text-gray-600">{product.name}</span>

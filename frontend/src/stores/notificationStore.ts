@@ -161,7 +161,7 @@ export const useNotificationStore = create<NotificationStore>((set, get) => ({
         ? {
             label: 'View',
             onClick: () => {
-              window.location.href = `/products/${notification.data?.product_id}`;
+              window.location.href = `/inventory/products/${notification.data?.product_id}`;
             },
           }
         : undefined,

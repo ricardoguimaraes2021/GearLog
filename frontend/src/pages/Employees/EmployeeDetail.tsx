@@ -177,7 +177,7 @@ export default function EmployeeDetail() {
                         <div className="flex items-center gap-2">
                           <Package className="w-5 h-5 text-blue-600" />
                           <Link
-                            to={`/products/${assignment.product?.id}`}
+                            to={`/inventory/products/${assignment.product?.id}`}
                             className="font-medium text-blue-600 hover:underline"
                           >
                             {assignment.product?.name}
@@ -227,7 +227,7 @@ export default function EmployeeDetail() {
                       <div className="flex items-center justify-between">
                         <div className="flex-1">
                           <Link
-                            to={`/products/${assignment.product?.id}`}
+                            to={`/inventory/products/${assignment.product?.id}`}
                             className="font-medium text-blue-600 hover:underline"
                           >
                             {assignment.product?.name}

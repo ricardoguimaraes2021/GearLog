@@ -288,7 +288,7 @@ export default function Dashboard() {
                         >
                           <div>
                             <Link
-                              to={`/products/${product.id}`}
+                              to={`/inventory/products/${product.id}`}
                               className="font-medium text-gray-900 hover:text-orange-600"
                             >
                               {product.name}
@@ -331,7 +331,7 @@ export default function Dashboard() {
                         >
                           <div>
                             <Link
-                              to={`/products/${product.id}`}
+                              to={`/inventory/products/${product.id}`}
                               className="font-medium text-gray-900 hover:text-red-600"
                             >
                               {product.name}
@@ -374,7 +374,7 @@ export default function Dashboard() {
                         >
                           <div>
                             <Link
-                              to={`/products/${product.id}`}
+                              to={`/inventory/products/${product.id}`}
                               className="font-medium text-gray-900 hover:text-yellow-600"
                             >
                               {product.name}
@@ -435,7 +435,7 @@ export default function Dashboard() {
                           <div>
                             <div className="flex items-center gap-2">
                               <Link
-                                to={`/products/${activity.product?.id}`}
+                                to={`/inventory/products/${activity.product?.id}`}
                                 className="font-medium text-blue-600 hover:underline"
                               >
                                 {activity.product?.name}
@@ -475,7 +475,7 @@ export default function Dashboard() {
                         ) : (
                           <div>
                             <Link
-                              to={`/products/${activity.product?.id}`}
+                              to={`/inventory/products/${activity.product?.id}`}
                               className="font-medium text-blue-600 hover:underline"
                             >
                               {activity.product?.name}

@@ -8,6 +8,7 @@ import ProductDetail from './pages/Products/ProductDetail';
 import ProductForm from './pages/Products/ProductForm';
 import ProductPublicView from './pages/Products/ProductPublicView';
 import Categories from './pages/Categories/Categories';
+import Inventory from './pages/Inventory/Inventory';
 import Tickets from './pages/Tickets/Tickets';
 import TicketDetail from './pages/Tickets/TicketDetail';
 import TicketForm from './pages/Tickets/TicketForm';
@@ -71,11 +72,14 @@ function App() {
             >
               <Route index element={<Navigate to="/dashboard" replace />} />
               <Route path="dashboard" element={<Dashboard />} />
-              <Route path="products" element={<Products />} />
-              <Route path="products/new" element={<ProductForm />} />
-              <Route path="products/:id" element={<ProductDetail />} />
-              <Route path="products/:id/edit" element={<ProductForm />} />
-              <Route path="categories" element={<Categories />} />
+              <Route path="inventory" element={<Inventory />}>
+                <Route index element={<Navigate to="/inventory/products" replace />} />
+                <Route path="products" element={<Products />} />
+                <Route path="products/new" element={<ProductForm />} />
+                <Route path="products/:id" element={<ProductDetail />} />
+                <Route path="products/:id/edit" element={<ProductForm />} />
+                <Route path="categories" element={<Categories />} />
+              </Route>
               <Route path="tickets" element={<Tickets />} />
               <Route path="tickets/dashboard" element={<TicketDashboard />} />
               <Route path="tickets/new" element={<TicketForm />} />

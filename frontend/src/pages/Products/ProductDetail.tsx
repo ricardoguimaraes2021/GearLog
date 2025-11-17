@@ -129,7 +129,7 @@ export default function ProductDetail() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-4">
-          <Link to="/products">
+          <Link to="/inventory/products">
             <Button variant="ghost" size="sm">
               <ArrowLeft className="w-4 h-4 mr-2" />
               Back
@@ -140,7 +140,7 @@ export default function ProductDetail() {
             <p className="text-sm text-gray-500">Product Details</p>
           </div>
         </div>
-        <Link to={`/products/${currentProduct.id}/edit`}>
+        <Link to={`/inventory/products/${currentProduct.id}/edit`}>
           <Button>
             <Edit className="w-4 h-4 mr-2" />
             Edit

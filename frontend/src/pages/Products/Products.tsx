@@ -89,7 +89,7 @@ export default function Products() {
           <h1 className="text-3xl font-bold text-gray-900">Products</h1>
           <p className="mt-1 text-sm text-gray-500">Manage your inventory</p>
         </div>
-        <Link to="/products/new">
+        <Link to="/inventory/products/new">
           <Button>
             <Plus className="w-4 h-4 mr-2" />
             Add Product
@@ -281,7 +281,7 @@ export default function Products() {
                     )}
                   </div>
                   <div className="mt-4 flex gap-2">
-                    <Link to={`/products/${product.id}`} className="flex-1">
+                    <Link to={`/inventory/products/${product.id}`} className="flex-1">
                       <Button variant="outline" size="sm" className="w-full">
                         View
                       </Button>

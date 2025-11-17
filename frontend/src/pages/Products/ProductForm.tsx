@@ -127,7 +127,7 @@ export default function ProductForm() {
         await createProduct(formDataToSend);
         toast.success('Product created successfully');
       }
-      navigate('/products');
+      navigate('/inventory/products');
     } catch (error: any) {
       toast.error(error.response?.data?.message || 'Failed to save product');
     }
@@ -162,7 +162,7 @@ export default function ProductForm() {
   return (
     <div className="space-y-6">
       <div className="flex items-center gap-4">
-        <Button variant="ghost" size="sm" onClick={() => navigate('/products')}>
+        <Button variant="ghost" size="sm" onClick={() => navigate('/inventory/products')}>
           <ArrowLeft className="w-4 h-4 mr-2" />
           Back
         </Button>
@@ -352,7 +352,7 @@ export default function ProductForm() {
                 <Save className="w-4 h-4 mr-2" />
                 {isEditing ? 'Update Product' : 'Create Product'}
               </Button>
-              <Button type="button" variant="outline" onClick={() => navigate('/products')}>
+              <Button type="button" variant="outline" onClick={() => navigate('/inventory/products')}>
                 Cancel
               </Button>
             </div>

@@ -1,7 +1,7 @@
 import { Outlet, Link, useLocation } from 'react-router-dom';
 import { useAuthStore } from '@/stores/authStore';
 import { Button } from '@/components/ui/button';
-import { LayoutDashboard, Package, FolderTree, Ticket, Users, Building2, LogOut, Menu, X } from 'lucide-react';
+import { LayoutDashboard, Package, Ticket, Users, Building2, LogOut, Menu, X } from 'lucide-react';
 import { useState } from 'react';
 import NotificationBell from '@/components/notifications/NotificationBell';
 
@@ -12,8 +12,7 @@ export default function Layout() {
 
   const navigation = [
     { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
-    { name: 'Products', href: '/products', icon: Package },
-    { name: 'Categories', href: '/categories', icon: FolderTree },
+    { name: 'Inventory', href: '/inventory/products', icon: Package },
     { name: 'Employees', href: '/employees', icon: Users },
     { name: 'Departments', href: '/departments', icon: Building2 },
     { name: 'Tickets', href: '/tickets', icon: Ticket },
@@ -45,7 +44,8 @@ export default function Layout() {
                 {navigation.map((item) => {
                   const Icon = item.icon;
                   const isActive = location.pathname === item.href || 
-                    (item.href !== '/dashboard' && location.pathname.startsWith(item.href));
+                    (item.href !== '/dashboard' && location.pathname.startsWith(item.href)) ||
+                    (item.href === '/inventory/products' && (location.pathname.startsWith('/inventory') || location.pathname.startsWith('/products') || location.pathname.startsWith('/categories')));
                   return (
                     <Link
                       key={item.name}
@@ -99,7 +99,8 @@ export default function Layout() {
             {navigation.map((item) => {
               const Icon = item.icon;
               const isActive = location.pathname === item.href || 
-                (item.href !== '/dashboard' && location.pathname.startsWith(item.href));
+                (item.href !== '/dashboard' && location.pathname.startsWith(item.href)) ||
+                (item.href === '/inventory/products' && (location.pathname.startsWith('/inventory') || location.pathname.startsWith('/products') || location.pathname.startsWith('/categories')));
               return (
                 <Link
                   key={item.name}

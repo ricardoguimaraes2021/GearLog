@@ -542,7 +542,7 @@ export default function TicketDetail() {
               {currentTicket.product && (
                 <div>
                   <Label className="text-gray-500">Product</Label>
-                  <Link to={`/products/${currentTicket.product.id}`} className="mt-1 text-blue-600 hover:underline block">
+                  <Link to={`/inventory/products/${currentTicket.product.id}`} className="mt-1 text-blue-600 hover:underline block">
                     {currentTicket.product.name}
                   </Link>
                 </div>
