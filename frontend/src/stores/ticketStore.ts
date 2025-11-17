@@ -122,8 +122,14 @@ export const useTicketStore = create<TicketStore>((set, get) => ({
       });
 
       const response = await api.getTickets(Object.fromEntries(params));
+      // Normalize snake_case to camelCase for tickets
+      const normalizedTickets = (response.data || []).map((ticket: any) => ({
+        ...ticket,
+        assignedTo: ticket.assigned_to || ticket.assignedTo,
+        openedBy: ticket.opened_by || ticket.openedBy,
+      }));
       set({
-        tickets: response.data || [],
+        tickets: normalizedTickets,
         pagination: {
           current_page: response.current_page ?? 1,
           last_page: response.last_page ?? 1,
@@ -142,7 +148,13 @@ export const useTicketStore = create<TicketStore>((set, get) => ({
     set({ isLoading: true });
     try {
       const response = await api.getTicket(id);
-      set({ currentTicket: response, isLoading: false });
+      // Normalize snake_case to camelCase for assigned_to
+      const normalizedTicket = {
+        ...response,
+        assignedTo: response.assigned_to || response.assignedTo,
+        openedBy: response.opened_by || response.openedBy,
+      };
+      set({ currentTicket: normalizedTicket as Ticket, isLoading: false });
     } catch (error: any) {
       toast.error(error.response?.data?.error || 'Failed to fetch ticket');
       set({ isLoading: false });
@@ -182,7 +194,18 @@ export const useTicketStore = create<TicketStore>((set, get) => ({
 
   assignTicket: async (id: number, assignedTo: number | null) => {
     try {
-      await api.assignTicket(id, assignedTo);
+      const response = await api.assignTicket(id, assignedTo);
+      // Normalize snake_case to camelCase
+      const normalizedTicket = {
+        ...response,
+        assignedTo: response.assigned_to || response.assignedTo,
+        openedBy: response.opened_by || response.openedBy,
+      };
+      // Update current ticket if it's the same one
+      const currentTicket = get().currentTicket;
+      if (currentTicket && currentTicket.id === id) {
+        set({ currentTicket: normalizedTicket as Ticket });
+      }
       toast.success('Ticket assigned successfully');
       await get().fetchTicket(id);
     } catch (error: any) {
