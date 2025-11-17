@@ -75,7 +75,7 @@ export default function EmployeeForm() {
         ...formData,
         employee_code: formData.employee_code || undefined,
         phone: formData.phone || undefined,
-        department_id: formData.department_id ? parseInt(formData.department_id) : undefined,
+        department_id: formData.department_id && formData.department_id !== 'none' ? parseInt(formData.department_id) : undefined,
         notes: formData.notes || undefined,
       };
 
