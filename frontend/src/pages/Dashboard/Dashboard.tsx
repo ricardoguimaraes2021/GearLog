@@ -361,27 +361,89 @@ export default function Dashboard() {
         </CardContent>
       </Card>
 
-      {/* Recent Movements */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Recent Movements</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-2">
-            {data.recent_movements.map((movement) => (
-              <div key={movement.id} className="flex justify-between items-center text-sm">
-                <div>
-                  <span className="font-medium">{movement.product?.name}</span>
-                  <span className="text-gray-500 ml-2">({movement.type})</span>
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Recent Movements */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Recent Movements</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-2">
+              {data.recent_movements.map((movement) => (
+                <div key={movement.id} className="flex justify-between items-center text-sm">
+                  <div>
+                    <span className="font-medium">{movement.product?.name}</span>
+                    <span className="text-gray-500 ml-2">({movement.type})</span>
+                  </div>
+                  <span className="text-gray-600">
+                    {new Date(movement.created_at).toLocaleDateString()}
+                  </span>
                 </div>
-                <span className="text-gray-600">
-                  {new Date(movement.created_at).toLocaleDateString()}
-                </span>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Recent Tickets */}
+        {data.recent_tickets && data.recent_tickets.length > 0 && (
+          <Card>
+            <CardHeader>
+              <div className="flex items-center justify-between">
+                <CardTitle>Recent Tickets</CardTitle>
+                <Link to="/tickets">
+                  <Button variant="ghost" size="sm">
+                    View All
+                  </Button>
+                </Link>
               </div>
-            ))}
-          </div>
-        </CardContent>
-      </Card>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-3">
+                {data.recent_tickets.map((ticket) => (
+                  <Link
+                    key={ticket.id}
+                    to={`/tickets/${ticket.id}`}
+                    className="block p-3 rounded-md hover:bg-gray-50 border border-gray-200 transition-colors"
+                  >
+                    <div className="flex items-start justify-between">
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2 mb-1">
+                          <span className="font-medium text-gray-900 truncate">{ticket.title}</span>
+                          <span className={`px-2 py-0.5 text-xs font-medium rounded-full ${getPriorityColor(ticket.priority)}`}>
+                            {ticket.priority.toUpperCase()}
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-2 text-sm text-gray-500">
+                          {ticket.product && (
+                            <>
+                              <Package className="w-3 h-3" />
+                              <span>{ticket.product}</span>
+                            </>
+                          )}
+                          {ticket.assigned_to && (
+                            <>
+                              <User className="w-3 h-3 ml-2" />
+                              <span>{ticket.assigned_to}</span>
+                            </>
+                          )}
+                        </div>
+                      </div>
+                      <div className="flex flex-col items-end gap-1 ml-2">
+                        <span className={`px-2 py-1 text-xs font-medium rounded-full ${getStatusColor(ticket.status)}`}>
+                          {formatStatus(ticket.status)}
+                        </span>
+                        <span className="text-xs text-gray-400">
+                          {new Date(ticket.created_at).toLocaleDateString()}
+                        </span>
+                      </div>
+                    </div>
+                  </Link>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        )}
+      </div>
     </div>
   );
 }
