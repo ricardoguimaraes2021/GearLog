@@ -289,11 +289,9 @@ export default function TicketForm() {
                       accept="image/*,.pdf,.doc,.docx,.txt"
                     />
                     <label htmlFor="attachments">
-                      <Button type="button" variant="outline" asChild>
-                        <span>
-                          <Paperclip className="w-4 h-4 mr-2" />
-                          Add Files
-                        </span>
+                      <Button type="button" variant="outline" className="cursor-pointer">
+                        <Paperclip className="w-4 h-4 mr-2" />
+                        Add Files
                       </Button>
                     </label>
                     <p className="text-xs text-gray-500 mt-1">

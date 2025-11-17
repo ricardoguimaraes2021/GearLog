@@ -37,8 +37,8 @@ Route::prefix('v1')->middleware('throttle:60,1')->group(function () {
         Route::get('/users', [UserController::class, 'index']);
 
         // Tickets
-        Route::apiResource('tickets', TicketController::class);
         Route::get('/tickets/dashboard', [TicketDashboardController::class, 'index']);
+        Route::apiResource('tickets', TicketController::class);
         Route::post('/tickets/{ticket}/assign', [TicketController::class, 'assign']);
         Route::post('/tickets/{ticket}/status', [TicketController::class, 'updateStatus']);
         Route::post('/tickets/{ticket}/resolve', [TicketController::class, 'resolve']);

@@ -102,7 +102,7 @@ export default function TicketDetail() {
     if (!commentText.trim() || !id) return;
 
     if (commentFiles.length > 0) {
-      // Use FormData for file upload
+      // Use FormData for file upload with api client
       const formData = new FormData();
       formData.append('message', commentText);
       commentFiles.forEach((file) => {
@@ -110,26 +110,17 @@ export default function TicketDetail() {
       });
 
       try {
-        const response = await fetch(`${import.meta.env.VITE_API_URL}/api/v1/tickets/${id}/comments`, {
-          method: 'POST',
+        await api.client.post(`/tickets/${id}/comments`, formData, {
           headers: {
-            'Authorization': `Bearer ${localStorage.getItem('token')}`,
-            'Accept': 'application/json',
+            'Content-Type': 'multipart/form-data',
           },
-          body: formData,
         });
-
-        if (!response.ok) {
-          const error = await response.json();
-          throw new Error(error.error || 'Failed to add comment');
-        }
-
         toast.success('Comment added');
         setCommentText('');
         setCommentFiles([]);
         await fetchTicket(parseInt(id));
       } catch (error: any) {
-        toast.error(error.message || 'Failed to add comment');
+        toast.error(error.response?.data?.error || error.message || 'Failed to add comment');
       }
     } else {
       await addComment(parseInt(id), commentText);
@@ -346,11 +337,9 @@ export default function TicketDetail() {
                           accept="image/*,.pdf,.doc,.docx,.txt"
                         />
                         <label htmlFor="comment-attachments">
-                          <Button type="button" variant="outline" size="sm" asChild>
-                            <span>
-                              <Paperclip className="w-4 h-4 mr-2" />
-                              Add Files
-                            </span>
+                          <Button type="button" variant="outline" size="sm" className="cursor-pointer">
+                            <Paperclip className="w-4 h-4 mr-2" />
+                            Add Files
                           </Button>
                         </label>
                         {commentFiles.length > 0 && (
