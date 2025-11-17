@@ -30,7 +30,7 @@ export default function ProductForm() {
     value: '',
     purchase_date: '',
     description: '',
-    specs: {} as Record<string, any>,
+    specs: undefined as Record<string, any> | undefined,
   });
   const [image, setImage] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
@@ -56,7 +56,7 @@ export default function ProductForm() {
         value: currentProduct.value?.toString() || '',
         purchase_date: currentProduct.purchase_date || '',
         description: currentProduct.description || '',
-        specs: currentProduct.specs || {},
+        specs: currentProduct.specs || undefined,
       });
       if (currentProduct.image_url) {
         setImagePreview(`http://localhost:8000/storage/${currentProduct.image_url}`);
