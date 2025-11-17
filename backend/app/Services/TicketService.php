@@ -155,6 +155,8 @@ class TicketService
                 'new_value' => ['assigned_to' => $assignedTo],
             ]);
 
+            // Refresh the ticket to get updated relationships
+            $ticket->refresh();
             return $ticket->load(['product', 'openedBy', 'assignedTo']);
         });
     }
