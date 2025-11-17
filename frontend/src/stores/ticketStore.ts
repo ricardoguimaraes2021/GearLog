@@ -125,10 +125,10 @@ export const useTicketStore = create<TicketStore>((set, get) => ({
       set({
         tickets: response.data || [],
         pagination: {
-          current_page: response.current_page || 1,
-          last_page: response.last_page || 1,
-          per_page: response.per_page || 15,
-          total: response.total || 0,
+          current_page: response.current_page ?? 1,
+          last_page: response.last_page ?? 1,
+          per_page: response.per_page ?? 15,
+          total: response.total ?? 0,
         },
         isLoading: false,
       });
