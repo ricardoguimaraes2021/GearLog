@@ -24,7 +24,7 @@ A full-stack inventory management system for tracking IT equipment, built with L
    ```bash
    cd backend
    composer install
-   cp .env.example .env
+   cp .env.example .env  # Copy example environment file
    php artisan key:generate
    
    # Configure database in .env
