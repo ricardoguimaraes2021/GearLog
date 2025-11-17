@@ -68,7 +68,7 @@
                 <td>{{ $product->serial_number ?? '-' }}</td>
                 <td>{{ ucfirst($product->status) }}</td>
                 <td>{{ $product->quantity }}</td>
-                <td>{{ $product->value ? '$' . number_format($product->value, 2) : '-' }}</td>
+                <td>{{ $product->value ? '€' . number_format($product->value, 2) : '-' }}</td>
             </tr>
             @endforeach
         </tbody>

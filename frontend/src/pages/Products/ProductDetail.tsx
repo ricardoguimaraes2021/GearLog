@@ -174,7 +174,7 @@ export default function ProductDetail() {
                   <label className="text-sm font-medium text-gray-500">Value</label>
                   <p className="mt-1">
                     {currentProduct.value
-                      ? `$${currentProduct.value.toLocaleString()}`
+                      ? `€${currentProduct.value.toLocaleString()}`
                       : '-'}
                   </p>
                 </div>

@@ -56,7 +56,7 @@ export default function Dashboard() {
     },
     {
       title: 'Total Value',
-      value: `$${data.kpis.total_value.toLocaleString()}`,
+      value: `€${data.kpis.total_value.toLocaleString()}`,
       icon: DollarSign,
       color: 'text-green-600',
     },

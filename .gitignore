@@ -29,3 +29,7 @@ yarn-error.log*
 *.tmp
 *.temp
 
+# Storage files (generated dynamically)
+backend/storage/app/public/products/
+backend/storage/app/public/qrcodes/
+

@@ -266,7 +266,7 @@ export default function Products() {
                     {product.value && (
                       <div>
                         <span className="text-gray-500">Value: </span>
-                        <span>${product.value.toLocaleString()}</span>
+                        <span>€{product.value.toLocaleString()}</span>
                       </div>
                     )}
                   </div>
