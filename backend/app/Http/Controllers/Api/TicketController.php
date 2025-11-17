@@ -95,10 +95,33 @@ class TicketController extends Controller
 
         // Handle file uploads
         $attachmentPaths = [];
+        
+        // Debug: Log what we receive
+        \Log::info('Ticket store - Files received', [
+            'has_attachment_files' => $request->hasFile('attachment_files'),
+            'has_attachment_files_array' => $request->hasFile('attachment_files[]'),
+            'all_files' => array_keys($request->allFiles()),
+        ]);
+        
+        // Check both 'attachment_files' and 'attachment_files[]' formats
+        $files = [];
         if ($request->hasFile('attachment_files')) {
-            foreach ($request->file('attachment_files') as $file) {
+            $files = $request->file('attachment_files');
+            if (!is_array($files)) {
+                $files = [$files];
+            }
+        } elseif ($request->hasFile('attachment_files[]')) {
+            $files = $request->file('attachment_files[]');
+            if (!is_array($files)) {
+                $files = [$files];
+            }
+        }
+        
+        foreach ($files as $file) {
+            if ($file && $file->isValid()) {
                 $path = $file->store('tickets/attachments', 'public');
                 $attachmentPaths[] = $path;
+                \Log::info('File stored', ['path' => $path, 'original_name' => $file->getClientOriginalName()]);
             }
         }
 
