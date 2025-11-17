@@ -26,6 +26,21 @@ class AssetAssignment extends Model
         'returned_at' => 'datetime',
     ];
 
+    protected static function boot(): void
+    {
+        parent::boot();
+
+        // Ensure returned_at is never in the future
+        static::saving(function ($assignment) {
+            if ($assignment->returned_at && $assignment->returned_at->isFuture()) {
+                // If returned_at is in the future, set it to now or assigned_at, whichever is later
+                $assignment->returned_at = now()->isAfter($assignment->assigned_at) 
+                    ? now() 
+                    : $assignment->assigned_at;
+            }
+        });
+    }
+
     public function product(): BelongsTo
     {
         return $this->belongsTo(Product::class);

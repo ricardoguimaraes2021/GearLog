@@ -458,7 +458,19 @@ class DemoDataSeeder extends Seeder
 
             // Some assignments are returned, some are still active
             $isReturned = rand(0, 1);
-            $returnedAt = $isReturned ? $assignedAt->copy()->addDays(rand(30, 120)) : null;
+            // Ensure returned_at is never in the future
+            if ($isReturned) {
+                $daysSinceAssignment = Carbon::now()->diffInDays($assignedAt);
+                // Return date should be between assigned_at and now
+                $daysToAdd = min(rand(30, 120), $daysSinceAssignment);
+                $returnedAt = $assignedAt->copy()->addDays($daysToAdd);
+                // Ensure it's not in the future
+                if ($returnedAt->isFuture()) {
+                    $returnedAt = Carbon::now()->subDays(rand(1, 7));
+                }
+            } else {
+                $returnedAt = null;
+            }
 
             AssetAssignment::create([
                 'product_id' => $product->id,

@@ -86,8 +86,14 @@ class DashboardController extends Controller
             }))
             ->merge($recentAssignments->map(function ($assignment) {
                 // Use assigned_at for checkout, returned_at for return, or created_at as fallback
-                $timestamp = $assignment['returned_at'] ?? $assignment['assigned_at'] ?? $assignment['created_at'];
-                return array_merge($assignment, ['timestamp' => $timestamp]);
+                // Ensure returned_at is not in the future (safety check)
+                $returnedAt = $assignment['returned_at'];
+                if ($returnedAt && \Carbon\Carbon::parse($returnedAt)->isFuture()) {
+                    // If returned_at is in the future, use assigned_at or created_at instead
+                    $returnedAt = null;
+                }
+                $timestamp = $returnedAt ?? $assignment['assigned_at'] ?? $assignment['created_at'];
+                return array_merge($assignment, ['timestamp' => $timestamp, 'returned_at' => $returnedAt]);
             }))
             ->sortByDesc('timestamp')
             ->take(10)
