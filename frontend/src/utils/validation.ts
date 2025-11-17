@@ -12,7 +12,16 @@ export const productSchema = z.object({
     (val) => !val || (!isNaN(parseFloat(val)) && parseFloat(val) >= 0),
     'Value must be a positive number'
   ),
-  purchase_date: z.string().optional(),
+  purchase_date: z.string().optional().refine(
+    (val) => {
+      if (!val) return true; // Optional field
+      const date = new Date(val);
+      const today = new Date();
+      today.setHours(23, 59, 59, 999); // End of today
+      return date <= today;
+    },
+    'Purchase date cannot be in the future'
+  ),
   description: z.string().optional(),
 });
 

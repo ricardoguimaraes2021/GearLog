@@ -307,9 +307,23 @@ export default function ProductForm() {
                 </label>
                 <Input
                   type="date"
+                  max={new Date().toISOString().split('T')[0]} // Set max to today
                   value={formData.purchase_date}
-                  onChange={(e) => setFormData({ ...formData, purchase_date: e.target.value })}
+                  onChange={(e) => {
+                    const selectedDate = e.target.value;
+                    const today = new Date().toISOString().split('T')[0];
+                    if (selectedDate > today) {
+                      // Prevent selecting future dates
+                      return;
+                    }
+                    setFormData({ ...formData, purchase_date: selectedDate });
+                    if (errors.purchase_date) setErrors({ ...errors, purchase_date: '' });
+                  }}
+                  className={errors.purchase_date ? 'border-red-500' : ''}
                 />
+                {errors.purchase_date && (
+                  <p className="text-sm text-red-500 mt-1">{errors.purchase_date}</p>
+                )}
               </div>
 
               <div className="md:col-span-2">
