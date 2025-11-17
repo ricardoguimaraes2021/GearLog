@@ -548,6 +548,15 @@ export default function TicketDetail() {
                 </div>
               )}
 
+              {(currentTicket as any).employee && (
+                <div>
+                  <Label className="text-gray-500">Employee</Label>
+                  <Link to={`/employees/${(currentTicket as any).employee.id}`} className="mt-1 text-blue-600 hover:underline block">
+                    {(currentTicket as any).employee.name} ({(currentTicket as any).employee.employee_code})
+                  </Link>
+                </div>
+              )}
+
               <div>
                 <Label className="text-gray-500">Opened By</Label>
                 <p className="mt-1">{currentTicket.openedBy?.name || 'Unknown'}</p>
