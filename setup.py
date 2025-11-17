@@ -14,8 +14,23 @@ import sys
 import subprocess
 import platform
 import shutil
+import logging
+import traceback
 from pathlib import Path
 from typing import Optional, Tuple
+from datetime import datetime
+
+# Configure logging
+log_file = Path.home() / "Desktop" / "GearLog_Setup_Log.txt"
+logging.basicConfig(
+    level=logging.DEBUG,
+    format='%(asctime)s - %(levelname)s - %(message)s',
+    handlers=[
+        logging.FileHandler(log_file, encoding='utf-8'),
+        logging.StreamHandler(sys.stdout)
+    ]
+)
+logger = logging.getLogger(__name__)
 
 # Colors for terminal output
 class Colors:
@@ -35,34 +50,63 @@ def print_header(text: str):
     print(f"{Colors.HEADER}{Colors.BOLD}{'='*60}{Colors.ENDC}\n")
 
 def print_success(text: str):
-    print(f"{Colors.OKGREEN}✓ {text}{Colors.ENDC}")
+    try:
+        print(f"{Colors.OKGREEN}✓ {text}{Colors.ENDC}")
+    except (UnicodeEncodeError, AttributeError):
+        print(f"[OK] {text}")
+    logger.info(f"SUCCESS: {text}")
 
 def print_error(text: str):
-    print(f"{Colors.FAIL}✗ {text}{Colors.ENDC}")
+    try:
+        print(f"{Colors.FAIL}✗ {text}{Colors.ENDC}")
+    except (UnicodeEncodeError, AttributeError):
+        print(f"[ERROR] {text}")
+    logger.error(f"ERROR: {text}")
 
 def print_warning(text: str):
-    print(f"{Colors.WARNING}⚠ {text}{Colors.ENDC}")
+    try:
+        print(f"{Colors.WARNING}⚠ {text}{Colors.ENDC}")
+    except (UnicodeEncodeError, AttributeError):
+        print(f"[WARNING] {text}")
+    logger.warning(f"WARNING: {text}")
 
 def print_info(text: str):
-    print(f"{Colors.OKCYAN}ℹ {text}{Colors.ENDC}")
+    try:
+        print(f"{Colors.OKCYAN}ℹ {text}{Colors.ENDC}")
+    except (UnicodeEncodeError, AttributeError):
+        print(f"[INFO] {text}")
+    logger.info(f"INFO: {text}")
 
 def run_command(command: list, check: bool = True, capture_output: bool = False) -> Tuple[bool, str]:
     """Run a shell command and return success status and output."""
+    logger.debug(f"Running command: {' '.join(command)}")
     try:
         result = subprocess.run(
             command,
             check=check,
             capture_output=capture_output,
-            text=True
+            text=True,
+            encoding='utf-8',
+            errors='replace'
         )
         output = result.stdout if capture_output else ""
+        if capture_output and output:
+            logger.debug(f"Command output: {output[:500]}")  # Log first 500 chars
         return True, output
     except subprocess.CalledProcessError as e:
+        error_msg = e.stderr if capture_output and e.stderr else str(e)
+        logger.error(f"Command failed: {' '.join(command)} - Error: {error_msg}")
         if capture_output:
-            return False, e.stderr
+            return False, error_msg
         return False, str(e)
-    except FileNotFoundError:
-        return False, "Command not found"
+    except FileNotFoundError as e:
+        error_msg = f"Command not found: {command[0] if command else 'unknown'}"
+        logger.error(error_msg)
+        return False, error_msg
+    except Exception as e:
+        error_msg = f"Unexpected error running command: {str(e)}"
+        logger.error(error_msg, exc_info=True)
+        return False, error_msg
 
 def check_command(command: str) -> bool:
     """Check if a command exists in the system."""
@@ -344,9 +388,17 @@ class ProjectSetup:
         
         # Generate application key
         print_info("Generating application key...")
-        success, _ = run_command(["php", "artisan", "key:generate"])
-        if success:
-            print_success("Application key generated")
+        try:
+            success, output = run_command(["php", "artisan", "key:generate"], capture_output=True)
+            if success:
+                print_success("Application key generated")
+                logger.info("Application key generated successfully")
+            else:
+                print_warning(f"Failed to generate key: {output}")
+                logger.warning(f"Key generation failed: {output}")
+        except Exception as e:
+            logger.error(f"Error generating application key: {e}", exc_info=True)
+            print_warning(f"Could not generate application key: {e}")
         
         # Configure database
         print_info("Configuring database...")
@@ -354,12 +406,20 @@ class ProjectSetup:
         
         # Run migrations
         print_info("Running database migrations...")
-        success, _ = run_command(["php", "artisan", "migrate", "--seed"])
-        if not success:
-            print_warning("Migrations failed. You may need to create the database manually.")
-            print_info("Create database: CREATE DATABASE gearlog;")
-        else:
-            print_success("Database migrations completed")
+        try:
+            success, output = run_command(["php", "artisan", "migrate", "--seed"], capture_output=True)
+            if not success:
+                print_warning("Migrations failed. You may need to create the database manually.")
+                print_info("Create database: CREATE DATABASE gearlog;")
+                logger.error(f"Migration failed: {output}")
+                print_error(f"Migration error details: {output[:500]}")
+            else:
+                print_success("Database migrations completed")
+                logger.info("Migrations completed successfully")
+        except Exception as e:
+            logger.error(f"Error running migrations: {e}", exc_info=True)
+            print_error(f"Migration error: {e}")
+            traceback.print_exc()
         
         # Create storage link
         print_info("Creating storage symlink...")
@@ -370,6 +430,7 @@ class ProjectSetup:
 
     def create_basic_env(self):
         """Create a basic .env file if .env.example doesn't exist."""
+        logger.info("Creating basic .env file")
         env_content = """APP_NAME=GearLog
 APP_ENV=local
 APP_KEY=
@@ -391,9 +452,14 @@ SESSION_DOMAIN=localhost
 
 SANCTUM_STATEFUL_DOMAINS=localhost:5173,127.0.0.1:5173
 """
-        env_file = self.backend_path / ".env"
-        with open(env_file, "w") as f:
-            f.write(env_content)
+        try:
+            env_file = self.backend_path / ".env"
+            with open(env_file, "w", encoding='utf-8') as f:
+                f.write(env_content)
+            logger.info(f".env file created at {env_file}")
+        except Exception as e:
+            logger.error(f"Failed to create .env file: {e}", exc_info=True)
+            raise
 
     def configure_database(self):
         """Configure database settings in .env file."""
@@ -496,12 +562,35 @@ SANCTUM_STATEFUL_DOMAINS=localhost:5173,127.0.0.1:5173
         elif self.system["is_linux"]:
             print("   sudo systemctl start mysql")
 
+def pause_before_exit():
+    """Pause before exiting to allow user to see output."""
+    if platform.system() == "Windows":
+        print("\n" + "=" * 60)
+        print("Press any key to exit...")
+        try:
+            import msvcrt
+            msvcrt.getch()
+        except ImportError:
+            input()
+    else:
+        input("\nPress Enter to exit...")
+
 def main():
     """Main setup function."""
-    print_header("GearLog Automated Setup")
-    
-    system_info = get_system_info()
-    print_info(f"Detected system: {system_info['system']}")
+    try:
+        logger.info("=" * 60)
+        logger.info("GearLog Setup Script Started")
+        logger.info(f"Python version: {sys.version}")
+        logger.info(f"Platform: {platform.platform()}")
+        logger.info(f"Log file: {log_file}")
+        logger.info("=" * 60)
+        
+        print_header("GearLog Automated Setup")
+        print_info(f"Log file location: {log_file}")
+        
+        system_info = get_system_info()
+        print_info(f"Detected system: {system_info['system']}")
+        logger.info(f"System detected: {system_info['system']}")
     
     # Check if running as root (not recommended)
     if os.geteuid() == 0 and not system_info["is_windows"]:
@@ -539,16 +628,29 @@ def main():
         print_error("Frontend setup failed")
         sys.exit(1)
     
-    # Print final instructions
-    setup.print_final_instructions()
-
-if __name__ == "__main__":
-    try:
-        main()
+        # Print final instructions
+        setup.print_final_instructions()
+        
+        logger.info("Setup completed successfully")
+        print_success(f"\nSetup completed! Check log file for details: {log_file}")
+        
     except KeyboardInterrupt:
+        logger.warning("Setup cancelled by user")
         print("\n\n" + Colors.WARNING + "Setup cancelled by user" + Colors.ENDC)
+        pause_before_exit()
         sys.exit(1)
     except Exception as e:
-        print_error(f"Unexpected error: {str(e)}")
+        error_msg = f"Unexpected error: {str(e)}"
+        logger.critical(error_msg, exc_info=True)
+        print_error(error_msg)
+        print_error(f"\nFull error details saved to: {log_file}")
+        print_error("\nTraceback:")
+        traceback.print_exc()
+        pause_before_exit()
         sys.exit(1)
+    
+    pause_before_exit()
+
+if __name__ == "__main__":
+    main()
 
