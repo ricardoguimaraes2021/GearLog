@@ -272,17 +272,30 @@ export default function TicketForm() {
                     <input
                       type="file"
                       id="attachments"
+                      ref={(input) => {
+                        if (input) {
+                          (window as any).ticketFileInput = input;
+                        }
+                      }}
                       multiple
                       onChange={handleFileSelect}
                       className="hidden"
                       accept="image/*,.pdf,.doc,.docx,.txt"
                     />
-                    <label htmlFor="attachments">
-                      <Button type="button" variant="outline" className="cursor-pointer">
-                        <Paperclip className="w-4 h-4 mr-2" />
-                        Add Files
-                      </Button>
-                    </label>
+                    <Button 
+                      type="button" 
+                      variant="outline" 
+                      className="cursor-pointer"
+                      onClick={() => {
+                        const input = document.getElementById('attachments') as HTMLInputElement;
+                        if (input) {
+                          input.click();
+                        }
+                      }}
+                    >
+                      <Paperclip className="w-4 h-4 mr-2" />
+                      Add Files
+                    </Button>
                     <p className="text-xs text-gray-500 mt-1">
                       Max 10MB per file. Allowed: Images, PDF, DOC, DOCX, TXT
                     </p>

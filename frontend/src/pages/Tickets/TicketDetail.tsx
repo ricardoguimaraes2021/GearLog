@@ -421,12 +421,21 @@ export default function TicketDetail() {
                           className="hidden"
                           accept="image/*,.pdf,.doc,.docx,.txt"
                         />
-                        <label htmlFor="comment-attachments">
-                          <Button type="button" variant="outline" size="sm" className="cursor-pointer">
-                            <Paperclip className="w-4 h-4 mr-2" />
-                            Add Files
-                          </Button>
-                        </label>
+                        <Button 
+                          type="button" 
+                          variant="outline" 
+                          size="sm" 
+                          className="cursor-pointer"
+                          onClick={() => {
+                            const input = document.getElementById('comment-attachments') as HTMLInputElement;
+                            if (input) {
+                              input.click();
+                            }
+                          }}
+                        >
+                          <Paperclip className="w-4 h-4 mr-2" />
+                          Add Files
+                        </Button>
                         {commentFiles.length > 0 && (
                           <div className="mt-2 space-y-1">
                             {commentFiles.map((file, index) => (
