@@ -192,6 +192,14 @@ export default function ProductDetail() {
                       : '-'}
                   </p>
                 </div>
+                {currentProduct.purchase_date && (
+                  <div>
+                    <label className="text-sm font-medium text-gray-500">Purchase Date</label>
+                    <p className="mt-1">
+                      {new Date(currentProduct.purchase_date).toLocaleDateString()}
+                    </p>
+                  </div>
+                )}
                 {currentProduct.description && (
                   <div className="col-span-2">
                     <label className="text-sm font-medium text-gray-500">Description</label>
@@ -199,6 +207,56 @@ export default function ProductDetail() {
                   </div>
                 )}
               </div>
+
+              {/* Purchase Dates by Entry Movements */}
+              {(() => {
+                // Group entry movements by date
+                const entryMovements = movements.filter(m => m.type === 'entrada' || m.type === 'devolucao');
+                if (entryMovements.length > 0) {
+                  const groupedByDate = entryMovements.reduce((acc, movement) => {
+                    const dateKey = new Date(movement.created_at).toLocaleDateString();
+                    if (!acc[dateKey]) {
+                      acc[dateKey] = { date: dateKey, totalQuantity: 0, movements: [] };
+                    }
+                    acc[dateKey].totalQuantity += movement.quantity;
+                    acc[dateKey].movements.push(movement);
+                    return acc;
+                  }, {} as Record<string, { date: string; totalQuantity: number; movements: Movement[] }>);
+
+                  const groupedEntries = Object.values(groupedByDate).sort((a, b) => 
+                    new Date(b.movements[0].created_at).getTime() - new Date(a.movements[0].created_at).getTime()
+                  );
+
+                  return (
+                    <div className="mt-6 pt-6 border-t">
+                      <label className="text-sm font-medium text-gray-500 mb-3 block">
+                        Purchase Dates by Entry
+                      </label>
+                      <div className="space-y-2">
+                        {groupedEntries.map((group, index) => (
+                          <div
+                            key={index}
+                            className="flex justify-between items-center p-2 bg-gray-50 rounded text-sm"
+                          >
+                            <div>
+                              <span className="font-medium">{group.date}</span>
+                              {group.movements.length > 1 && (
+                                <span className="text-gray-500 ml-2">
+                                  ({group.movements.length} entries)
+                                </span>
+                              )}
+                            </div>
+                            <span className="text-gray-600 font-semibold">
+                              Qty: {group.totalQuantity}
+                            </span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  );
+                }
+                return null;
+              })()}
 
               {currentProduct.qr_code_url && (
                 <div className="mt-6 pt-6 border-t">
