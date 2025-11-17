@@ -16,6 +16,9 @@ import Notifications from './pages/Notifications/Notifications';
 import Employees from './pages/Employees/Employees';
 import EmployeeDetail from './pages/Employees/EmployeeDetail';
 import EmployeeForm from './pages/Employees/EmployeeForm';
+import Departments from './pages/Departments/Departments';
+import DepartmentDetail from './pages/Departments/DepartmentDetail';
+import DepartmentForm from './pages/Departments/DepartmentForm';
 import Layout from './components/layout/Layout';
 import { Toaster } from './components/ui/toast';
 import ErrorBoundary from './components/ErrorBoundary';
@@ -83,6 +86,10 @@ function App() {
               <Route path="employees/new" element={<EmployeeForm />} />
               <Route path="employees/:id" element={<EmployeeDetail />} />
               <Route path="employees/:id/edit" element={<EmployeeForm />} />
+              <Route path="departments" element={<Departments />} />
+              <Route path="departments/new" element={<DepartmentForm />} />
+              <Route path="departments/:id" element={<DepartmentDetail />} />
+              <Route path="departments/:id/edit" element={<DepartmentForm />} />
             </Route>
           </Routes>
       </BrowserRouter>

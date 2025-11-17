@@ -5,10 +5,11 @@ import { useDepartmentStore } from '@/stores/departmentStore';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Plus, Search, Filter, Users, Mail, Phone, Building2 } from 'lucide-react';
+import { Plus, Search, Filter, Users, Mail, Phone, Building2, Download } from 'lucide-react';
 import type { Employee } from '@/types';
 import { toast } from 'sonner';
 import { Skeleton } from '@/components/ui/skeleton';
+import { api } from '@/services/api';
 
 export default function Employees() {
   const {
@@ -54,6 +55,23 @@ export default function Employees() {
     }
   };
 
+  const handleExport = async (format: 'csv' | 'excel' | 'pdf') => {
+    try {
+      const blob = await api.exportEmployees(format, filters);
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `employees_${new Date().toISOString()}.${format === 'csv' ? 'csv' : format === 'excel' ? 'xlsx' : 'pdf'}`;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+      toast.success('Export completed successfully');
+    } catch (error) {
+      toast.error('Export failed');
+    }
+  };
+
   const getStatusColor = (status: Employee['status']) => {
     return status === 'active'
       ? 'bg-green-100 text-green-800'
@@ -67,12 +85,26 @@ export default function Employees() {
           <h1 className="text-3xl font-bold text-gray-900">Employees</h1>
           <p className="mt-1 text-sm text-gray-500">Manage your employee directory</p>
         </div>
-        <Link to="/employees/new">
-          <Button>
-            <Plus className="w-4 h-4 mr-2" />
-            Add Employee
+        <div className="flex gap-2">
+          <Button
+            variant="outline"
+            onClick={() => {
+              const format = window.prompt('Export format (csv/excel/pdf):', 'excel');
+              if (format && ['csv', 'excel', 'pdf'].includes(format.toLowerCase())) {
+                handleExport(format.toLowerCase() as 'csv' | 'excel' | 'pdf');
+              }
+            }}
+          >
+            <Download className="w-4 h-4 mr-2" />
+            Export
           </Button>
-        </Link>
+          <Link to="/employees/new">
+            <Button>
+              <Plus className="w-4 h-4 mr-2" />
+              Add Employee
+            </Button>
+          </Link>
+        </div>
       </div>
 
       {/* Search and Filters */}

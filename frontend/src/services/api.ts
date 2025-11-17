@@ -407,6 +407,14 @@ class ApiClient {
       return response.data;
     }
 
+    async exportEmployees(format: 'csv' | 'excel' | 'pdf', params?: Record<string, any>) {
+      const response = await this.client.get(`/employees/export/${format}`, {
+        params,
+        responseType: 'blob',
+      });
+      return response.data;
+    }
+
     // Departments
     async getDepartments(params?: Record<string, any>) {
       const response = await this.client.get<Department[]>('/departments', { params });

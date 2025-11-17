@@ -7,6 +7,11 @@ use App\Http\Controllers\Controller;
 use App\Models\Employee;
 use App\Services\EmployeeService;
 use Illuminate\Http\Request;
+use Maatwebsite\Excel\Facades\Excel;
+use Maatwebsite\Excel\Concerns\FromCollection;
+use Maatwebsite\Excel\Concerns\WithHeadings;
+use Maatwebsite\Excel\Concerns\WithMapping;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class EmployeeController extends Controller
 {
@@ -185,5 +190,137 @@ class EmployeeController extends Controller
                 'message' => config('app.debug') ? $e->getMessage() : null,
             ], 500);
         }
+    }
+
+    public function export(Request $request, string $format)
+    {
+        $request->user()->can('employees.view') || abort(403, 'Unauthorized');
+
+        // Apply same filters as index
+        $query = Employee::with('department');
+
+        if ($request->has('search')) {
+            $search = $request->get('search');
+            $query->where(function ($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                    ->orWhere('email', 'like', "%{$search}%")
+                    ->orWhere('employee_code', 'like', "%{$search}%")
+                    ->orWhere('position', 'like', "%{$search}%");
+            });
+        }
+
+        if ($request->has('status')) {
+            $query->where('status', $request->get('status'));
+        }
+
+        if ($request->has('department_id')) {
+            $query->where('department_id', $request->get('department_id'));
+        }
+
+        $employees = $query->get();
+
+        switch ($format) {
+            case 'csv':
+                return $this->exportCsv($employees);
+            case 'excel':
+                return $this->exportExcel($employees);
+            case 'pdf':
+                return $this->exportPdf($employees);
+            default:
+                return response()->json(['error' => 'Invalid format'], 400);
+        }
+    }
+
+    protected function exportCsv($employees)
+    {
+        $filename = 'employees_' . now()->format('Y-m-d_His') . '.csv';
+        $headers = [
+            'Content-Type' => 'text/csv',
+            'Content-Disposition' => "attachment; filename=\"{$filename}\"",
+        ];
+
+        $callback = function () use ($employees) {
+            $file = fopen('php://output', 'w');
+            fputcsv($file, ['ID', 'Employee Code', 'Name', 'Email', 'Phone', 'Department', 'Position', 'Status']);
+
+            foreach ($employees as $employee) {
+                fputcsv($file, [
+                    $employee->id,
+                    $employee->employee_code,
+                    $employee->name,
+                    $employee->email,
+                    $employee->phone ?? '',
+                    $employee->department->name ?? '',
+                    $employee->position,
+                    $employee->status,
+                ]);
+            }
+
+            fclose($file);
+        };
+
+        return response()->stream($callback, 200, $headers);
+    }
+
+    protected function exportExcel($employees)
+    {
+        $export = new class($employees) implements FromCollection, WithHeadings, WithMapping {
+            protected $employees;
+
+            public function __construct($employees)
+            {
+                $this->employees = $employees;
+            }
+
+            public function collection()
+            {
+                return $this->employees->load('department');
+            }
+
+            public function headings(): array
+            {
+                return [
+                    'ID',
+                    'Employee Code',
+                    'Name',
+                    'Email',
+                    'Phone',
+                    'Department',
+                    'Position',
+                    'Status',
+                    'Notes',
+                ];
+            }
+
+            public function map($employee): array
+            {
+                return [
+                    $employee->id,
+                    $employee->employee_code,
+                    $employee->name,
+                    $employee->email,
+                    $employee->phone ?? '',
+                    $employee->department->name ?? '',
+                    $employee->position,
+                    $employee->status,
+                    $employee->notes ?? '',
+                ];
+            }
+        };
+
+        $filename = 'employees_' . now()->format('Y-m-d_His') . '.xlsx';
+        return Excel::download($export, $filename);
+    }
+
+    protected function exportPdf($employees)
+    {
+        $employees = $employees->load('department');
+        $pdf = Pdf::loadView('exports.employees', [
+            'employees' => $employees,
+            'date' => now()->format('Y-m-d H:i:s'),
+        ]);
+
+        $filename = 'employees_' . now()->format('Y-m-d_His') . '.pdf';
+        return $pdf->download($filename);
     }
 }

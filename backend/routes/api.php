@@ -63,6 +63,7 @@ Route::prefix('v1')->middleware('throttle:60,1')->group(function () {
             Route::apiResource('employees', EmployeeController::class);
             Route::post('/employees/{employee}/deactivate', [EmployeeController::class, 'deactivate']);
             Route::post('/employees/{employee}/reactivate', [EmployeeController::class, 'reactivate']);
+            Route::get('/employees/export/{format}', [EmployeeController::class, 'export'])->name('employees.export');
 
             // Departments
             Route::apiResource('departments', DepartmentController::class);
