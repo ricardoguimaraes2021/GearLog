@@ -1091,7 +1091,7 @@ SANCTUM_STATEFUL_DOMAINS=localhost:5173,127.0.0.1:5173
             except Exception:
                 content = ""
             
-            # Função helper para substituir variáveis de ambiente
+            # Substituir variáveis de ambiente usando regex (re já está importado no topo)
             def replace_env_var(content: str, key: str, value: str) -> str:
                 pattern = rf"^{re.escape(key)}=.*$"
                 repl = f"{key}={value}"
@@ -1127,6 +1127,7 @@ SANCTUM_STATEFUL_DOMAINS=localhost:5173,127.0.0.1:5173
             
             # Criar base de dados (tentativa)
             print_info(f"Tentando criar base de dados '{db_name}' (se não existir)...")
+            db_created = False
             if which("mysql"):
                 # Use mysql command with proper password handling
                 if db_pass:
@@ -1141,21 +1142,39 @@ SANCTUM_STATEFUL_DOMAINS=localhost:5173,127.0.0.1:5173
                 
                 if ok:
                     print_success(f"Base de dados {db_name} assegurada.")
+                    db_created = True
                 else:
-                    print_warning("Não foi possível criar a base de dados automaticamente. Podes criar manualmente.")
+                    print_warning("Não foi possível criar a base de dados automaticamente. Tentando continuar...")
                     logger.debug("MySQL create DB output: %s", out[:500] if out else "sem output")
             else:
                 print_warning("Cliente MySQL não encontrado, salta criação automática da BD.")
             
-            # Migrations
+            # Migrations - CRÍTICO: deve ser executado
             print_info("Executando migrations (php artisan migrate --seed)...")
-            ok, out = run_command(["php", "artisan", "migrate", "--seed", "--force"], check=False, capture_output=True)
-            if ok:
+            migration_ok, migration_out = run_command(["php", "artisan", "migrate", "--seed", "--force"], check=False, capture_output=True)
+            if migration_ok:
                 print_success("Migrations executadas com sucesso.")
             else:
-                print_warning("Migrations falharam ou foram parcialmente executadas. Verifica logs.")
-                logger.error("Migration failed: %s", out[:2000] if out else "sem output")
-                print_error(f"Erro detalhado: {out[:500] if out else 'Sem detalhes'}")
+                print_error("Migrations falharam!")
+                logger.error("Migration failed: %s", migration_out[:2000] if migration_out else "sem output")
+                print_error(f"Erro detalhado: {migration_out[:500] if migration_out else 'Sem detalhes'}")
+                
+                # Tentar diagnosticar o problema
+                if "Access denied" in migration_out or "1045" in migration_out:
+                    print_error("Erro de autenticação MySQL. Verifique as credenciais no .env")
+                elif "Unknown database" in migration_out or "1049" in migration_out:
+                    print_error(f"Base de dados '{db_name}' não existe. Tente criar manualmente.")
+                    if not db_created:
+                        print_info("Comando para criar manualmente:")
+                        if db_pass:
+                            print_info(f"  mysql -u {db_user} -p -e \"CREATE DATABASE {db_name};\"")
+                        else:
+                            print_info(f"  mysql -u {db_user} -e \"CREATE DATABASE {db_name};\"")
+                else:
+                    print_warning("Verifique o log para mais detalhes sobre o erro de migration.")
+                
+                # Não abortar completamente, mas avisar
+                print_warning("O setup continuará, mas você precisará executar migrations manualmente.")
             
             # Storage link
             run_command(["php", "artisan", "storage:link"], check=False)
