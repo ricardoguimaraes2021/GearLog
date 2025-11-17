@@ -9,8 +9,9 @@ return new class extends Migration
 {
     public function up(): void
     {
-        // Update products.status enum values
-        DB::statement("ALTER TABLE products MODIFY COLUMN status ENUM('new', 'used', 'damaged', 'repair', 'reserved') DEFAULT 'new'");
+        // First, update existing product status values to temporary values
+        // We need to change the column type temporarily to allow any string value
+        DB::statement("ALTER TABLE products MODIFY COLUMN status VARCHAR(20) DEFAULT 'new'");
         
         // Update existing product status values
         DB::table('products')->where('status', 'novo')->update(['status' => 'new']);
@@ -18,27 +19,35 @@ return new class extends Migration
         DB::table('products')->where('status', 'avariado')->update(['status' => 'damaged']);
         DB::table('products')->where('status', 'reparação')->update(['status' => 'repair']);
         DB::table('products')->where('status', 'reservado')->update(['status' => 'reserved']);
+        
+        // Now change back to ENUM with new values
+        DB::statement("ALTER TABLE products MODIFY COLUMN status ENUM('new', 'used', 'damaged', 'repair', 'reserved') DEFAULT 'new'");
 
-        // Update movements.type enum values
-        DB::statement("ALTER TABLE movements MODIFY COLUMN type ENUM('entry', 'exit', 'allocation', 'return')");
+        // First, update existing movement type values to temporary values
+        DB::statement("ALTER TABLE movements MODIFY COLUMN type VARCHAR(20)");
         
         // Update existing movement type values
         DB::table('movements')->where('type', 'entrada')->update(['type' => 'entry']);
         DB::table('movements')->where('type', 'saida')->update(['type' => 'exit']);
         DB::table('movements')->where('type', 'alocacao')->update(['type' => 'allocation']);
         DB::table('movements')->where('type', 'devolucao')->update(['type' => 'return']);
+        
+        // Now change back to ENUM with new values
+        DB::statement("ALTER TABLE movements MODIFY COLUMN type ENUM('entry', 'exit', 'allocation', 'return')");
     }
 
     public function down(): void
     {
-        // Revert movement type values
+        // Revert movement type values - first change to VARCHAR
+        DB::statement("ALTER TABLE movements MODIFY COLUMN type VARCHAR(20)");
         DB::table('movements')->where('type', 'entry')->update(['type' => 'entrada']);
         DB::table('movements')->where('type', 'exit')->update(['type' => 'saida']);
         DB::table('movements')->where('type', 'allocation')->update(['type' => 'alocacao']);
         DB::table('movements')->where('type', 'return')->update(['type' => 'devolucao']);
         DB::statement("ALTER TABLE movements MODIFY COLUMN type ENUM('entrada', 'saida', 'alocacao', 'devolucao')");
 
-        // Revert product status values
+        // Revert product status values - first change to VARCHAR
+        DB::statement("ALTER TABLE products MODIFY COLUMN status VARCHAR(20) DEFAULT 'novo'");
         DB::table('products')->where('status', 'new')->update(['status' => 'novo']);
         DB::table('products')->where('status', 'used')->update(['status' => 'usado']);
         DB::table('products')->where('status', 'damaged')->update(['status' => 'avariado']);
