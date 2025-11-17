@@ -14,11 +14,11 @@ class TicketController extends Controller
     public function __construct(
         protected TicketService $ticketService
     ) {
-        $this->authorizeResource(Ticket::class, 'ticket');
     }
 
     public function index(Request $request)
     {
+        $this->authorize('viewAny', Ticket::class);
         $query = Ticket::with(['product', 'openedBy', 'assignedTo']);
 
         // Filter by status
@@ -48,13 +48,13 @@ class TicketController extends Controller
 
         // Role-based filtering
         $user = Auth::user();
-        if ($user->hasRole('tecnico')) {
+        if ($user && $user->hasRole('tecnico')) {
             // Technicians see assigned tickets or tickets they opened
             $query->where(function ($q) use ($user) {
                 $q->where('assigned_to', $user->id)
                   ->orWhere('opened_by', $user->id);
             });
-        } elseif ($user->hasRole('consulta')) {
+        } elseif ($user && $user->hasRole('consulta')) {
             // Consulta only sees tickets they opened
             $query->where('opened_by', $user->id);
         }
@@ -76,6 +76,8 @@ class TicketController extends Controller
 
     public function store(Request $request)
     {
+        $this->authorize('create', Ticket::class);
+        
         $validated = $request->validate([
             'title' => 'required|string|max:255',
             'product_id' => 'nullable|exists:products,id',
@@ -98,12 +100,16 @@ class TicketController extends Controller
 
     public function show(Ticket $ticket)
     {
+        $this->authorize('view', $ticket);
+        
         $ticket->load(['product', 'openedBy', 'assignedTo', 'comments.user', 'logs.user']);
         return response()->json($ticket);
     }
 
     public function update(Request $request, Ticket $ticket)
     {
+        $this->authorize('update', $ticket);
+        
         $validated = $request->validate([
             'title' => 'sometimes|required|string|max:255',
             'product_id' => 'nullable|exists:products,id',
@@ -124,6 +130,8 @@ class TicketController extends Controller
 
     public function destroy(Ticket $ticket)
     {
+        $this->authorize('delete', $ticket);
+        
         try {
             $this->ticketService->deleteTicket($ticket, Auth::id());
             return response()->json(['message' => 'Ticket deleted successfully'], 200);

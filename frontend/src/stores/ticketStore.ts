@@ -121,14 +121,14 @@ export const useTicketStore = create<TicketStore>((set, get) => ({
         ),
       });
 
-      const response = await api.get(`/tickets?${params}`);
+      const response = await api.getTickets(Object.fromEntries(params));
       set({
-        tickets: response.data.data,
+        tickets: response.data || [],
         pagination: {
-          current_page: response.data.current_page,
-          last_page: response.data.last_page,
-          per_page: response.data.per_page,
-          total: response.data.total,
+          current_page: response.current_page || 1,
+          last_page: response.last_page || 1,
+          per_page: response.per_page || 15,
+          total: response.total || 0,
         },
         isLoading: false,
       });
@@ -141,8 +141,8 @@ export const useTicketStore = create<TicketStore>((set, get) => ({
   fetchTicket: async (id: number) => {
     set({ isLoading: true });
     try {
-      const response = await api.get(`/tickets/${id}`);
-      set({ currentTicket: response.data, isLoading: false });
+      const response = await api.getTicket(id);
+      set({ currentTicket: response, isLoading: false });
     } catch (error: any) {
       toast.error(error.response?.data?.error || 'Failed to fetch ticket');
       set({ isLoading: false });
@@ -151,9 +151,9 @@ export const useTicketStore = create<TicketStore>((set, get) => ({
 
   createTicket: async (data: Partial<Ticket>) => {
     try {
-      const response = await api.post('/tickets', data);
+      const response = await api.createTicket(data);
       toast.success('Ticket created successfully');
-      return response.data;
+      return response;
     } catch (error: any) {
       toast.error(error.response?.data?.error || 'Failed to create ticket');
       return null;
@@ -162,7 +162,7 @@ export const useTicketStore = create<TicketStore>((set, get) => ({
 
   updateTicket: async (id: number, data: Partial<Ticket>) => {
     try {
-      await api.put(`/tickets/${id}`, data);
+      await api.updateTicket(id, data);
       toast.success('Ticket updated successfully');
       await get().fetchTicket(id);
     } catch (error: any) {
@@ -172,7 +172,7 @@ export const useTicketStore = create<TicketStore>((set, get) => ({
 
   deleteTicket: async (id: number) => {
     try {
-      await api.delete(`/tickets/${id}`);
+      await api.deleteTicket(id);
       toast.success('Ticket deleted successfully');
       await get().fetchTickets(get().pagination.current_page);
     } catch (error: any) {
@@ -182,7 +182,7 @@ export const useTicketStore = create<TicketStore>((set, get) => ({
 
   assignTicket: async (id: number, assignedTo: number | null) => {
     try {
-      await api.post(`/tickets/${id}/assign`, { assigned_to: assignedTo });
+      await api.assignTicket(id, assignedTo);
       toast.success('Ticket assigned successfully');
       await get().fetchTicket(id);
     } catch (error: any) {
@@ -192,7 +192,7 @@ export const useTicketStore = create<TicketStore>((set, get) => ({
 
   updateStatus: async (id: number, status: string, resolution?: string) => {
     try {
-      await api.post(`/tickets/${id}/status`, { status, resolution });
+      await api.updateTicketStatus(id, status, resolution);
       toast.success('Ticket status updated');
       await get().fetchTicket(id);
     } catch (error: any) {
@@ -202,7 +202,7 @@ export const useTicketStore = create<TicketStore>((set, get) => ({
 
   resolveTicket: async (id: number, resolution: string) => {
     try {
-      await api.post(`/tickets/${id}/resolve`, { resolution });
+      await api.resolveTicket(id, resolution);
       toast.success('Ticket resolved');
       await get().fetchTicket(id);
     } catch (error: any) {
@@ -212,7 +212,7 @@ export const useTicketStore = create<TicketStore>((set, get) => ({
 
   closeTicket: async (id: number, resolution?: string) => {
     try {
-      await api.post(`/tickets/${id}/close`, { resolution });
+      await api.closeTicket(id, resolution);
       toast.success('Ticket closed');
       await get().fetchTicket(id);
     } catch (error: any) {
@@ -222,7 +222,7 @@ export const useTicketStore = create<TicketStore>((set, get) => ({
 
   addComment: async (ticketId: number, message: string, attachments?: string[]) => {
     try {
-      await api.post(`/tickets/${ticketId}/comments`, { message, attachments });
+      await api.addTicketComment(ticketId, message, attachments);
       toast.success('Comment added');
       await get().fetchTicket(ticketId);
     } catch (error: any) {

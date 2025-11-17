@@ -293,6 +293,61 @@ class ApiClient {
       return response.data;
     }
 
+    // Tickets
+    async getTickets(params?: Record<string, any>) {
+      const response = await this.client.get('/tickets', { params });
+      return response.data;
+    }
+
+    async getTicket(id: number) {
+      const response = await this.client.get(`/tickets/${id}`);
+      return response.data;
+    }
+
+    async createTicket(data: any) {
+      const response = await this.client.post('/tickets', data);
+      return response.data;
+    }
+
+    async updateTicket(id: number, data: any) {
+      const response = await this.client.put(`/tickets/${id}`, data);
+      return response.data;
+    }
+
+    async deleteTicket(id: number) {
+      await this.client.delete(`/tickets/${id}`);
+    }
+
+    async assignTicket(id: number, assignedTo: number | null) {
+      const response = await this.client.post(`/tickets/${id}/assign`, { assigned_to: assignedTo });
+      return response.data;
+    }
+
+    async updateTicketStatus(id: number, status: string, resolution?: string) {
+      const response = await this.client.post(`/tickets/${id}/status`, { status, resolution });
+      return response.data;
+    }
+
+    async resolveTicket(id: number, resolution: string) {
+      const response = await this.client.post(`/tickets/${id}/resolve`, { resolution });
+      return response.data;
+    }
+
+    async closeTicket(id: number, resolution?: string) {
+      const response = await this.client.post(`/tickets/${id}/close`, { resolution });
+      return response.data;
+    }
+
+    async getTicketComments(ticketId: number) {
+      const response = await this.client.get(`/tickets/${ticketId}/comments`);
+      return response.data;
+    }
+
+    async addTicketComment(ticketId: number, message: string, attachments?: string[]) {
+      const response = await this.client.post(`/tickets/${ticketId}/comments`, { message, attachments });
+      return response.data;
+    }
+
     // Helper method to get full URL for storage files
     getStorageUrl(path: string | null | undefined): string | null {
       if (!path) return null;
