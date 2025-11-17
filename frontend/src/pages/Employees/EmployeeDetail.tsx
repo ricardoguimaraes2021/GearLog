@@ -7,7 +7,6 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ArrowLeft, Edit, Mail, Phone, Building2, Package, Clock, User } from 'lucide-react';
 import { toast } from 'sonner';
 import { Skeleton } from '@/components/ui/skeleton';
-import { formatDistanceToNow } from 'date-fns';
 import AssignmentModal from '@/components/employees/AssignmentModal';
 import ReturnModal from '@/components/employees/ReturnModal';
 
