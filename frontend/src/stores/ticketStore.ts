@@ -164,8 +164,14 @@ export const useTicketStore = create<TicketStore>((set, get) => ({
   createTicket: async (data: Partial<Ticket>) => {
     try {
       const response = await api.createTicket(data);
+      // Normalize snake_case to camelCase
+      const normalizedTicket = {
+        ...response,
+        assignedTo: response.assigned_to || response.assignedTo,
+        openedBy: response.opened_by || response.openedBy,
+      };
       toast.success('Ticket created successfully');
-      return response;
+      return normalizedTicket as Ticket;
     } catch (error: any) {
       toast.error(error.response?.data?.error || 'Failed to create ticket');
       return null;
