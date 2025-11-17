@@ -10,3 +10,8 @@ Route::get('/', function () {
     ]);
 });
 
+// Sanctum CSRF cookie route
+Route::get('/sanctum/csrf-cookie', function () {
+    return response()->json(['message' => 'CSRF cookie set']);
+})->middleware('web');
+
