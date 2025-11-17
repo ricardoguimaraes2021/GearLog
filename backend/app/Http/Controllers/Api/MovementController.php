@@ -24,7 +24,7 @@ class MovementController extends Controller
     public function store(Request $request, Product $product)
     {
         $validated = $request->validate([
-            'type' => 'required|in:entrada,saida,alocacao,devolucao',
+            'type' => 'required|in:entry,exit,allocation,return',
             'quantity' => 'required|integer|min:1',
             'assigned_to' => 'nullable|string|max:255',
             'notes' => 'nullable|string',

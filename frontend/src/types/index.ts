@@ -33,7 +33,7 @@ export interface Product {
   brand?: string;
   model?: string;
   serial_number?: string;
-  status: 'novo' | 'usado' | 'avariado' | 'reparação' | 'reservado';
+  status: 'new' | 'used' | 'damaged' | 'repair' | 'reserved';
   quantity: number;
   value?: number;
   purchase_date?: string;
@@ -50,7 +50,7 @@ export interface Movement {
   id: number;
   product_id: number;
   product?: Product;
-  type: 'entrada' | 'saida' | 'alocacao' | 'devolucao';
+  type: 'entry' | 'exit' | 'allocation' | 'return';
   quantity: number;
   assigned_to?: string;
   notes?: string;

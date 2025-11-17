@@ -26,7 +26,7 @@ export default function ProductForm() {
     brand: '',
     model: '',
     serial_number: '',
-    status: 'novo' as const,
+    status: 'new' as const,
     quantity: 0,
     value: '',
     purchase_date: '',
@@ -257,11 +257,11 @@ export default function ProductForm() {
                   className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
                   required
                 >
-                  <option value="novo">Novo</option>
-                  <option value="usado">Usado</option>
-                  <option value="avariado">Avariado</option>
-                  <option value="reparação">Reparação</option>
-                  <option value="reservado">Reservado</option>
+                  <option value="new">New</option>
+                  <option value="used">Used</option>
+                  <option value="damaged">Damaged</option>
+                  <option value="repair">Repair</option>
+                  <option value="reserved">Reserved</option>
                 </select>
               </div>
 

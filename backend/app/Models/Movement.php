@@ -30,8 +30,8 @@ class Movement extends Model
     public function getQuantityChangeAttribute(): int
     {
         return match ($this->type) {
-            'entrada', 'devolucao' => $this->quantity,
-            'saida', 'alocacao' => -$this->quantity,
+            'entry', 'return' => $this->quantity,
+            'exit', 'allocation' => -$this->quantity,
             default => 0,
         };
     }

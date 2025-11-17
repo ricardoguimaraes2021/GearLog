@@ -14,7 +14,7 @@ class DashboardController extends Controller
     {
         $totalProducts = Product::count();
         $totalValue = Product::sum(DB::raw('quantity * COALESCE(value, 0)'));
-        $damagedProducts = Product::where('status', 'avariado')->count();
+        $damagedProducts = Product::where('status', 'damaged')->count();
         $lowStockProducts = Product::where('quantity', '<=', 1)->count();
 
         // Products by category
@@ -63,7 +63,7 @@ class DashboardController extends Controller
             });
 
         // Damaged products list
-        $damagedProductsList = Product::where('status', 'avariado')
+        $damagedProductsList = Product::where('status', 'damaged')
             ->with('category')
             ->select('id', 'name', 'category_id', 'quantity', 'status')
             ->get()

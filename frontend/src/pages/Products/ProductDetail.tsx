@@ -19,7 +19,7 @@ export default function ProductDetail() {
   const [movements, setMovements] = useState<Movement[]>([]);
   const [showMovementForm, setShowMovementForm] = useState(false);
   const [movementData, setMovementData] = useState({
-    type: 'entrada' as Movement['type'],
+    type: 'entry' as Movement['type'],
     quantity: 1,
     assigned_to: '',
     notes: '',
@@ -48,7 +48,7 @@ export default function ProductDetail() {
     if (!id || !currentProduct) return;
 
     // Validate quantity before submitting
-    if (['saida', 'alocacao'].includes(movementData.type)) {
+    if (['exit', 'allocation'].includes(movementData.type)) {
       if (movementData.quantity > currentProduct.quantity) {
         toast.error(
           `Insufficient stock. Available: ${currentProduct.quantity}, requested: ${movementData.quantity}`
@@ -67,7 +67,7 @@ export default function ProductDetail() {
       await fetchProduct(parseInt(id));
       setShowMovementForm(false);
       setMovementData({
-        type: 'entrada',
+        type: 'entry',
         quantity: 1,
         assigned_to: '',
         notes: '',
@@ -211,7 +211,7 @@ export default function ProductDetail() {
               {/* Purchase Dates by Entry Movements */}
               {(() => {
                 // Group entry movements by date
-                const entryMovements = movements.filter(m => m.type === 'entrada' || m.type === 'devolucao');
+                const entryMovements = movements.filter(m => m.type === 'entry' || m.type === 'return');
                 if (entryMovements.length > 0) {
                   const groupedByDate = entryMovements.reduce((acc, movement) => {
                     const dateKey = new Date(movement.created_at).toLocaleDateString();
@@ -300,7 +300,7 @@ export default function ProductDetail() {
                           // Reset quantity to 1 when changing movement type
                           // If changing to exit/allocation and current quantity exceeds available, set to max available
                           let newQuantity = 1;
-                          if (['saida', 'alocacao'].includes(newType) && currentProduct) {
+                          if (['exit', 'allocation'].includes(newType) && currentProduct) {
                             newQuantity = Math.min(movementData.quantity, currentProduct.quantity) || 1;
                           }
                           setMovementData({ ...movementData, type: newType, quantity: newQuantity });
@@ -308,16 +308,16 @@ export default function ProductDetail() {
                         className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
                         required
                       >
-                        <option value="entrada">Entrada</option>
-                        <option value="saida">Saída</option>
-                        <option value="alocacao">Alocação</option>
-                        <option value="devolucao">Devolução</option>
+                        <option value="entry">Entry</option>
+                        <option value="exit">Exit</option>
+                        <option value="allocation">Allocation</option>
+                        <option value="return">Return</option>
                       </select>
                     </div>
                     <div>
                       <label className="block text-sm font-medium mb-1">
                         Quantity
-                        {['saida', 'alocacao'].includes(movementData.type) && currentProduct && (
+                        {['exit', 'allocation'].includes(movementData.type) && currentProduct && (
                           <span className="text-xs text-gray-500 ml-2">
                             (Available: {currentProduct.quantity})
                           </span>
@@ -327,7 +327,7 @@ export default function ProductDetail() {
                         type="number"
                         min="1"
                         max={
-                          ['saida', 'alocacao'].includes(movementData.type) && currentProduct
+                          ['exit', 'allocation'].includes(movementData.type) && currentProduct
                             ? currentProduct.quantity
                             : undefined
                         }
@@ -335,7 +335,7 @@ export default function ProductDetail() {
                         onChange={(e) => {
                           const value = parseInt(e.target.value) || 0;
                           // Validate max quantity for exit/allocation movements
-                          if (['saida', 'alocacao'].includes(movementData.type) && currentProduct) {
+                          if (['exit', 'allocation'].includes(movementData.type) && currentProduct) {
                             const maxQuantity = currentProduct.quantity;
                             if (value > maxQuantity) {
                               toast.error(`Maximum quantity available is ${maxQuantity}`);
@@ -346,7 +346,7 @@ export default function ProductDetail() {
                         }}
                         required
                       />
-                      {['saida', 'alocacao'].includes(movementData.type) &&
+                      {['exit', 'allocation'].includes(movementData.type) &&
                         currentProduct &&
                         movementData.quantity > currentProduct.quantity && (
                           <p className="text-sm text-red-500 mt-1">

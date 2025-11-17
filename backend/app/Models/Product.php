@@ -52,7 +52,7 @@ class Product extends Model
 
     public function canAllocate(): bool
     {
-        return $this->status !== 'avariado' && $this->quantity > 0;
+        return $this->status !== 'damaged' && $this->quantity > 0;
     }
 
     public function getImageUrlAttribute($value): ?string

@@ -6,7 +6,7 @@ export const productSchema = z.object({
   brand: z.string().max(255, 'Brand is too long').optional().or(z.literal('')),
   model: z.string().max(255, 'Model is too long').optional().or(z.literal('')),
   serial_number: z.string().max(255, 'Serial number is too long').optional().or(z.literal('')),
-  status: z.enum(['novo', 'usado', 'avariado', 'reparação', 'reservado']),
+  status: z.enum(['new', 'used', 'damaged', 'repair', 'reserved']),
   quantity: z.number().int().min(0, 'Quantity must be 0 or greater'),
   value: z.string().optional().refine(
     (val) => !val || (!isNaN(parseFloat(val)) && parseFloat(val) >= 0),
@@ -30,7 +30,7 @@ export const categorySchema = z.object({
 });
 
 export const movementSchema = z.object({
-  type: z.enum(['entrada', 'saida', 'alocacao', 'devolucao']),
+  type: z.enum(['entry', 'exit', 'allocation', 'return']),
   quantity: z.number().int().min(1, 'Quantity must be at least 1'),
   assigned_to: z.string().max(255, 'Assigned to is too long').optional().or(z.literal('')),
   notes: z.string().optional(),

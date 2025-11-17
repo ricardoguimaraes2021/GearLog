@@ -82,8 +82,8 @@ class MovementService
     protected function calculateQuantityChange(string $type, int $quantity): int
     {
         return match ($type) {
-            'entrada', 'devolucao' => $quantity,
-            'saida', 'alocacao' => -$quantity,
+            'entry', 'return' => $quantity,
+            'exit', 'allocation' => -$quantity,
             default => 0,
         };
     }
