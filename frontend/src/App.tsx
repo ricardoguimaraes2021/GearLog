@@ -40,11 +40,15 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
 }
 
 function App() {
-  const { initialize } = useAuthStore();
+  const { initialize, isInitializing } = useAuthStore();
 
   useEffect(() => {
-    initialize();
-  }, [initialize]);
+    // Only initialize once on mount
+    if (!isInitializing) {
+      initialize();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // Empty dependency array to run only once
 
   return (
     <ErrorBoundary>
