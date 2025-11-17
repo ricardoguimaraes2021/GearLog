@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Package, AlertTriangle, DollarSign, TrendingDown, ChevronDown, ChevronUp, Ticket, Clock, User } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Link } from 'react-router-dom';
+import { Button } from '@/components/ui/button';
 
 export default function Dashboard() {
   const { data, isLoading, fetchDashboard } = useDashboardStore();
@@ -150,23 +151,56 @@ export default function Dashboard() {
         <p className="mt-1 text-sm text-gray-500">Overview of your inventory</p>
       </div>
 
-      {/* KPIs */}
-      <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
-        {kpiCards.map((kpi) => {
-          const Icon = kpi.icon;
-          return (
-            <Card key={kpi.title}>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">{kpi.title}</CardTitle>
-                <Icon className={`h-4 w-4 ${kpi.color}`} />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">{kpi.value}</div>
-              </CardContent>
-            </Card>
-          );
-        })}
+      {/* Product KPIs */}
+      <div>
+        <h2 className="text-xl font-semibold text-gray-900 mb-4">Products Overview</h2>
+        <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
+          {kpiCards.map((kpi) => {
+            const Icon = kpi.icon;
+            return (
+              <Card key={kpi.title}>
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="text-sm font-medium">{kpi.title}</CardTitle>
+                  <Icon className={`h-4 w-4 ${kpi.color}`} />
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold">{kpi.value}</div>
+                </CardContent>
+              </Card>
+            );
+          })}
+        </div>
       </div>
+
+      {/* Ticket KPIs */}
+      {ticketKpiCards.length > 0 && (
+        <div>
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-xl font-semibold text-gray-900">Tickets Overview</h2>
+            <Link to="/tickets/dashboard">
+              <Button variant="outline" size="sm">
+                View Full Dashboard
+              </Button>
+            </Link>
+          </div>
+          <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
+            {ticketKpiCards.map((kpi) => {
+              const Icon = kpi.icon;
+              return (
+                <Card key={kpi.title}>
+                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                    <CardTitle className="text-sm font-medium">{kpi.title}</CardTitle>
+                    <Icon className={`h-4 w-4 ${kpi.color}`} />
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-2xl font-bold">{kpi.value}</div>
+                  </CardContent>
+                </Card>
+              );
+            })}
+          </div>
+        </div>
+      )}
 
       {/* Alerts */}
       {(data.alerts.low_stock > 0 || data.alerts.damaged > 0 || data.alerts.inactive > 0) && (
