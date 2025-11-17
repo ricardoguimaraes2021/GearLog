@@ -258,6 +258,56 @@ export default function TicketDashboard() {
         </div>
       )}
 
+      {/* SLA Compliance Trend Chart */}
+      {data.compliance_trend && data.compliance_trend.length > 0 && (
+        <Card>
+          <CardHeader>
+            <CardTitle>SLA Compliance Trend (Last 30 Days)</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <ResponsiveContainer width="100%" height={300}>
+              <LineChart data={data.compliance_trend}>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis 
+                  dataKey="date" 
+                  tickFormatter={(value) => {
+                    const date = new Date(value);
+                    return `${date.getMonth() + 1}/${date.getDate()}`;
+                  }}
+                />
+                <YAxis 
+                  domain={[0, 100]}
+                  label={{ value: 'Compliance Rate (%)', angle: -90, position: 'insideLeft' }}
+                />
+                <Tooltip 
+                  formatter={(value: any) => {
+                    if (value === null) return 'No data';
+                    return `${value}%`;
+                  }}
+                  labelFormatter={(label) => {
+                    const date = new Date(label);
+                    return date.toLocaleDateString();
+                  }}
+                />
+                <Legend />
+                <Line 
+                  type="monotone" 
+                  dataKey="compliance_rate" 
+                  stroke="#10b981" 
+                  strokeWidth={2}
+                  name="Compliance Rate (%)"
+                  dot={{ r: 4 }}
+                  connectNulls={false}
+                />
+              </LineChart>
+            </ResponsiveContainer>
+            <div className="mt-4 text-sm text-gray-600">
+              <p>Shows the daily SLA compliance rate for resolved tickets over the last 30 days.</p>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Tickets by Status */}
         <Card>
