@@ -195,10 +195,20 @@ class ApiClient {
     return response.data;
   }
 
-  async getProduct(id: number) {
-    const response = await this.client.get<Product>(`/products/${id}`);
-    return response.data;
-  }
+    async getProduct(id: number) {
+      const response = await this.client.get<Product>(`/products/${id}`);
+      return response.data;
+    }
+
+    // Public product endpoint (no authentication required)
+    async getProductPublic(id: number) {
+      const response = await axios.get<Product>(`${this.baseURL}/api/v1/products/${id}/public`, {
+        headers: {
+          'Accept': 'application/json',
+        },
+      });
+      return response.data;
+    }
 
   async createProduct(data: FormData) {
     // CSRF token is automatically added by the interceptor

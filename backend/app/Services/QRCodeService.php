@@ -11,7 +11,8 @@ class QRCodeService
     public function generateForProduct(Product $product): string
     {
         $frontendUrl = config('app.frontend_url', 'http://localhost:5173');
-        $url = "{$frontendUrl}/products/{$product->id}";
+        // Use public view route for QR codes (no authentication required)
+        $url = "{$frontendUrl}/products/{$product->id}/view";
 
         $qrCodePath = "qrcodes/product-{$product->id}.svg";
         $fullPath = storage_path("app/public/{$qrCodePath}");

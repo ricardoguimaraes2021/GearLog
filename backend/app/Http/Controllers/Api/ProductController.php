@@ -100,6 +100,35 @@ class ProductController extends Controller
         return response()->json($product);
     }
 
+    /**
+     * Public endpoint to view product details (no authentication required)
+     * Used for QR code access
+     */
+    public function showPublic(Product $product)
+    {
+        $product->load('category');
+        
+        // Return only public information (no movements, no sensitive data)
+        return response()->json([
+            'id' => $product->id,
+            'name' => $product->name,
+            'category' => $product->category ? [
+                'id' => $product->category->id,
+                'name' => $product->category->name,
+            ] : null,
+            'brand' => $product->brand,
+            'model' => $product->model,
+            'serial_number' => $product->serial_number,
+            'status' => $product->status,
+            'quantity' => $product->quantity,
+            'value' => $product->value,
+            'description' => $product->description,
+            'image_url' => $product->image_url,
+            'qr_code_url' => $product->qr_code_url,
+            'created_at' => $product->created_at,
+        ]);
+    }
+
     #[OA\Post(
         path: '/api/v1/products',
         summary: 'Create a new product',

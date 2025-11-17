@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\Route;
 Route::prefix('v1')->middleware('throttle:60,1')->group(function () {
     // Public routes
     Route::post('/login', [AuthController::class, 'login'])->middleware('throttle:5,1');
+    Route::get('/products/{product}/public', [ProductController::class, 'showPublic']);
 
     // Protected routes
     Route::middleware('auth:sanctum')->group(function () {

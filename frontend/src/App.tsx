@@ -6,6 +6,7 @@ import Dashboard from './pages/Dashboard/Dashboard';
 import Products from './pages/Products/Products';
 import ProductDetail from './pages/Products/ProductDetail';
 import ProductForm from './pages/Products/ProductForm';
+import ProductPublicView from './pages/Products/ProductPublicView';
 import Categories from './pages/Categories/Categories';
 import Layout from './components/layout/Layout';
 import { Toaster } from './components/ui/toast';
@@ -50,6 +51,7 @@ function App() {
           <Routes>
             <Route path="/landing" element={<Landing />} />
             <Route path="/login" element={<Login />} />
+            <Route path="/products/:id/view" element={<ProductPublicView />} />
             <Route
               path="/"
               element={
