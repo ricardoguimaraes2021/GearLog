@@ -59,15 +59,31 @@ class ApiClient {
   async login(email: string, password: string) {
     // First, get CSRF cookie from Sanctum
     const baseURL = import.meta.env.VITE_API_URL?.replace('/api/v1', '') || 'http://localhost:8000';
+    
+    // Fetch CSRF cookie with proper credentials
     await axios.get(`${baseURL}/sanctum/csrf-cookie`, {
       withCredentials: true,
+      headers: {
+        'Accept': 'application/json',
+      },
     });
 
-    // Then make the login request
-    const response = await this.client.post<{ user: User; token: string }>('/login', {
-      email,
-      password,
-    });
+    // Then make the login request with the same base URL to ensure cookies are sent
+    const response = await axios.post<{ user: User; token: string }>(
+      `${baseURL}/api/v1/login`,
+      {
+        email,
+        password,
+      },
+      {
+        withCredentials: true,
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+        },
+      }
+    );
+    
     if (response.data.token) {
       localStorage.setItem('auth_token', response.data.token);
     }
