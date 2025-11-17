@@ -166,10 +166,7 @@ export default function Landing() {
             </div>
             <div className="flex items-center gap-4">
               <Link to="/login">
-                <Button variant="ghost">Sign In</Button>
-              </Link>
-              <Link to="/login">
-                <Button>Get Started</Button>
+                <Button>Sign In</Button>
               </Link>
             </div>
           </div>
