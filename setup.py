@@ -591,43 +591,48 @@ def main():
         system_info = get_system_info()
         print_info(f"Detected system: {system_info['system']}")
         logger.info(f"System detected: {system_info['system']}")
-    
-    # Check if running as root (not recommended)
-    if os.geteuid() == 0 and not system_info["is_windows"]:
-        print_warning("Running as root is not recommended. Some commands may fail.")
-        response = input("Continue anyway? (y/n): ").strip().lower()
-        if response != 'y':
+        
+        # Check if running as root (not recommended)
+        if not system_info["is_windows"]:
+            try:
+                if os.geteuid() == 0:
+                    print_warning("Running as root is not recommended. Some commands may fail.")
+                    response = input("Continue anyway? (y/n): ").strip().lower()
+                    if response != 'y':
+                        sys.exit(1)
+            except AttributeError:
+                # Windows doesn't have geteuid
+                pass
+        
+        # Install dependencies
+        installer = DependencyInstaller(system_info)
+        if not installer.install_all():
+            print_warning("Some dependencies failed to install automatically.")
+            print_info("Please install them manually and run this script again.")
+            if installer.failed:
+                print_error(f"Failed: {', '.join(installer.failed)}")
+        
+        # Setup project
+        desktop = Path(system_info["home"]) / "Desktop"
+        project_path = desktop / "GearLog"
+        
+        setup = ProjectSetup(system_info, project_path)
+        
+        # Clone repository
+        if not setup.clone_repository():
+            print_error("Failed to clone repository")
             sys.exit(1)
-    
-    # Install dependencies
-    installer = DependencyInstaller(system_info)
-    if not installer.install_all():
-        print_warning("Some dependencies failed to install automatically.")
-        print_info("Please install them manually and run this script again.")
-        if installer.failed:
-            print_error(f"Failed: {', '.join(installer.failed)}")
-    
-    # Setup project
-    desktop = Path(system_info["home"]) / "Desktop"
-    project_path = desktop / "GearLog"
-    
-    setup = ProjectSetup(system_info, project_path)
-    
-    # Clone repository
-    if not setup.clone_repository():
-        print_error("Failed to clone repository")
-        sys.exit(1)
-    
-    # Setup backend
-    if not setup.setup_backend():
-        print_error("Backend setup failed")
-        sys.exit(1)
-    
-    # Setup frontend
-    if not setup.setup_frontend():
-        print_error("Frontend setup failed")
-        sys.exit(1)
-    
+        
+        # Setup backend
+        if not setup.setup_backend():
+            print_error("Backend setup failed")
+            sys.exit(1)
+        
+        # Setup frontend
+        if not setup.setup_frontend():
+            print_error("Frontend setup failed")
+            sys.exit(1)
+        
         # Print final instructions
         setup.print_final_instructions()
         

@@ -71,7 +71,13 @@ class ProductService
 
     protected function storeImage(UploadedFile $image): string
     {
-        $filename = Str::uuid() . '.jpg';
+        // Use uniqid with more entropy for better uniqueness, fallback if uuid fails
+        try {
+            $filename = Str::uuid() . '.jpg';
+        } catch (\Exception $e) {
+            // Fallback if UUID generation fails (e.g., missing PHP uuid extension on Windows)
+            $filename = uniqid('img_', true) . '_' . time() . '.jpg';
+        }
         $path = storage_path('app/public/products/' . $filename);
         
         // Ensure directory exists
