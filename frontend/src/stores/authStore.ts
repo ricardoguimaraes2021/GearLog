@@ -87,10 +87,13 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       if (user) {
         localStorage.setItem('auth_user', JSON.stringify(user));
       }
-    } catch (error) {
-      set({ user: null, isAuthenticated: false, isLoading: false });
-      localStorage.removeItem('auth_token');
-      localStorage.removeItem('auth_user');
+    } catch (error: any) {
+      // If 401, token is invalid/expired - clear auth state
+      if (error.response?.status === 401) {
+        set({ user: null, isAuthenticated: false, isLoading: false });
+        localStorage.removeItem('auth_token');
+        localStorage.removeItem('auth_user');
+      }
       throw error; // Re-throw to let initialize handle it
     }
   },
