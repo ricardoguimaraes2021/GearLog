@@ -1074,11 +1074,15 @@ SANCTUM_STATEFUL_DOMAINS=localhost:5173,127.0.0.1:5173
                 print_warning(".env.example não encontrado; criando .env básico.")
                 self.create_basic_env_backend()
             
-            # Perguntar configurações essenciais da BD
-            print_info("Configuração da base de dados (entrada mínima).")
-            db_name = input("Nome da BD (default: gearlog): ").strip() or "gearlog"
-            db_user = input("Utilizador BD (default: root): ").strip() or "root"
-            db_pass = input("Password BD (podem existir caracteres especiais) (default: vazio): ").strip() or ""
+            # Configuração da BD com defaults (minimizar interação)
+            print_info("Configuração da base de dados (usando valores padrão).")
+            db_name = "gearlog"
+            db_user = "root"
+            db_pass = ""
+            print_info(f"  Database: {db_name}")
+            print_info(f"  Username: {db_user}")
+            print_info(f"  Password: (vazio)")
+            print_info("(Para personalizar, edite o arquivo .env manualmente após o setup)")
             
             # atualiza .env
             try:
@@ -1226,38 +1230,123 @@ SANCTUM_STATEFUL_DOMAINS=localhost:5173,127.0.0.1:5173
         finally:
             os.chdir(cwd)
 
-    def print_final_instructions(self):
-        print_header("Instruções Finais")
-        print_success("Setup concluído (ou concluído parcialmente). Lê as mensagens acima para detalhes.")
-        print()
-        print(color_text("Próximos passos (manuais):", Colors.BOLD))
-        print("1) Garantir que o MySQL está em execução.")
-        if self.sys["is_windows"]:
-            print("   - Verifica o serviço MySQL ou usa o MySQL Workbench / MySQL Installer.")
-        elif self.sys["is_macos"]:
-            print("   - brew services start mysql")
-        elif self.sys["is_linux"]:
-            print("   - sudo systemctl start mysql")
-        print()
-        print("2) Iniciar backend (Laravel):")
-        print(f"   cd \"{self.backend_dir}\"")
-        print("   php artisan serve --host=127.0.0.1 --port=8000")
-        print()
-        print("3) Iniciar frontend (React/Vite):")
-        print(f"   cd \"{self.frontend_dir}\"")
-        print("   npm run dev")
-        print()
-        print("4) Endereços:")
-        print("   Frontend: http://localhost:5173")
-        print("   Backend API: http://localhost:8000")
-        print("   API Docs: http://localhost:8000/api/documentation")
+    def start_servers(self) -> Tuple[bool, bool]:
+        """Inicia os servidores backend e frontend em processos separados."""
+        backend_started = False
+        frontend_started = False
+        
+        print_header("Iniciando Servidores")
+        
+        # Verificar se MySQL está rodando (tentativa básica)
+        print_info("Verificando MySQL...")
+        if which("mysql"):
+            # Tentativa simples de conexão
+            mysql_check = run_command(["mysql", "-u", "root", "-e", "SELECT 1"], check=False, capture_output=True, timeout=5)
+            if not mysql_check[0]:
+                print_warning("MySQL pode não estar rodando. Verifique manualmente se necessário.")
+        
+        # Iniciar backend
+        print_info("Iniciando servidor backend (Laravel)...")
+        backend_process = None
+        try:
+            os.chdir(self.backend_dir)
+            backend_process = subprocess.Popen(
+                ["php", "artisan", "serve", "--host=127.0.0.1", "--port=8000"],
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                shell=platform.system() == "Windows"
+            )
+            # Aguardar um pouco para verificar se iniciou
+            time.sleep(3)
+            if backend_process.poll() is None:
+                backend_started = True
+                print_success("Backend iniciado em http://localhost:8000")
+            else:
+                print_warning("Backend pode não ter iniciado corretamente. Verifique manualmente.")
+        except Exception as e:
+            logger.exception("Erro ao iniciar backend")
+            print_warning(f"Não foi possível iniciar o backend automaticamente: {e}")
+        
+        # Iniciar frontend
+        print_info("Iniciando servidor frontend (React/Vite)...")
+        frontend_process = None
+        try:
+            os.chdir(self.frontend_dir)
+            frontend_process = subprocess.Popen(
+                ["npm", "run", "dev"],
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                shell=platform.system() == "Windows"
+            )
+            # Aguardar um pouco para verificar se iniciou
+            time.sleep(5)
+            if frontend_process.poll() is None:
+                frontend_started = True
+                print_success("Frontend iniciado em http://localhost:5173")
+            else:
+                print_warning("Frontend pode não ter iniciado corretamente. Verifique manualmente.")
+        except Exception as e:
+            logger.exception("Erro ao iniciar frontend")
+            print_warning(f"Não foi possível iniciar o frontend automaticamente: {e}")
+        
+        return backend_started, frontend_started
+    
+    def open_browser(self, url: str = "http://localhost:5173"):
+        """Abre o navegador na URL especificada."""
+        try:
+            print_info(f"Abrindo navegador em {url}...")
+            time.sleep(2)  # Aguardar servidores iniciarem
+            webbrowser.open(url)
+            print_success("Navegador aberto!")
+        except Exception as e:
+            logger.exception("Erro ao abrir navegador")
+            print_warning(f"Não foi possível abrir o navegador automaticamente: {e}")
+            print_info(f"Por favor, abra manualmente: {url}")
+    
+    def print_final_instructions(self, servers_started: bool = False):
+        print_header("Setup Concluído!")
+        
+        if servers_started:
+            print_success("✅ Servidores iniciados automaticamente!")
+            print()
+            print(color_text("🌐 Acesse a aplicação:", Colors.BOLD))
+            print("   Frontend (Landing Page): http://localhost:5173")
+            print("   Backend API: http://localhost:8000")
+            print("   API Docs: http://localhost:8000/api/documentation")
+        else:
+            print_success("Setup concluído (ou concluído parcialmente). Lê as mensagens acima para detalhes.")
+            print()
+            print(color_text("Próximos passos (manuais):", Colors.BOLD))
+            print("1) Garantir que o MySQL está em execução.")
+            if self.sys["is_windows"]:
+                print("   - Verifica o serviço MySQL ou usa o MySQL Workbench / MySQL Installer.")
+            elif self.sys["is_macos"]:
+                print("   - brew services start mysql")
+            elif self.sys["is_linux"]:
+                print("   - sudo systemctl start mysql")
+            print()
+            print("2) Iniciar backend (Laravel):")
+            print(f"   cd \"{self.backend_dir}\"")
+            print("   php artisan serve --host=127.0.0.1 --port=8000")
+            print()
+            print("3) Iniciar frontend (React/Vite):")
+            print(f"   cd \"{self.frontend_dir}\"")
+            print("   npm run dev")
+            print()
+            print("4) Endereços:")
+            print("   Frontend: http://localhost:5173")
+            print("   Backend API: http://localhost:8000")
+            print("   API Docs: http://localhost:8000/api/documentation")
+        
         print()
         print("5) Credenciais por defeito (se existirem fixtures/seeds):")
         print("   Admin: admin@gearlog.local / password")
         print("   Manager: gestor@gearlog.local / password")
         print("   Technician: tecnico@gearlog.local / password")
         print()
-        print_warning("Reabre o terminal/PowerShell depois de alterações ao PATH para aplicar as alterações (Windows).")
+        
+        if not servers_started:
+            print_warning("Reabre o terminal/PowerShell depois de alterações ao PATH para aplicar as alterações (Windows).")
 
 # ---------------------------
 # Main
