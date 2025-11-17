@@ -132,12 +132,16 @@ export default function Departments() {
                       <span className="font-medium">{department.cost_center}</span>
                     </div>
                   )}
-                  {department.manager && (
-                    <div className="text-sm">
-                      <span className="text-gray-500">Manager:</span>{' '}
-                      <span className="font-medium">{department.manager.name}</span>
-                    </div>
-                  )}
+                  <div className="text-sm min-h-[20px]">
+                    {department.manager ? (
+                      <>
+                        <span className="text-gray-500">Manager:</span>{' '}
+                        <span className="font-medium">{department.manager.name}</span>
+                      </>
+                    ) : (
+                      <span className="invisible">Manager:</span>
+                    )}
+                  </div>
 
                   <div className="grid grid-cols-2 gap-4 pt-3 border-t">
                     <div className="text-center">
