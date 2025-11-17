@@ -9,6 +9,7 @@ use App\Http\Controllers\Api\TicketController;
 use App\Http\Controllers\Api\TicketCommentController;
 use App\Http\Controllers\Api\UserController;
 use App\Http\Controllers\Api\TicketDashboardController;
+use App\Http\Controllers\Api\NotificationController;
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('v1')->middleware('throttle:60,1')->group(function () {
@@ -46,6 +47,13 @@ Route::prefix('v1')->middleware('throttle:60,1')->group(function () {
         Route::get('/tickets/{ticket}/logs', [TicketController::class, 'logs']);
         Route::get('/tickets/{ticket}/comments', [TicketCommentController::class, 'index']);
         Route::post('/tickets/{ticket}/comments', [TicketCommentController::class, 'store']);
+
+        // Notifications
+        Route::get('/notifications', [NotificationController::class, 'index']);
+        Route::get('/notifications/unread-count', [NotificationController::class, 'unreadCount']);
+        Route::post('/notifications/{notification}/read', [NotificationController::class, 'markAsRead']);
+        Route::post('/notifications/read-all', [NotificationController::class, 'markAllAsRead']);
+        Route::delete('/notifications/{notification}', [NotificationController::class, 'destroy']);
     });
 });
 

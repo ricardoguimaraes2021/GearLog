@@ -76,13 +76,16 @@ class TicketCommentController extends Controller
             $ticket->update(['first_response_at' => now()]);
         }
 
-        TicketLog::create([
-            'ticket_id' => $ticket->id,
-            'user_id' => Auth::id(),
-            'action' => 'comment_added',
-            'new_value' => ['comment_id' => $comment->id, 'message' => $comment->message],
-        ]);
+            TicketLog::create([
+                'ticket_id' => $ticket->id,
+                'user_id' => Auth::id(),
+                'action' => 'comment_added',
+                'new_value' => ['comment_id' => $comment->id, 'message' => $comment->message],
+            ]);
 
-        return response()->json($comment->load('user'), 201);
+            // Fire comment event for notifications
+            event(new \App\Events\TicketCommented($ticket, $comment));
+
+            return response()->json($comment->load('user'), 201);
     }
 }

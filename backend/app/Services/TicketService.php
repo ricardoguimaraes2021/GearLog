@@ -53,6 +53,14 @@ class TicketService
                 'new_value' => ['status' => 'open'],
             ]);
 
+            // Fire event for notifications
+            event(new \App\Events\TicketCreated($ticket));
+
+            // If assigned, fire assignment event
+            if ($ticket->assigned_to) {
+                event(new \App\Events\TicketAssigned($ticket, $ticket->assignedTo));
+            }
+
             return $ticket->load(['product', 'openedBy', 'assignedTo']);
         });
     }
@@ -118,7 +126,7 @@ class TicketService
             );
         }
 
-        return DB::transaction(function () use ($ticket, $status, $userId, $resolution) {
+            return DB::transaction(function () use ($ticket, $status, $userId, $resolution) {
             $oldStatus = $ticket->status;
             $ticket->status = $status;
             
@@ -147,6 +155,11 @@ class TicketService
                 ]);
             }
 
+            // Fire status changed event
+            if ($oldStatus !== $status) {
+                event(new \App\Events\TicketStatusChanged($ticket, $oldStatus, $status));
+            }
+
             return $ticket->load(['product', 'openedBy', 'assignedTo']);
         });
     }
@@ -169,7 +182,13 @@ class TicketService
 
             // Refresh the ticket to get updated relationships
             $ticket->refresh();
-            return $ticket->load(['product', 'openedBy', 'assignedTo']);
+            $ticket->load(['product', 'openedBy', 'assignedTo']);
+
+            // Fire assignment event
+            $assignedUser = $assignedTo ? \App\Models\User::find($assignedTo) : null;
+            event(new \App\Events\TicketAssigned($ticket, $assignedUser));
+
+            return $ticket;
         });
     }
 
