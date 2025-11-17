@@ -137,25 +137,9 @@ class ApiClient {
   // Auth
   async login(email: string, password: string) {
     // First, get CSRF cookie from Sanctum
-    const baseURL = import.meta.env.VITE_API_URL?.replace('/api/v1', '') || 'http://localhost:8000';
+    await this.ensureCsrfToken();
     
-    // Fetch CSRF cookie with proper credentials
-    await axios.get(`${baseURL}/sanctum/csrf-cookie`, {
-      withCredentials: true,
-      headers: {
-        'Accept': 'application/json',
-      },
-    });
-
-    // Get CSRF token from cookie (Laravel stores it as XSRF-TOKEN)
-    const getCookie = (name: string) => {
-      const value = `; ${document.cookie}`;
-      const parts = value.split(`; ${name}=`);
-      if (parts.length === 2) return parts.pop()?.split(';').shift();
-      return null;
-    };
-    
-    const csrfToken = getCookie('XSRF-TOKEN');
+    const csrfToken = this.getCsrfToken();
     const headers: Record<string, string> = {
       'Content-Type': 'application/json',
       'Accept': 'application/json',
@@ -163,12 +147,12 @@ class ApiClient {
     
     // Add X-XSRF-TOKEN header if CSRF token exists
     if (csrfToken) {
-      headers['X-XSRF-TOKEN'] = decodeURIComponent(csrfToken);
+      headers['X-XSRF-TOKEN'] = csrfToken;
     }
 
     // Then make the login request with the same base URL to ensure cookies are sent
     const response = await axios.post<{ user: User; token: string }>(
-      `${baseURL}/api/v1/login`,
+      `${this.baseURL}/api/v1/login`,
       {
         email,
         password,
@@ -217,6 +201,7 @@ class ApiClient {
   }
 
   async createProduct(data: FormData) {
+    // CSRF token is automatically added by the interceptor
     const response = await this.client.post<Product>('/products', data, {
       headers: { 'Content-Type': 'multipart/form-data' },
     });
