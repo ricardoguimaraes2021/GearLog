@@ -56,10 +56,10 @@ class MovementService
 
     protected function validateMovement(Product $product, array $data): void
     {
-        // Rule: A product with status "avariado" cannot be allocated
-        if ($data['type'] === 'alocacao' && $product->status === 'avariado') {
+        // Rule: A product with status "damaged" cannot be allocated
+        if ($data['type'] === 'allocation' && $product->status === 'damaged') {
             throw new BusinessRuleException(
-                "Cannot allocate product '{$product->name}' because it is marked as damaged (avariado). Please repair or remove the product first.",
+                "Cannot allocate product '{$product->name}' because it is marked as damaged. Please repair or remove the product first.",
                 "Product {$product->id} is damaged and cannot be allocated",
                 ['product_id' => $product->id, 'product_name' => $product->name, 'status' => $product->status]
             );
