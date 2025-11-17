@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\Movement;
 use App\Models\Product;
+use App\Models\Ticket;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -77,6 +78,35 @@ class DashboardController extends Controller
                 ];
             });
 
+        // Ticket metrics
+        $totalTickets = Ticket::count();
+        $openTickets = Ticket::where('status', 'open')->count();
+        $inProgressTickets = Ticket::where('status', 'in_progress')->count();
+        $criticalTickets = Ticket::where('priority', 'critical')
+            ->whereIn('status', ['open', 'in_progress'])
+            ->count();
+        $unassignedTickets = Ticket::whereNull('assigned_to')
+            ->whereIn('status', ['open', 'in_progress'])
+            ->count();
+
+        // Recent tickets (last 5)
+        $recentTickets = Ticket::with(['product', 'openedBy', 'assignedTo'])
+            ->orderBy('created_at', 'desc')
+            ->limit(5)
+            ->get()
+            ->map(function ($ticket) {
+                return [
+                    'id' => $ticket->id,
+                    'title' => $ticket->title,
+                    'status' => $ticket->status,
+                    'priority' => $ticket->priority,
+                    'product' => $ticket->product ? $ticket->product->name : null,
+                    'opened_by' => $ticket->openedBy ? $ticket->openedBy->name : null,
+                    'assigned_to' => $ticket->assignedTo ? $ticket->assignedTo->name : null,
+                    'created_at' => $ticket->created_at,
+                ];
+            });
+
         // Alerts
         $alerts = [
             'low_stock' => $lowStockProducts,
@@ -94,8 +124,16 @@ class DashboardController extends Controller
                 'damaged_products' => $damagedProducts,
                 'low_stock_products' => $lowStockProducts,
             ],
+            'tickets' => [
+                'total_tickets' => $totalTickets,
+                'open_tickets' => $openTickets,
+                'in_progress_tickets' => $inProgressTickets,
+                'critical_tickets' => $criticalTickets,
+                'unassigned_tickets' => $unassignedTickets,
+            ],
             'products_by_category' => $productsByCategory,
             'recent_movements' => $recentMovements,
+            'recent_tickets' => $recentTickets,
             'alerts' => $alerts,
         ]);
     }

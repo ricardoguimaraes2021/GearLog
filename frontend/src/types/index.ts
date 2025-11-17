@@ -65,11 +65,28 @@ export interface DashboardData {
     damaged_products: number;
     low_stock_products: number;
   };
+  tickets?: {
+    total_tickets: number;
+    open_tickets: number;
+    in_progress_tickets: number;
+    critical_tickets: number;
+    unassigned_tickets: number;
+  };
   products_by_category: Array<{
     name: string;
     count: number;
   }>;
   recent_movements: Movement[];
+  recent_tickets?: Array<{
+    id: number;
+    title: string;
+    status: string;
+    priority: string;
+    product: string | null;
+    opened_by: string | null;
+    assigned_to: string | null;
+    created_at: string;
+  }>;
   alerts: {
     low_stock: number;
     low_stock_products?: Array<{

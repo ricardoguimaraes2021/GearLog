@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useDashboardStore } from '@/stores/dashboardStore';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Package, AlertTriangle, DollarSign, TrendingDown, ChevronDown, ChevronUp } from 'lucide-react';
+import { Package, AlertTriangle, DollarSign, TrendingDown, ChevronDown, ChevronUp, Ticket, Clock, User } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Link } from 'react-router-dom';
 
@@ -64,6 +64,31 @@ export default function Dashboard() {
     return <div className="text-center py-8">No data available</div>;
   }
 
+  const getPriorityColor = (priority: string) => {
+    const colors = {
+      low: 'bg-gray-100 text-gray-800',
+      medium: 'bg-blue-100 text-blue-800',
+      high: 'bg-orange-100 text-orange-800',
+      critical: 'bg-red-100 text-red-800',
+    };
+    return colors[priority as keyof typeof colors] || 'bg-gray-100 text-gray-800';
+  };
+
+  const getStatusColor = (status: string) => {
+    const colors = {
+      open: 'bg-green-100 text-green-800',
+      in_progress: 'bg-blue-100 text-blue-800',
+      waiting_parts: 'bg-yellow-100 text-yellow-800',
+      resolved: 'bg-purple-100 text-purple-800',
+      closed: 'bg-gray-100 text-gray-800',
+    };
+    return colors[status as keyof typeof colors] || 'bg-gray-100 text-gray-800';
+  };
+
+  const formatStatus = (status: string) => {
+    return status.split('_').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
+  };
+
   const kpiCards = [
     {
       title: 'Total Products',
@@ -90,6 +115,33 @@ export default function Dashboard() {
       color: 'text-orange-600',
     },
   ];
+
+  const ticketKpiCards = data.tickets ? [
+    {
+      title: 'Open Tickets',
+      value: data.tickets.open_tickets,
+      icon: Ticket,
+      color: 'text-green-600',
+    },
+    {
+      title: 'In Progress',
+      value: data.tickets.in_progress_tickets,
+      icon: Clock,
+      color: 'text-blue-600',
+    },
+    {
+      title: 'Critical Tickets',
+      value: data.tickets.critical_tickets,
+      icon: AlertTriangle,
+      color: 'text-red-600',
+    },
+    {
+      title: 'Unassigned',
+      value: data.tickets.unassigned_tickets,
+      icon: User,
+      color: 'text-orange-600',
+    },
+  ] : [];
 
   return (
     <div className="space-y-6">
