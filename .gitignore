@@ -34,3 +34,10 @@ yarn-error.log*
 backend/storage/app/public/products/
 backend/storage/app/public/qrcodes/
 
+# PyInstaller build files
+build/
+dist/
+*.spec
+__pycache__/
+*.pyc
+

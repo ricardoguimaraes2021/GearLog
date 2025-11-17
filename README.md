@@ -6,24 +6,32 @@ A full-stack inventory management system for tracking IT equipment, built with L
 
 ### Automated Setup (Recommended)
 
-We provide an automated setup script that handles everything for you:
+We provide automated setup tools that handle everything for you:
+
+#### Windows Users
+Download and run the executable:
+- **[Download GearLogSetup.exe](https://github.com/ricardoguimaraes2021/GearLog/releases/latest/download/GearLogSetup.exe)**
+- Double-click to run (no Python required!)
+
+#### macOS/Linux Users
+Use the Python script:
 
 ```bash
-# Make the script executable (macOS/Linux)
+# Make the script executable
 chmod +x setup.py
 
 # Run the automated setup
 python3 setup.py
 ```
 
-The script will:
+#### What the setup does:
 - ✅ Install all required dependencies (PHP, Composer, MySQL, Node.js)
 - ✅ Clone the repository to your Desktop
 - ✅ Configure backend and frontend
 - ✅ Set up the database
 - ✅ Run migrations and seeders
 
-**Note:** The script works on macOS and Linux. For Windows, please follow the manual setup below.
+**Note:** The Python script works on macOS and Linux. Windows users can use the .exe executable.
 
 ### Manual Installation
 

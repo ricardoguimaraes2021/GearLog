@@ -33,6 +33,19 @@ export default function Landing() {
     document.body.removeChild(link);
   };
 
+  const handleDownloadExe = () => {
+    // Create a download link for the Windows executable
+    // Note: This will need to be updated with the actual release URL once the .exe is built and uploaded
+    const exeUrl = 'https://github.com/ricardoguimaraes2021/GearLog/releases/latest/download/GearLogSetup.exe';
+    const link = document.createElement('a');
+    link.href = exeUrl;
+    link.download = 'GearLogSetup.exe';
+    link.target = '_blank';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
   const features = [
     {
       icon: Package,
@@ -175,10 +188,19 @@ export default function Landing() {
                     size="lg"
                     variant="secondary"
                     className="text-lg px-6 bg-white text-blue-600 hover:bg-gray-100"
-                    onClick={handleDownloadSetupScript}
+                    onClick={handleDownloadExe}
                   >
                     <Download className="mr-2 h-5 w-5" />
-                    Download Setup Script
+                    Download for Windows (.exe)
+                  </Button>
+                  <Button
+                    size="lg"
+                    variant="outline"
+                    className="text-lg px-6 border-white text-white hover:bg-white/10"
+                    onClick={handleDownloadSetupScript}
+                  >
+                    <Code className="mr-2 h-5 w-5" />
+                    Download Python Script
                   </Button>
                   <a
                     href="https://github.com/ricardoguimaraes2021/GearLog#-quick-start"
@@ -190,7 +212,6 @@ export default function Landing() {
                       variant="outline"
                       className="text-lg px-6 border-white text-white hover:bg-white/10"
                     >
-                      <Code className="mr-2 h-5 w-5" />
                       View Instructions
                     </Button>
                   </a>
