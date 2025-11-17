@@ -1,5 +1,5 @@
 import axios, { AxiosError, AxiosInstance } from 'axios';
-import type { User, Product, Category, Movement, DashboardData, PaginatedResponse } from '@/types';
+import type { User, Product, Category, Movement, DashboardData, PaginatedResponse, Employee, Department, AssetAssignment } from '@/types';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000/api/v1';
 
@@ -362,6 +362,87 @@ class ApiClient {
 
     async getTicketDashboard() {
       const response = await this.client.get('/tickets/dashboard');
+      return response.data;
+    }
+
+    // Employees
+    async getEmployees(params?: Record<string, any>) {
+      const response = await this.client.get<PaginatedResponse<Employee>>('/employees', { params });
+      return response.data;
+    }
+
+    async getEmployee(id: number) {
+      const response = await this.client.get<Employee>(`/employees/${id}`);
+      return response.data;
+    }
+
+    async createEmployee(data: Partial<Employee>) {
+      const response = await this.client.post<Employee>('/employees', data);
+      return response.data;
+    }
+
+    async updateEmployee(id: number, data: Partial<Employee>) {
+      const response = await this.client.put<Employee>(`/employees/${id}`, data);
+      return response.data;
+    }
+
+    async deleteEmployee(id: number) {
+      await this.client.delete(`/employees/${id}`);
+    }
+
+    async deactivateEmployee(id: number) {
+      const response = await this.client.post<Employee>(`/employees/${id}/deactivate`);
+      return response.data;
+    }
+
+    async reactivateEmployee(id: number) {
+      const response = await this.client.post<Employee>(`/employees/${id}/reactivate`);
+      return response.data;
+    }
+
+    // Departments
+    async getDepartments(params?: Record<string, any>) {
+      const response = await this.client.get<Department[]>('/departments', { params });
+      return response.data;
+    }
+
+    async getDepartment(id: number) {
+      const response = await this.client.get<Department>(`/departments/${id}`);
+      return response.data;
+    }
+
+    async createDepartment(data: Partial<Department>) {
+      const response = await this.client.post<Department>('/departments', data);
+      return response.data;
+    }
+
+    async updateDepartment(id: number, data: Partial<Department>) {
+      const response = await this.client.put<Department>(`/departments/${id}`, data);
+      return response.data;
+    }
+
+    async deleteDepartment(id: number) {
+      await this.client.delete(`/departments/${id}`);
+    }
+
+    // Assignments
+    async checkoutAsset(data: { product_id: number; employee_id: number; notes?: string }) {
+      const response = await this.client.post<AssetAssignment>('/assignments/checkout', data);
+      return response.data;
+    }
+
+    async checkinAsset(assignmentId: number, data: { condition_on_return?: string; product_status?: string; notes?: string }) {
+      const response = await this.client.post<AssetAssignment>(`/assignments/${assignmentId}/checkin`, data);
+      return response.data;
+    }
+
+    async getAssignmentHistoryByEmployee(employeeId: number) {
+      const response = await this.client.get<PaginatedResponse<AssetAssignment>>(`/assignments/history/employee/${employeeId}`);
+      return response.data;
+    }
+
+    async getAssignmentHistoryByAsset(productId: number) {
+      const response = await this.client.get<PaginatedResponse<AssetAssignment>>(`/assignments/history/asset/${productId}`);
       return response.data;
     }
 
