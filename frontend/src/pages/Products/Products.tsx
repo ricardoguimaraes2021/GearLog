@@ -186,6 +186,7 @@ export default function Products() {
                       variant="outline"
                       size="sm"
                       onClick={() => handleExport('csv')}
+                      title="Export as CSV"
                     >
                       <Download className="w-4 h-4" />
                     </Button>
@@ -193,8 +194,17 @@ export default function Products() {
                       variant="outline"
                       size="sm"
                       onClick={() => handleExport('excel')}
+                      title="Export as Excel"
                     >
                       Excel
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleExport('pdf')}
+                      title="Export as PDF"
+                    >
+                      PDF
                     </Button>
                   </div>
                 </div>
