@@ -227,7 +227,7 @@ export default function Landing() {
       </section>
 
       {/* Features Section */}
-      <section className="container mx-auto px-4 py-20">
+      <section id="features" className="container mx-auto px-4 py-20 scroll-mt-20">
         <div className="text-center mb-16">
           <h2 className="text-4xl font-bold text-gray-900 mb-4">
             Everything You Need to Manage IT Inventory
@@ -259,7 +259,7 @@ export default function Landing() {
       </section>
 
       {/* Tech Stack Section */}
-      <section className="bg-gray-50 py-20">
+      <section id="tech-stack" className="bg-gray-50 py-20 scroll-mt-20">
         <div className="container mx-auto px-4">
           <div className="text-center mb-16">
             <h2 className="text-4xl font-bold text-gray-900 mb-4">
@@ -372,24 +372,100 @@ export default function Landing() {
             <div>
               <h4 className="font-semibold text-gray-900 mb-4">Product</h4>
               <ul className="space-y-2 text-gray-600">
-                <li><a href="#features" className="hover:text-blue-600">Features</a></li>
-                <li><a href="#tech-stack" className="hover:text-blue-600">Technology</a></li>
-                <li><a href="https://github.com/ricardoguimaraes2021/GearLog" target="_blank" rel="noopener noreferrer" className="hover:text-blue-600">Documentation</a></li>
+                <li>
+                  <a 
+                    href="#features" 
+                    className="hover:text-blue-600 transition-colors"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      document.getElementById('features')?.scrollIntoView({ behavior: 'smooth' });
+                    }}
+                  >
+                    Features
+                  </a>
+                </li>
+                <li>
+                  <a 
+                    href="#tech-stack" 
+                    className="hover:text-blue-600 transition-colors"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      document.getElementById('tech-stack')?.scrollIntoView({ behavior: 'smooth' });
+                    }}
+                  >
+                    Technology
+                  </a>
+                </li>
+                <li>
+                  <a 
+                    href="https://github.com/ricardoguimaraes2021/GearLog#readme" 
+                    target="_blank" 
+                    rel="noopener noreferrer" 
+                    className="hover:text-blue-600 transition-colors"
+                  >
+                    Documentation
+                  </a>
+                </li>
               </ul>
             </div>
             <div>
               <h4 className="font-semibold text-gray-900 mb-4">Resources</h4>
               <ul className="space-y-2 text-gray-600">
-                <li><a href="https://github.com/ricardoguimaraes2021/GearLog" target="_blank" rel="noopener noreferrer" className="hover:text-blue-600">GitHub</a></li>
-                <li><a href="https://github.com/ricardoguimaraes2021/GearLog/issues" target="_blank" rel="noopener noreferrer" className="hover:text-blue-600">Support</a></li>
-                <li><a href="https://github.com/ricardoguimaraes2021/GearLog/blob/main/README.md" target="_blank" rel="noopener noreferrer" className="hover:text-blue-600">Quick Start</a></li>
+                <li>
+                  <a 
+                    href="https://github.com/ricardoguimaraes2021/GearLog" 
+                    target="_blank" 
+                    rel="noopener noreferrer" 
+                    className="hover:text-blue-600 transition-colors"
+                  >
+                    GitHub
+                  </a>
+                </li>
+                <li>
+                  <a 
+                    href="https://github.com/ricardoguimaraes2021/GearLog/issues" 
+                    target="_blank" 
+                    rel="noopener noreferrer" 
+                    className="hover:text-blue-600 transition-colors"
+                  >
+                    Support
+                  </a>
+                </li>
+                <li>
+                  <a 
+                    href="https://github.com/ricardoguimaraes2021/GearLog/blob/main/README.md" 
+                    target="_blank" 
+                    rel="noopener noreferrer" 
+                    className="hover:text-blue-600 transition-colors"
+                  >
+                    Quick Start
+                  </a>
+                </li>
               </ul>
             </div>
             <div>
               <h4 className="font-semibold text-gray-900 mb-4">Legal</h4>
               <ul className="space-y-2 text-gray-600">
-                <li><a href="https://github.com/ricardoguimaraes2021/GearLog/blob/main/LICENSE" target="_blank" rel="noopener noreferrer" className="hover:text-blue-600">License</a></li>
-                <li><a href="https://github.com/ricardoguimaraes2021/GearLog" target="_blank" rel="noopener noreferrer" className="hover:text-blue-600">Contributing</a></li>
+                <li>
+                  <a 
+                    href="https://github.com/ricardoguimaraes2021/GearLog/blob/main/LICENSE" 
+                    target="_blank" 
+                    rel="noopener noreferrer" 
+                    className="hover:text-blue-600 transition-colors"
+                  >
+                    License
+                  </a>
+                </li>
+                <li>
+                  <a 
+                    href="https://github.com/ricardoguimaraes2021/GearLog/blob/main/CONTRIBUTING.md" 
+                    target="_blank" 
+                    rel="noopener noreferrer" 
+                    className="hover:text-blue-600 transition-colors"
+                  >
+                    Contributing
+                  </a>
+                </li>
               </ul>
             </div>
           </div>
