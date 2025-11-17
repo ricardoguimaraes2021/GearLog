@@ -4,7 +4,30 @@ A full-stack inventory management system for tracking IT equipment, built with L
 
 ## 🚀 Quick Start
 
-### Prerequisites
+### Automated Setup (Recommended)
+
+We provide an automated setup script that handles everything for you:
+
+```bash
+# Make the script executable (macOS/Linux)
+chmod +x setup.py
+
+# Run the automated setup
+python3 setup.py
+```
+
+The script will:
+- ✅ Install all required dependencies (PHP, Composer, MySQL, Node.js)
+- ✅ Clone the repository to your Desktop
+- ✅ Configure backend and frontend
+- ✅ Set up the database
+- ✅ Run migrations and seeders
+
+**Note:** The script works on macOS and Linux. For Windows, please follow the manual setup below.
+
+### Manual Installation
+
+#### Prerequisites
 
 - PHP 8.3+
 - Composer
@@ -12,7 +35,7 @@ A full-stack inventory management system for tracking IT equipment, built with L
 - MySQL 8
 - npm or yarn
 
-### Installation
+#### Installation Steps
 
 1. **Clone the repository**
    ```bash

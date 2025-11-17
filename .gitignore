@@ -28,6 +28,7 @@ yarn-error.log*
 # Temporary files
 *.tmp
 *.temp
+*.bak
 
 # Storage files (generated dynamically)
 backend/storage/app/public/products/
