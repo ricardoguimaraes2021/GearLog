@@ -1,7 +1,7 @@
 import { Outlet, Link, useLocation } from 'react-router-dom';
 import { useAuthStore } from '@/stores/authStore';
 import { Button } from '@/components/ui/button';
-import { LayoutDashboard, Package, FolderTree, LogOut } from 'lucide-react';
+import { LayoutDashboard, Package, FolderTree, Ticket, LogOut } from 'lucide-react';
 
 export default function Layout() {
   const { user, logout } = useAuthStore();
@@ -11,6 +11,7 @@ export default function Layout() {
     { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
     { name: 'Products', href: '/products', icon: Package },
     { name: 'Categories', href: '/categories', icon: FolderTree },
+    { name: 'Tickets', href: '/tickets', icon: Ticket },
   ];
 
   const handleLogout = async () => {

@@ -8,6 +8,7 @@ import ProductDetail from './pages/Products/ProductDetail';
 import ProductForm from './pages/Products/ProductForm';
 import ProductPublicView from './pages/Products/ProductPublicView';
 import Categories from './pages/Categories/Categories';
+import Tickets from './pages/Tickets/Tickets';
 import Layout from './components/layout/Layout';
 import { Toaster } from './components/ui/toast';
 import ErrorBoundary from './components/ErrorBoundary';
@@ -67,6 +68,7 @@ function App() {
               <Route path="products/:id" element={<ProductDetail />} />
               <Route path="products/:id/edit" element={<ProductForm />} />
               <Route path="categories" element={<Categories />} />
+              <Route path="tickets" element={<Tickets />} />
             </Route>
           </Routes>
       </BrowserRouter>
