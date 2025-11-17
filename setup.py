@@ -231,6 +231,179 @@ def get_system_info() -> dict:
     }
 
 # ---------------------------
+# PHP Extensions Helper
+# ---------------------------
+def check_php_extension(extension: str) -> bool:
+    """Verifica se uma extensão PHP está carregada."""
+    ok, out = run_command(["php", "-m"], capture_output=True)
+    if not ok:
+        return False
+    return extension.lower() in out.lower()
+
+def get_php_ini_path() -> Optional[str]:
+    """Obtém o caminho do php.ini usando php --ini."""
+    ok, out = run_command(["php", "--ini"], capture_output=True)
+    if not ok:
+        return None
+    
+    # Procura por "Loaded Configuration File:"
+    for line in out.splitlines():
+        if "Loaded Configuration File:" in line:
+            path = line.split(":", 1)[1].strip()
+            if path and path != "(none)":
+                return path
+    
+    return None
+
+def enable_php_extension(extension: str) -> Tuple[bool, str]:
+    """
+    Tenta habilitar uma extensão PHP no php.ini.
+    Retorna (success, message).
+    """
+    php_ini_path = get_php_ini_path()
+    if not php_ini_path:
+        return False, "Não foi possível localizar o php.ini"
+    
+    php_ini_file = Path(php_ini_path)
+    if not php_ini_file.exists():
+        return False, f"php.ini não encontrado em: {php_ini_path}"
+    
+    try:
+        # Ler conteúdo do php.ini
+        with open(php_ini_file, "r", encoding="utf-8", errors="replace") as f:
+            content = f.read()
+        
+        lines = content.splitlines()
+        modified = False
+        new_lines = []
+        
+        # Procurar pela extensão
+        extension_line = f"extension={extension}"
+        extension_line_win = f"extension=php_{extension}.dll"
+        extension_line_unix = f"extension={extension}.so"
+        
+        found = False
+        for i, line in enumerate(lines):
+            stripped = line.strip()
+            
+            # Se encontrar a extensão comentada, descomenta
+            if stripped.startswith(f";{extension_line}") or \
+               stripped.startswith(f";{extension_line_win}") or \
+               stripped.startswith(f";{extension_line_unix}"):
+                # Descomenta a linha
+                new_line = line.replace(";", "", 1).lstrip()
+                new_lines.append(new_line)
+                modified = True
+                found = True
+                logger.info(f"Descomentada linha: {line} -> {new_line}")
+            # Se encontrar a extensão já habilitada
+            elif stripped.startswith(extension_line) or \
+                 stripped.startswith(extension_line_win) or \
+                 stripped.startswith(extension_line_unix):
+                new_lines.append(line)
+                found = True
+            else:
+                new_lines.append(line)
+        
+        # Se não encontrou, adiciona no final da seção de extensões
+        if not found:
+            # Procura pela seção [Extensions] ou adiciona no final
+            ext_section_found = False
+            for i, line in enumerate(new_lines):
+                if "[Extensions]" in line or "extension=" in line.lower():
+                    # Adiciona após a última linha de extensão
+                    j = i + 1
+                    while j < len(new_lines) and (new_lines[j].strip().startswith("extension=") or 
+                                                   new_lines[j].strip().startswith(";extension=") or
+                                                   new_lines[j].strip() == ""):
+                        j += 1
+                    new_lines.insert(j, f"extension={extension}")
+                    modified = True
+                    found = True
+                    logger.info(f"Adicionada nova linha de extensão: extension={extension}")
+                    break
+            
+            if not found:
+                # Adiciona no final do arquivo
+                new_lines.append(f"\n; Added by GearLog Setup")
+                new_lines.append(f"extension={extension}")
+                modified = True
+                logger.info(f"Adicionada extensão no final do arquivo: extension={extension}")
+        
+        # Escrever de volta se modificado
+        if modified:
+            # No Windows, pode precisar de permissões de administrador
+            try:
+                with open(php_ini_file, "w", encoding="utf-8") as f:
+                    f.write("\n".join(new_lines))
+                return True, f"Extensão {extension} habilitada com sucesso em {php_ini_path}"
+            except PermissionError:
+                return False, f"Permissão negada para editar {php_ini_path}. Execute como administrador."
+            except Exception as e:
+                return False, f"Erro ao editar php.ini: {str(e)}"
+        elif found:
+            return True, f"Extensão {extension} já está habilitada"
+        else:
+            return False, f"Não foi possível localizar ou adicionar a extensão {extension}"
+    
+    except Exception as e:
+        logger.exception(f"Erro ao processar php.ini")
+        return False, f"Erro ao processar php.ini: {str(e)}"
+
+def check_and_enable_php_extensions() -> Tuple[bool, List[str]]:
+    """
+    Verifica e habilita extensões PHP necessárias.
+    Retorna (all_ok, missing_extensions).
+    """
+    required_extensions = ["fileinfo", "gd"]
+    missing = []
+    
+    print_info("Verificando extensões PHP necessárias...")
+    
+    for ext in required_extensions:
+        if not check_php_extension(ext):
+            missing.append(ext)
+            print_warning(f"Extensão PHP '{ext}' não está habilitada.")
+    
+    if not missing:
+        print_success("Todas as extensões PHP necessárias estão habilitadas.")
+        return True, []
+    
+    print_info(f"Tentando habilitar extensões em falta: {', '.join(missing)}")
+    
+    # Tentar habilitar automaticamente
+    failed = []
+    for ext in missing:
+        success, message = enable_php_extension(ext)
+        if success:
+            print_success(f"Extensão '{ext}': {message}")
+            # Verificar novamente se foi habilitada
+            if check_php_extension(ext):
+                missing.remove(ext)
+            else:
+                print_warning(f"Extensão '{ext}' foi adicionada ao php.ini mas ainda não está carregada. Reinicie o terminal.")
+        else:
+            print_warning(f"Extensão '{ext}': {message}")
+            failed.append(ext)
+    
+    if failed:
+        php_ini_path = get_php_ini_path()
+        print_error("Não foi possível habilitar automaticamente algumas extensões.")
+        print_info("Por favor, edite manualmente o php.ini:")
+        if php_ini_path:
+            print_info(f"  Arquivo: {php_ini_path}")
+        print_info("  Procure e descomente (remova o ';' do início) estas linhas:")
+        for ext in failed:
+            print_info(f"    extension={ext}")
+        print_info("  Ou adicione estas linhas se não existirem:")
+        for ext in failed:
+            print_info(f"    extension={ext}")
+        print_info("  Depois, reinicie o terminal e execute o script novamente.")
+        return False, failed
+    
+    return len(missing) == 0, missing
+
+# ---------------------------
 # Dependency installer
 # ---------------------------
 class DependencyInstaller:
@@ -711,6 +884,13 @@ SANCTUM_STATEFUL_DOMAINS=localhost:5173,127.0.0.1:5173
             print_error(f"composer.json não encontrado em {self.backend_dir}")
             return False
         
+        # Verificar e habilitar extensões PHP necessárias
+        if which("php"):
+            extensions_ok, missing = check_and_enable_php_extensions()
+            if not extensions_ok and missing:
+                print_warning("Algumas extensões PHP ainda estão em falta. Tentando continuar...")
+                print_info("Se composer install falhar, você precisará habilitar manualmente as extensões.")
+        
         cwd = os.getcwd()
         os.chdir(self.backend_dir)
         
@@ -725,6 +905,37 @@ SANCTUM_STATEFUL_DOMAINS=localhost:5173,127.0.0.1:5173
             print_info("Executando composer install...")
             ok, out = run_command(["composer", "install", "--no-interaction"], check=False, capture_output=True)
             if not ok:
+                # Verificar se o erro é relacionado a extensões PHP
+                if "ext-fileinfo" in out or "ext-gd" in out or "missing from your system" in out:
+                    print_error("composer install FALHOU devido a extensões PHP em falta.")
+                    print_error("O Composer precisa das extensões 'fileinfo' e 'gd' habilitadas.")
+                    
+                    # Tentar novamente habilitar as extensões
+                    print_info("Tentando habilitar extensões PHP novamente...")
+                    extensions_ok, missing = check_and_enable_php_extensions()
+                    
+                    if missing:
+                        php_ini_path = get_php_ini_path()
+                        print_error("\n" + "="*60)
+                        print_error("AÇÃO NECESSÁRIA:")
+                        print_error("="*60)
+                        print_error("Por favor, edite manualmente o php.ini e habilite as extensões:")
+                        if php_ini_path:
+                            print_error(f"  Arquivo: {php_ini_path}")
+                        print_error("  Procure estas linhas e remova o ';' do início:")
+                        for ext in missing:
+                            print_error(f"    ;extension={ext}  ->  extension={ext}")
+                        print_error("  Ou adicione estas linhas se não existirem:")
+                        for ext in missing:
+                            print_error(f"    extension={ext}")
+                        print_error("  Depois, REINICIE O TERMINAL e execute o script novamente.")
+                        print_error("="*60 + "\n")
+                        return False
+                    else:
+                        print_info("Extensões habilitadas. Por favor, REINICIE O TERMINAL e execute o script novamente.")
+                        print_info("As extensões PHP só são carregadas quando o PHP é iniciado.")
+                        return False
+                
                 print_error("composer install FALHOU. Não é possível continuar sem as dependências PHP.")
                 print_error(f"Erro: {out[:500] if out else 'Sem detalhes'}")
                 logger.error("Composer install failed: %s", out[:2000] if out else "sem output")
