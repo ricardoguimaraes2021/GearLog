@@ -110,11 +110,8 @@ export default function TicketDetail() {
       });
 
       try {
-        await api.client.post(`/tickets/${id}/comments`, formData, {
-          headers: {
-            'Content-Type': 'multipart/form-data',
-          },
-        });
+        // Content-Type will be set automatically by axios for FormData
+        await api.client.post(`/tickets/${id}/comments`, formData);
         toast.success('Comment added');
         setCommentText('');
         setCommentFiles([]);

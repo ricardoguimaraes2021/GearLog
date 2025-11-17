@@ -38,6 +38,12 @@ class ApiClient {
           config.headers.Authorization = `Bearer ${token}`;
         }
 
+        // For FormData, let browser set Content-Type with boundary
+        const isFormData = config.data instanceof FormData;
+        if (isFormData) {
+          delete config.headers['Content-Type'];
+        }
+
         // For state-changing requests, ensure CSRF token is available
         if (['post', 'put', 'patch', 'delete'].includes(config.method?.toLowerCase() || '')) {
           // Get CSRF token from cookie

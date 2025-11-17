@@ -122,26 +122,18 @@ export default function TicketForm() {
       });
 
       if (isEditing && id) {
-        // For update, use FormData with api client
+        // For update, use FormData with api client (Content-Type will be set automatically)
         try {
-          const response = await api.client.put(`/tickets/${id}`, formDataToSend, {
-            headers: {
-              'Content-Type': 'multipart/form-data',
-            },
-          });
+          const response = await api.client.put(`/tickets/${id}`, formDataToSend);
           toast.success('Ticket updated successfully');
           navigate(`/tickets/${id}`);
         } catch (error: any) {
           throw new Error(error.response?.data?.error || 'Failed to update ticket');
         }
       } else {
-        // For create, use FormData with api client
+        // For create, use FormData with api client (Content-Type will be set automatically)
         try {
-          const response = await api.client.post('/tickets', formDataToSend, {
-            headers: {
-              'Content-Type': 'multipart/form-data',
-            },
-          });
+          const response = await api.client.post('/tickets', formDataToSend);
           toast.success('Ticket created successfully');
           navigate(`/tickets/${response.data.id}`);
         } catch (error: any) {
