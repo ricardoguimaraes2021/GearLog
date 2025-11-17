@@ -4,6 +4,16 @@ This directory contains technical documentation for the GearLog project.
 
 ## 📚 Available Documentation
 
+### [PRD.md](./PRD.md) ⭐
+**Product Requirements Document** - Comprehensive product documentation for stakeholders:
+- Executive summary and product overview
+- Complete feature list with user stories
+- Technical specifications
+- User roles and permissions
+- Business rules and requirements
+- Roadmap and success metrics
+- Perfect for sharing with clients, investors, or team members
+
 ### [API_REFERENCE.md](./API_REFERENCE.md)
 Complete API reference for developers, including:
 - All endpoints organized by feature
