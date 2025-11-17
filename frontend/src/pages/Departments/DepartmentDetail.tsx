@@ -340,6 +340,112 @@ export default function DepartmentDetail() {
             </CardContent>
           </Card>
         )}
+
+        {activeTab === 'analytics' && (
+          <div className="space-y-6">
+            {loadingStats ? (
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <Card>
+                  <CardHeader>
+                    <Skeleton className="h-6 w-32" />
+                  </CardHeader>
+                  <CardContent>
+                    <Skeleton className="h-64 w-full" />
+                  </CardContent>
+                </Card>
+                <Card>
+                  <CardHeader>
+                    <Skeleton className="h-6 w-32" />
+                  </CardHeader>
+                  <CardContent>
+                    <Skeleton className="h-64 w-full" />
+                  </CardContent>
+                </Card>
+              </div>
+            ) : usageStats ? (
+              <>
+                {/* Asset Usage by Department */}
+                {usageStats.asset_usage && usageStats.asset_usage.length > 0 && (
+                  <Card>
+                    <CardHeader>
+                      <CardTitle>Asset Usage by Department</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <ResponsiveContainer width="100%" height={300}>
+                        <BarChart data={usageStats.asset_usage}>
+                          <CartesianGrid strokeDasharray="3 3" />
+                          <XAxis dataKey="name" />
+                          <YAxis />
+                          <Tooltip />
+                          <Legend />
+                          <Bar dataKey="active_assignments" fill="#3b82f6" name="Active Assignments" />
+                          <Bar dataKey="employees_with_assets" fill="#10b981" name="Employees with Assets" />
+                        </BarChart>
+                      </ResponsiveContainer>
+                    </CardContent>
+                  </Card>
+                )}
+
+                {/* Ticket Usage by Department */}
+                {usageStats.ticket_usage && usageStats.ticket_usage.length > 0 && (
+                  <Card>
+                    <CardHeader>
+                      <CardTitle>Active Tickets by Department</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <ResponsiveContainer width="100%" height={300}>
+                        <BarChart data={usageStats.ticket_usage}>
+                          <CartesianGrid strokeDasharray="3 3" />
+                          <XAxis dataKey="name" />
+                          <YAxis />
+                          <Tooltip />
+                          <Legend />
+                          <Bar dataKey="active_tickets" fill="#f59e0b" name="Active Tickets" />
+                        </BarChart>
+                      </ResponsiveContainer>
+                    </CardContent>
+                  </Card>
+                )}
+
+                {/* Asset Value by Department */}
+                {usageStats.asset_usage && usageStats.asset_usage.length > 0 && (
+                  <Card>
+                    <CardHeader>
+                      <CardTitle>Total Asset Value by Department</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <ResponsiveContainer width="100%" height={300}>
+                        <BarChart data={usageStats.asset_usage}>
+                          <CartesianGrid strokeDasharray="3 3" />
+                          <XAxis dataKey="name" />
+                          <YAxis />
+                          <Tooltip formatter={(value: number) => `€${value.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`} />
+                          <Legend />
+                          <Bar dataKey="total_value" fill="#10b981" name="Total Value (€)" />
+                        </BarChart>
+                      </ResponsiveContainer>
+                    </CardContent>
+                  </Card>
+                )}
+
+                {(!usageStats.asset_usage || usageStats.asset_usage.length === 0) && 
+                 (!usageStats.ticket_usage || usageStats.ticket_usage.length === 0) && (
+                  <Card>
+                    <CardContent className="py-8 text-center text-gray-500">
+                      No usage statistics available
+                    </CardContent>
+                  </Card>
+                )}
+              </>
+            ) : (
+              <Card>
+                <CardContent className="py-8 text-center text-gray-500">
+                  Failed to load usage statistics
+                </CardContent>
+              </Card>
+            )}
+          </div>
+        )}
       </div>
     </div>
   );
