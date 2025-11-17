@@ -116,10 +116,18 @@ export default function TicketForm() {
         });
       }
 
-      // Add new files
+      // Add new files - Laravel expects array format without brackets in the key
       selectedFiles.forEach((file) => {
         formDataToSend.append('attachment_files[]', file);
       });
+      
+      // Debug: Log FormData contents
+      console.log('FormData files:', selectedFiles.length);
+      for (const [key, value] of formDataToSend.entries()) {
+        if (value instanceof File) {
+          console.log(`File: ${key}`, value.name, value.size, value.type);
+        }
+      }
 
       if (isEditing && id) {
         // For update, use FormData with api client (Content-Type will be set automatically)

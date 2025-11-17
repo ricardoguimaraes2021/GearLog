@@ -89,8 +89,8 @@ class TicketController extends Controller
             'type' => 'nullable|in:damage,maintenance,update,audit,other',
             'description' => 'required|string',
             'attachments' => 'nullable|array',
-            'attachment_files' => 'nullable|array',
-            'attachment_files.*' => 'file|max:10240|mimes:jpg,jpeg,png,gif,pdf,doc,docx,txt',
+            'attachment_files' => 'nullable',
+            'attachment_files.*' => 'nullable|file|max:10240|mimes:jpg,jpeg,png,gif,pdf,doc,docx,txt',
         ]);
 
         // Handle file uploads
@@ -151,16 +151,39 @@ class TicketController extends Controller
             'type' => 'sometimes|in:damage,maintenance,update,audit,other',
             'description' => 'sometimes|required|string',
             'attachments' => 'nullable|array',
-            'attachment_files' => 'nullable|array',
-            'attachment_files.*' => 'file|max:10240|mimes:jpg,jpeg,png,gif,pdf,doc,docx,txt',
+            'attachment_files' => 'nullable',
+            'attachment_files.*' => 'nullable|file|max:10240|mimes:jpg,jpeg,png,gif,pdf,doc,docx,txt',
         ]);
 
         // Handle file uploads
         $attachmentPaths = [];
+        
+        // Debug: Log what we receive
+        \Log::info('Ticket update - Files received', [
+            'has_attachment_files' => $request->hasFile('attachment_files'),
+            'has_attachment_files_array' => $request->hasFile('attachment_files[]'),
+            'all_files' => array_keys($request->allFiles()),
+        ]);
+        
+        // Check both 'attachment_files' and 'attachment_files[]' formats
+        $files = [];
         if ($request->hasFile('attachment_files')) {
-            foreach ($request->file('attachment_files') as $file) {
+            $files = $request->file('attachment_files');
+            if (!is_array($files)) {
+                $files = [$files];
+            }
+        } elseif ($request->hasFile('attachment_files[]')) {
+            $files = $request->file('attachment_files[]');
+            if (!is_array($files)) {
+                $files = [$files];
+            }
+        }
+        
+        foreach ($files as $file) {
+            if ($file && $file->isValid()) {
                 $path = $file->store('tickets/attachments', 'public');
                 $attachmentPaths[] = $path;
+                \Log::info('File stored', ['path' => $path, 'original_name' => $file->getClientOriginalName()]);
             }
         }
 

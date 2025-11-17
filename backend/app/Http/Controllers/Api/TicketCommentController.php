@@ -34,14 +34,29 @@ class TicketCommentController extends Controller
         $validated = $request->validate([
             'message' => 'required|string',
             'attachments' => 'nullable|array',
-            'attachment_files' => 'nullable|array',
-            'attachment_files.*' => 'file|max:10240|mimes:jpg,jpeg,png,gif,pdf,doc,docx,txt',
+            'attachment_files' => 'nullable',
+            'attachment_files.*' => 'nullable|file|max:10240|mimes:jpg,jpeg,png,gif,pdf,doc,docx,txt',
         ]);
 
         // Handle file uploads
         $attachmentPaths = [];
+        
+        // Check both 'attachment_files' and 'attachment_files[]' formats
+        $files = [];
         if ($request->hasFile('attachment_files')) {
-            foreach ($request->file('attachment_files') as $file) {
+            $files = $request->file('attachment_files');
+            if (!is_array($files)) {
+                $files = [$files];
+            }
+        } elseif ($request->hasFile('attachment_files[]')) {
+            $files = $request->file('attachment_files[]');
+            if (!is_array($files)) {
+                $files = [$files];
+            }
+        }
+        
+        foreach ($files as $file) {
+            if ($file && $file->isValid()) {
                 $path = $file->store('tickets/comments', 'public');
                 $attachmentPaths[] = $path;
             }
