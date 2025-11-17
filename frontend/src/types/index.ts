@@ -76,7 +76,29 @@ export interface DashboardData {
     name: string;
     count: number;
   }>;
-  recent_movements: Movement[];
+  recent_movements: Array<Movement | {
+    id: number;
+    type: 'movement' | 'assignment_checkout' | 'assignment_return';
+    product?: {
+      id: number;
+      name: string;
+      category?: string | null;
+    } | null;
+    movement_type?: string;
+    quantity?: number;
+    assigned_to?: string;
+    employee?: {
+      id: number;
+      name: string;
+      employee_code: string;
+    } | null;
+    assigned_by?: string | null;
+    returned_by?: string | null;
+    assigned_at?: string;
+    returned_at?: string | null;
+    created_at: string;
+    timestamp: string;
+  }>;
   recent_tickets?: Array<{
     id: number;
     title: string;

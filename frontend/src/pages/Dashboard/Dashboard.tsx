@@ -413,24 +413,89 @@ export default function Dashboard() {
       </Card>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Recent Movements */}
+        {/* Recent Movements & Assignments */}
         <Card>
           <CardHeader>
-            <CardTitle>Recent Movements</CardTitle>
+            <CardTitle>Recent Activities</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="space-y-2">
-              {data.recent_movements.map((movement) => (
-                <div key={movement.id} className="flex justify-between items-center text-sm">
-                  <div>
-                    <span className="font-medium">{movement.product?.name}</span>
-                    <span className="text-gray-500 ml-2">({movement.type})</span>
-                  </div>
-                  <span className="text-gray-600">
-                    {new Date(movement.created_at).toLocaleDateString()}
-                  </span>
-                </div>
-              ))}
+            <div className="space-y-3">
+              {data.recent_movements.length === 0 ? (
+                <p className="text-sm text-gray-500 text-center py-4">No recent activities</p>
+              ) : (
+                data.recent_movements.map((activity: any) => {
+                  const isAssignment = activity.type === 'assignment_checkout' || activity.type === 'assignment_return';
+                  const isReturn = activity.type === 'assignment_return';
+                  const timestamp = activity.timestamp || activity.created_at || activity.assigned_at || activity.returned_at;
+                  
+                  return (
+                    <div key={activity.id} className="flex justify-between items-start text-sm border-b pb-2 last:border-b-0 last:pb-0">
+                      <div className="flex-1">
+                        {isAssignment ? (
+                          <div>
+                            <div className="flex items-center gap-2">
+                              <Link
+                                to={`/products/${activity.product?.id}`}
+                                className="font-medium text-blue-600 hover:underline"
+                              >
+                                {activity.product?.name}
+                              </Link>
+                              <span className={`px-2 py-0.5 rounded text-xs ${
+                                isReturn 
+                                  ? 'bg-green-100 text-green-800' 
+                                  : 'bg-blue-100 text-blue-800'
+                              }`}>
+                                {isReturn ? 'Returned' : 'Assigned'}
+                              </span>
+                            </div>
+                            <div className="text-gray-600 mt-1">
+                              {isReturn ? (
+                                <>
+                                  Returned by{' '}
+                                  <Link
+                                    to={`/employees/${activity.employee?.id}`}
+                                    className="font-medium hover:underline"
+                                  >
+                                    {activity.employee?.name}
+                                  </Link>
+                                </>
+                              ) : (
+                                <>
+                                  Assigned to{' '}
+                                  <Link
+                                    to={`/employees/${activity.employee?.id}`}
+                                    className="font-medium hover:underline"
+                                  >
+                                    {activity.employee?.name}
+                                  </Link>
+                                </>
+                              )}
+                            </div>
+                          </div>
+                        ) : (
+                          <div>
+                            <Link
+                              to={`/products/${activity.product?.id}`}
+                              className="font-medium text-blue-600 hover:underline"
+                            >
+                              {activity.product?.name}
+                            </Link>
+                            <span className="text-gray-500 ml-2 capitalize">
+                              ({activity.movement_type || activity.type})
+                            </span>
+                            {activity.quantity && (
+                              <span className="text-gray-600 ml-2">Qty: {activity.quantity}</span>
+                            )}
+                          </div>
+                        )}
+                      </div>
+                      <span className="text-gray-500 text-xs whitespace-nowrap ml-4">
+                        {new Date(timestamp).toLocaleDateString()}
+                      </span>
+                    </div>
+                  );
+                })
+              )}
             </div>
           </CardContent>
         </Card>

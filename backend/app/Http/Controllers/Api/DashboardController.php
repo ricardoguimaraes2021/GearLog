@@ -30,7 +30,64 @@ class DashboardController extends Controller
         $recentMovements = Movement::with(['product.category'])
             ->orderBy('created_at', 'desc')
             ->limit(10)
-            ->get();
+            ->get()
+            ->map(function ($movement) {
+                return [
+                    'id' => $movement->id,
+                    'type' => 'movement',
+                    'product' => $movement->product ? [
+                        'id' => $movement->product->id,
+                        'name' => $movement->product->name,
+                        'category' => $movement->product->category ? $movement->product->category->name : null,
+                    ] : null,
+                    'movement_type' => $movement->type,
+                    'quantity' => $movement->quantity,
+                    'assigned_to' => $movement->assigned_to,
+                    'created_at' => $movement->created_at,
+                ];
+            });
+
+        // Recent assignments (checkout and checkin)
+        $recentAssignments = AssetAssignment::with(['product.category', 'employee', 'assignedBy', 'returnedBy'])
+            ->orderBy('created_at', 'desc')
+            ->limit(10)
+            ->get()
+            ->map(function ($assignment) {
+                return [
+                    'id' => $assignment->id,
+                    'type' => $assignment->returned_at ? 'assignment_return' : 'assignment_checkout',
+                    'product' => $assignment->product ? [
+                        'id' => $assignment->product->id,
+                        'name' => $assignment->product->name,
+                        'category' => $assignment->product->category ? $assignment->product->category->name : null,
+                    ] : null,
+                    'employee' => $assignment->employee ? [
+                        'id' => $assignment->employee->id,
+                        'name' => $assignment->employee->name,
+                        'employee_code' => $assignment->employee->employee_code,
+                    ] : null,
+                    'assigned_by' => $assignment->assignedBy ? $assignment->assignedBy->name : null,
+                    'returned_by' => $assignment->returnedBy ? $assignment->returnedBy->name : null,
+                    'assigned_at' => $assignment->assigned_at,
+                    'returned_at' => $assignment->returned_at,
+                    'created_at' => $assignment->created_at,
+                ];
+            });
+
+        // Combine and sort by created_at (most recent first)
+        $recentActivities = collect()
+            ->merge($recentMovements->map(function ($movement) {
+                return array_merge($movement, ['timestamp' => $movement['created_at']]);
+            }))
+            ->merge($recentAssignments->map(function ($assignment) {
+                // Use assigned_at for checkout, returned_at for return, or created_at as fallback
+                $timestamp = $assignment['returned_at'] ?? $assignment['assigned_at'] ?? $assignment['created_at'];
+                return array_merge($assignment, ['timestamp' => $timestamp]);
+            }))
+            ->sortByDesc('timestamp')
+            ->take(10)
+            ->values()
+            ->all();
 
         // Products without movement in last 30 days
         $inactiveProductsQuery = Product::whereDoesntHave('movements', function ($query) {
@@ -144,7 +201,7 @@ class DashboardController extends Controller
                 'total_assignments' => $totalAssignments,
             ],
             'products_by_category' => $productsByCategory,
-            'recent_movements' => $recentMovements,
+            'recent_movements' => $recentActivities,
             'recent_tickets' => $recentTickets,
             'alerts' => $alerts,
         ]);
