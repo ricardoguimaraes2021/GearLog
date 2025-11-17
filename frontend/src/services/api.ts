@@ -378,10 +378,5 @@ class ApiClient {
     }
   }
 
-  const apiInstance = new ApiClient();
-  
-  // Expose client for direct access when needed (e.g., FormData uploads)
-  (apiInstance as any).client = (apiInstance as any).client;
-  
-  export const api = apiInstance;
+  export const api = new ApiClient();
 
