@@ -12,6 +12,7 @@ import Tickets from './pages/Tickets/Tickets';
 import TicketDetail from './pages/Tickets/TicketDetail';
 import TicketForm from './pages/Tickets/TicketForm';
 import TicketDashboard from './pages/Tickets/TicketDashboard';
+import Notifications from './pages/Notifications/Notifications';
 import Layout from './components/layout/Layout';
 import { Toaster } from './components/ui/toast';
 import ErrorBoundary from './components/ErrorBoundary';
@@ -76,6 +77,7 @@ function App() {
               <Route path="tickets/new" element={<TicketForm />} />
               <Route path="tickets/:id" element={<TicketDetail />} />
               <Route path="tickets/:id/edit" element={<TicketForm />} />
+              <Route path="notifications" element={<Notifications />} />
             </Route>
           </Routes>
       </BrowserRouter>

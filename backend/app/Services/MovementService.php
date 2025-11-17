@@ -41,7 +41,15 @@ class MovementService
                 );
             }
 
+            $oldQuantity = $product->quantity;
             $product->update(['quantity' => $newQuantity]);
+            $product->refresh();
+
+            // Fire notification events
+            // If movement results in low stock (<= 1)
+            if ($newQuantity <= 1 && $oldQuantity > 1) {
+                event(new \App\Events\LowStockAlert($product));
+            }
 
             // Log activity
             Log::info("Movement created: {$movement->type} for product {$product->id}", [

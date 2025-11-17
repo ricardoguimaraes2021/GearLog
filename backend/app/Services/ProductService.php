@@ -28,11 +28,27 @@ class ProductService
         // Generate QR code
         $this->qrCodeService->generateForProduct($product);
 
+        $product->refresh();
+
+        // Fire notification events
+        // If product is created as damaged
+        if ($product->status === 'damaged') {
+            event(new \App\Events\ProductDamaged($product));
+        }
+
+        // If product is created with low stock
+        if ($product->quantity <= 1) {
+            event(new \App\Events\LowStockAlert($product));
+        }
+
         return $product->fresh();
     }
 
     public function updateProduct(Product $product, array $data, ?UploadedFile $image = null): Product
     {
+        $oldStatus = $product->status;
+        $oldQuantity = $product->quantity;
+
         // Handle image upload
         if ($image) {
             // Delete old image if exists
@@ -43,6 +59,18 @@ class ProductService
         }
 
         $product->update($data);
+        $product->refresh();
+
+        // Fire notification events
+        // If status changed to damaged
+        if (isset($data['status']) && $data['status'] === 'damaged' && $oldStatus !== 'damaged') {
+            event(new \App\Events\ProductDamaged($product));
+        }
+
+        // If quantity changed to low stock (<= 1)
+        if (isset($data['quantity']) && $data['quantity'] <= 1 && $oldQuantity > 1) {
+            event(new \App\Events\LowStockAlert($product));
+        }
 
         return $product->fresh();
     }
