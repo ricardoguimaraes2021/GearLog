@@ -72,7 +72,9 @@ class TicketController extends Controller
         }
 
         $perPage = $request->get('per_page', 15);
-        $tickets = $query->orderBy('created_at', 'desc')->paginate($perPage);
+        $tickets = $query->with(['product', 'employee', 'openedBy', 'assignedTo'])
+            ->orderBy('created_at', 'desc')
+            ->paginate($perPage);
 
         return response()->json($tickets);
     }
@@ -84,6 +86,7 @@ class TicketController extends Controller
         $validated = $request->validate([
             'title' => 'required|string|max:255',
             'product_id' => 'nullable|exists:products,id',
+            'employee_id' => 'nullable|exists:employees,id',
             'assigned_to' => 'nullable|exists:users,id',
             'priority' => 'nullable|in:low,medium,high,critical',
             'type' => 'nullable|in:damage,maintenance,update,audit,other',

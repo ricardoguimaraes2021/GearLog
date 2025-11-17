@@ -67,6 +67,7 @@ Route::prefix('v1')->middleware('throttle:60,1')->group(function () {
 
             // Departments
             Route::apiResource('departments', DepartmentController::class);
+            Route::get('/departments/stats/usage', [DepartmentController::class, 'usageStats']);
 
             // Assignments
             Route::post('/assignments/checkout', [AssignmentController::class, 'checkout']);

@@ -14,6 +14,7 @@ class Ticket extends Model
     protected $fillable = [
         'title',
         'product_id',
+        'employee_id',
         'opened_by',
         'assigned_to',
         'priority',
@@ -41,6 +42,11 @@ class Ticket extends Model
     public function product(): BelongsTo
     {
         return $this->belongsTo(Product::class);
+    }
+
+    public function employee(): BelongsTo
+    {
+        return $this->belongsTo(Employee::class);
     }
 
     public function openedBy(): BelongsTo
