@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Plus, Search, Filter, ChevronLeft, ChevronRight } from 'lucide-react';
-import { toast } from 'sonner';
+// Toast is handled by store
 import { Skeleton } from '@/components/ui/skeleton';
 import type { Ticket } from '@/stores/ticketStore';
 
