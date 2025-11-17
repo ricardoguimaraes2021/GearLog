@@ -8,11 +8,16 @@ use App\Models\Product;
 use App\Models\Ticket;
 use App\Models\Employee;
 use App\Models\AssetAssignment;
+use App\Services\SlaService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
 class DashboardController extends Controller
 {
+    public function __construct(
+        protected SlaService $slaService
+    ) {}
+
     public function index()
     {
         $totalProducts = Product::count();
@@ -171,6 +176,85 @@ class DashboardController extends Controller
         $activeEmployees = Employee::where('status', 'active')->count();
         $totalAssignments = AssetAssignment::whereNull('returned_at')->count();
 
+        // Ticket alerts - SLA violations
+        $slaViolatedTickets = Ticket::where('sla_violated', true)
+            ->whereIn('status', ['open', 'in_progress', 'waiting_parts'])
+            ->with(['product', 'assignedTo'])
+            ->orderBy('created_at', 'desc')
+            ->get()
+            ->map(function ($ticket) {
+                return [
+                    'id' => $ticket->id,
+                    'title' => $ticket->title,
+                    'priority' => $ticket->priority,
+                    'status' => $ticket->status,
+                    'product' => $ticket->product ? $ticket->product->name : null,
+                    'assigned_to' => $ticket->assignedTo ? $ticket->assignedTo->name : null,
+                    'created_at' => $ticket->created_at,
+                ];
+            });
+
+        // Ticket alerts - SLA at risk (80% of time elapsed)
+        $slaAtRiskTickets = Ticket::whereIn('status', ['open', 'in_progress', 'waiting_parts'])
+            ->with(['product', 'assignedTo'])
+            ->get()
+            ->filter(function ($ticket) {
+                $risks = $this->slaService->isSlaAtRisk($ticket);
+                return $risks['first_response'] || $risks['resolution'];
+            })
+            ->take(10)
+            ->map(function ($ticket) {
+                $risks = $this->slaService->isSlaAtRisk($ticket);
+                return [
+                    'id' => $ticket->id,
+                    'title' => $ticket->title,
+                    'priority' => $ticket->priority,
+                    'status' => $ticket->status,
+                    'product' => $ticket->product ? $ticket->product->name : null,
+                    'assigned_to' => $ticket->assignedTo ? $ticket->assignedTo->name : null,
+                    'first_response_at_risk' => $risks['first_response'],
+                    'resolution_at_risk' => $risks['resolution'],
+                    'created_at' => $ticket->created_at,
+                ];
+            })
+            ->values();
+
+        // Critical tickets (open/in progress)
+        $criticalTicketsList = Ticket::where('priority', 'critical')
+            ->whereIn('status', ['open', 'in_progress'])
+            ->with(['product', 'assignedTo'])
+            ->orderBy('created_at', 'desc')
+            ->limit(10)
+            ->get()
+            ->map(function ($ticket) {
+                return [
+                    'id' => $ticket->id,
+                    'title' => $ticket->title,
+                    'status' => $ticket->status,
+                    'product' => $ticket->product ? $ticket->product->name : null,
+                    'assigned_to' => $ticket->assignedTo ? $ticket->assignedTo->name : null,
+                    'created_at' => $ticket->created_at,
+                ];
+            });
+
+        // Unassigned tickets (open/in progress)
+        $unassignedTicketsList = Ticket::whereNull('assigned_to')
+            ->whereIn('status', ['open', 'in_progress'])
+            ->with(['product'])
+            ->orderBy('created_at', 'desc')
+            ->limit(10)
+            ->get()
+            ->map(function ($ticket) {
+                return [
+                    'id' => $ticket->id,
+                    'title' => $ticket->title,
+                    'priority' => $ticket->priority,
+                    'status' => $ticket->status,
+                    'product' => $ticket->product ? $ticket->product->name : null,
+                    'created_at' => $ticket->created_at,
+                ];
+            });
+
         // Alerts
         $alerts = [
             'low_stock' => $lowStockProducts,
@@ -179,6 +263,14 @@ class DashboardController extends Controller
             'damaged_products' => $damagedProductsList,
             'inactive' => $inactiveProducts,
             'inactive_products' => $inactiveProductsList,
+            'sla_violated' => $slaViolatedTickets->count(),
+            'sla_violated_tickets' => $slaViolatedTickets,
+            'sla_at_risk' => $slaAtRiskTickets->count(),
+            'sla_at_risk_tickets' => $slaAtRiskTickets,
+            'critical_tickets' => $criticalTickets,
+            'critical_tickets_list' => $criticalTicketsList,
+            'unassigned_tickets' => $unassignedTickets,
+            'unassigned_tickets_list' => $unassignedTicketsList,
         ];
 
         return response()->json([

@@ -139,6 +139,46 @@ export interface DashboardData {
       quantity: number;
       status: string;
     }>;
+    sla_violated?: number;
+    sla_violated_tickets?: Array<{
+      id: number;
+      title: string;
+      priority: string;
+      status: string;
+      product: string | null;
+      assigned_to: string | null;
+      created_at: string;
+    }>;
+    sla_at_risk?: number;
+    sla_at_risk_tickets?: Array<{
+      id: number;
+      title: string;
+      priority: string;
+      status: string;
+      product: string | null;
+      assigned_to: string | null;
+      first_response_at_risk: boolean;
+      resolution_at_risk: boolean;
+      created_at: string;
+    }>;
+    critical_tickets?: number;
+    critical_tickets_list?: Array<{
+      id: number;
+      title: string;
+      status: string;
+      product: string | null;
+      assigned_to: string | null;
+      created_at: string;
+    }>;
+    unassigned_tickets?: number;
+    unassigned_tickets_list?: Array<{
+      id: number;
+      title: string;
+      priority: string;
+      status: string;
+      product: string | null;
+      created_at: string;
+    }>;
   };
 }
 

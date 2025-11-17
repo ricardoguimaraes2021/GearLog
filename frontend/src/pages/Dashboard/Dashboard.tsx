@@ -12,13 +12,21 @@ export default function Dashboard() {
     low_stock: boolean;
     damaged: boolean;
     inactive: boolean;
+    sla_violated: boolean;
+    sla_at_risk: boolean;
+    critical_tickets: boolean;
+    unassigned_tickets: boolean;
   }>({
     low_stock: false,
     damaged: false,
     inactive: false,
+    sla_violated: false,
+    sla_at_risk: false,
+    critical_tickets: false,
+    unassigned_tickets: false,
   });
 
-  const toggleAlert = (alertType: 'low_stock' | 'damaged' | 'inactive') => {
+  const toggleAlert = (alertType: 'low_stock' | 'damaged' | 'inactive' | 'sla_violated' | 'sla_at_risk' | 'critical_tickets' | 'unassigned_tickets') => {
     setExpandedAlerts((prev) => ({
       ...prev,
       [alertType]: !prev[alertType],
@@ -254,7 +262,13 @@ export default function Dashboard() {
       )}
 
       {/* Alerts */}
-      {(data.alerts.low_stock > 0 || data.alerts.damaged > 0 || data.alerts.inactive > 0) && (
+      {(data.alerts.low_stock > 0 || 
+        data.alerts.damaged > 0 || 
+        data.alerts.inactive > 0 ||
+        (data.alerts.sla_violated && data.alerts.sla_violated > 0) ||
+        (data.alerts.sla_at_risk && data.alerts.sla_at_risk > 0) ||
+        (data.alerts.critical_tickets && data.alerts.critical_tickets > 0) ||
+        (data.alerts.unassigned_tickets && data.alerts.unassigned_tickets > 0)) && (
         <Card>
           <CardHeader>
             <CardTitle>Alerts</CardTitle>
@@ -384,6 +398,216 @@ export default function Dashboard() {
                             )}
                           </div>
                           <span className="text-gray-600">Qty: {product.quantity}</span>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )}
+              {/* SLA Violated Tickets */}
+              {data.alerts.sla_violated !== undefined && data.alerts.sla_violated > 0 && (
+                <div className="border-b pb-4 last:border-b-0 last:pb-0">
+                  <button
+                    onClick={() => toggleAlert('sla_violated')}
+                    className="flex items-center justify-between w-full text-left text-red-600 hover:text-red-700"
+                  >
+                    <div className="flex items-center">
+                      <AlertTriangle className="h-4 w-4 mr-2" />
+                      <span className="font-medium">
+                        {data.alerts.sla_violated} ticket(s) with SLA violations
+                      </span>
+                    </div>
+                    {expandedAlerts.sla_violated ? (
+                      <ChevronUp className="h-4 w-4" />
+                    ) : (
+                      <ChevronDown className="h-4 w-4" />
+                    )}
+                  </button>
+                  {expandedAlerts.sla_violated && data.alerts.sla_violated_tickets && (
+                    <div className="mt-3 ml-6 space-y-2">
+                      {data.alerts.sla_violated_tickets.map((ticket) => (
+                        <div
+                          key={ticket.id}
+                          className="flex items-center justify-between p-2 bg-red-50 rounded text-sm"
+                        >
+                          <div className="flex-1">
+                            <Link
+                              to={`/tickets/${ticket.id}`}
+                              className="font-medium text-gray-900 hover:text-red-600"
+                            >
+                              #{ticket.id} - {ticket.title}
+                            </Link>
+                            <div className="text-xs text-gray-500 mt-1">
+                              {ticket.product && (
+                                <span>Product: {ticket.product}</span>
+                              )}
+                              {ticket.assigned_to && (
+                                <span className="ml-2">Assigned to: {ticket.assigned_to}</span>
+                              )}
+                            </div>
+                          </div>
+                          <span className={`px-2 py-0.5 text-xs font-medium rounded-full ${getPriorityColor(ticket.priority)}`}>
+                            {ticket.priority.toUpperCase()}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )}
+              {/* SLA At Risk Tickets */}
+              {data.alerts.sla_at_risk !== undefined && data.alerts.sla_at_risk > 0 && (
+                <div className="border-b pb-4 last:border-b-0 last:pb-0">
+                  <button
+                    onClick={() => toggleAlert('sla_at_risk')}
+                    className="flex items-center justify-between w-full text-left text-orange-600 hover:text-orange-700"
+                  >
+                    <div className="flex items-center">
+                      <Clock className="h-4 w-4 mr-2" />
+                      <span className="font-medium">
+                        {data.alerts.sla_at_risk} ticket(s) at risk of SLA violation
+                      </span>
+                    </div>
+                    {expandedAlerts.sla_at_risk ? (
+                      <ChevronUp className="h-4 w-4" />
+                    ) : (
+                      <ChevronDown className="h-4 w-4" />
+                    )}
+                  </button>
+                  {expandedAlerts.sla_at_risk && data.alerts.sla_at_risk_tickets && (
+                    <div className="mt-3 ml-6 space-y-2">
+                      {data.alerts.sla_at_risk_tickets.map((ticket) => (
+                        <div
+                          key={ticket.id}
+                          className="flex items-center justify-between p-2 bg-orange-50 rounded text-sm"
+                        >
+                          <div className="flex-1">
+                            <Link
+                              to={`/tickets/${ticket.id}`}
+                              className="font-medium text-gray-900 hover:text-orange-600"
+                            >
+                              #{ticket.id} - {ticket.title}
+                            </Link>
+                            <div className="text-xs text-gray-500 mt-1">
+                              {ticket.product && (
+                                <span>Product: {ticket.product}</span>
+                              )}
+                              {ticket.assigned_to && (
+                                <span className="ml-2">Assigned to: {ticket.assigned_to}</span>
+                              )}
+                              {(ticket.first_response_at_risk || ticket.resolution_at_risk) && (
+                                <span className="ml-2 text-orange-600">
+                                  {ticket.first_response_at_risk && ticket.resolution_at_risk
+                                    ? 'First Response & Resolution at risk'
+                                    : ticket.first_response_at_risk
+                                    ? 'First Response at risk'
+                                    : 'Resolution at risk'}
+                                </span>
+                              )}
+                            </div>
+                          </div>
+                          <span className={`px-2 py-0.5 text-xs font-medium rounded-full ${getPriorityColor(ticket.priority)}`}>
+                            {ticket.priority.toUpperCase()}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )}
+              {/* Critical Tickets */}
+              {data.alerts.critical_tickets !== undefined && data.alerts.critical_tickets > 0 && (
+                <div className="border-b pb-4 last:border-b-0 last:pb-0">
+                  <button
+                    onClick={() => toggleAlert('critical_tickets')}
+                    className="flex items-center justify-between w-full text-left text-red-600 hover:text-red-700"
+                  >
+                    <div className="flex items-center">
+                      <AlertTriangle className="h-4 w-4 mr-2" />
+                      <span className="font-medium">
+                        {data.alerts.critical_tickets} critical ticket(s) open
+                      </span>
+                    </div>
+                    {expandedAlerts.critical_tickets ? (
+                      <ChevronUp className="h-4 w-4" />
+                    ) : (
+                      <ChevronDown className="h-4 w-4" />
+                    )}
+                  </button>
+                  {expandedAlerts.critical_tickets && data.alerts.critical_tickets_list && (
+                    <div className="mt-3 ml-6 space-y-2">
+                      {data.alerts.critical_tickets_list.map((ticket) => (
+                        <div
+                          key={ticket.id}
+                          className="flex items-center justify-between p-2 bg-red-50 rounded text-sm"
+                        >
+                          <div className="flex-1">
+                            <Link
+                              to={`/tickets/${ticket.id}`}
+                              className="font-medium text-gray-900 hover:text-red-600"
+                            >
+                              #{ticket.id} - {ticket.title}
+                            </Link>
+                            <div className="text-xs text-gray-500 mt-1">
+                              {ticket.product && (
+                                <span>Product: {ticket.product}</span>
+                              )}
+                              {ticket.assigned_to && (
+                                <span className="ml-2">Assigned to: {ticket.assigned_to}</span>
+                              )}
+                            </div>
+                          </div>
+                          <span className={`px-2 py-0.5 text-xs font-medium rounded-full ${getStatusColor(ticket.status)}`}>
+                            {formatStatus(ticket.status)}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )}
+              {/* Unassigned Tickets */}
+              {data.alerts.unassigned_tickets !== undefined && data.alerts.unassigned_tickets > 0 && (
+                <div className="border-b pb-4 last:border-b-0 last:pb-0">
+                  <button
+                    onClick={() => toggleAlert('unassigned_tickets')}
+                    className="flex items-center justify-between w-full text-left text-yellow-600 hover:text-yellow-700"
+                  >
+                    <div className="flex items-center">
+                      <User className="h-4 w-4 mr-2" />
+                      <span className="font-medium">
+                        {data.alerts.unassigned_tickets} unassigned ticket(s)
+                      </span>
+                    </div>
+                    {expandedAlerts.unassigned_tickets ? (
+                      <ChevronUp className="h-4 w-4" />
+                    ) : (
+                      <ChevronDown className="h-4 w-4" />
+                    )}
+                  </button>
+                  {expandedAlerts.unassigned_tickets && data.alerts.unassigned_tickets_list && (
+                    <div className="mt-3 ml-6 space-y-2">
+                      {data.alerts.unassigned_tickets_list.map((ticket) => (
+                        <div
+                          key={ticket.id}
+                          className="flex items-center justify-between p-2 bg-yellow-50 rounded text-sm"
+                        >
+                          <div className="flex-1">
+                            <Link
+                              to={`/tickets/${ticket.id}`}
+                              className="font-medium text-gray-900 hover:text-yellow-600"
+                            >
+                              #{ticket.id} - {ticket.title}
+                            </Link>
+                            <div className="text-xs text-gray-500 mt-1">
+                              {ticket.product && (
+                                <span>Product: {ticket.product}</span>
+                              )}
+                            </div>
+                          </div>
+                          <span className={`px-2 py-0.5 text-xs font-medium rounded-full ${getPriorityColor(ticket.priority)}`}>
+                            {ticket.priority.toUpperCase()}
+                          </span>
                         </div>
                       ))}
                     </div>
