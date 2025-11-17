@@ -105,13 +105,13 @@ export default function ProductForm() {
     try {
       const formDataToSend = new FormData();
       Object.entries(formData).forEach(([key, value]) => {
-        // Skip specs if it's empty or not provided
+        // Skip specs completely - it's not used in the form
         if (key === 'specs') {
-          if (value && typeof value === 'object' && Object.keys(value).length > 0) {
-            formDataToSend.append(key, JSON.stringify(value));
-          }
-          // Don't append if specs is empty
-        } else if (value !== '' && value !== null && value !== undefined) {
+          return;
+        }
+        
+        // Skip empty values for other fields
+        if (value !== '' && value !== null && value !== undefined) {
           formDataToSend.append(key, value.toString());
         }
       });
