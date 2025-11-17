@@ -4,7 +4,7 @@ import { useTicketStore, type TicketComment } from '@/stores/ticketStore';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { ArrowLeft, Edit, MessageSquare, Send, User, Clock } from 'lucide-react';
+import { ArrowLeft, Edit, MessageSquare, Send, User, Clock, Paperclip, X, Download } from 'lucide-react';
 import { toast } from 'sonner';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Textarea } from '@/components/ui/textarea';
@@ -24,6 +24,7 @@ export default function TicketDetail() {
   const [showAssignForm, setShowAssignForm] = useState(false);
   const [users, setUsers] = useState<UserType[]>([]);
   const [selectedUserId, setSelectedUserId] = useState<number | null>(null);
+  const [commentFiles, setCommentFiles] = useState<File[]>([]);
 
   useEffect(() => {
     if (id) {
@@ -70,12 +71,81 @@ export default function TicketDetail() {
     return status.split('_').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
   };
 
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files || []);
+    const validFiles = files.filter(file => {
+      const maxSize = 10 * 1024 * 1024; // 10MB
+      const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'text/plain'];
+      
+      if (file.size > maxSize) {
+        toast.error(`File ${file.name} is too large. Maximum size is 10MB.`);
+        return false;
+      }
+      
+      if (!allowedTypes.includes(file.type)) {
+        toast.error(`File ${file.name} has an invalid type. Allowed: images, PDF, DOC, DOCX, TXT.`);
+        return false;
+      }
+      
+      return true;
+    });
+    
+    setCommentFiles(prev => [...prev, ...validFiles]);
+  };
+
+  const removeCommentFile = (index: number) => {
+    setCommentFiles(prev => prev.filter((_, i) => i !== index));
+  };
+
   const handleAddComment = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!commentText.trim() || !id) return;
 
-    await addComment(parseInt(id), commentText);
-    setCommentText('');
+    if (commentFiles.length > 0) {
+      // Use FormData for file upload
+      const formData = new FormData();
+      formData.append('message', commentText);
+      commentFiles.forEach((file) => {
+        formData.append('attachment_files[]', file);
+      });
+
+      try {
+        const response = await fetch(`${import.meta.env.VITE_API_URL}/api/v1/tickets/${id}/comments`, {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${localStorage.getItem('token')}`,
+            'Accept': 'application/json',
+          },
+          body: formData,
+        });
+
+        if (!response.ok) {
+          const error = await response.json();
+          throw new Error(error.error || 'Failed to add comment');
+        }
+
+        toast.success('Comment added');
+        setCommentText('');
+        setCommentFiles([]);
+        await fetchTicket(parseInt(id));
+      } catch (error: any) {
+        toast.error(error.message || 'Failed to add comment');
+      }
+    } else {
+      await addComment(parseInt(id), commentText);
+      setCommentText('');
+    }
+  };
+
+  const getFileName = (path: string) => {
+    return path.split('/').pop() || path;
+  };
+
+  const getFileUrl = (path: string) => {
+    if (path.startsWith('http://') || path.startsWith('https://')) {
+      return path;
+    }
+    return `${import.meta.env.VITE_API_URL}/storage/${path}`;
   };
 
   const handleStatusChange = async (status: string) => {
@@ -178,6 +248,38 @@ export default function TicketDetail() {
             </Card>
           )}
 
+          {/* Ticket Attachments */}
+          {currentTicket.attachments && currentTicket.attachments.length > 0 && (
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Paperclip className="w-5 h-5" />
+                  Attachments ({currentTicket.attachments.length})
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                  {currentTicket.attachments.map((path: string, index: number) => (
+                    <div key={index} className="flex items-center justify-between p-2 bg-gray-50 rounded border">
+                      <div className="flex items-center gap-2 flex-1 min-w-0">
+                        <Paperclip className="w-4 h-4 text-gray-500 flex-shrink-0" />
+                        <span className="text-sm text-gray-700 truncate">{getFileName(path)}</span>
+                      </div>
+                      <a
+                        href={getFileUrl(path)}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="ml-2 p-1 hover:bg-gray-200 rounded"
+                      >
+                        <Download className="w-4 h-4 text-blue-600" />
+                      </a>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
           {/* Comments */}
           <Card>
             <CardHeader>
@@ -198,28 +300,84 @@ export default function TicketDetail() {
                         {new Date(comment.created_at).toLocaleString()}
                       </span>
                     </div>
-                    <p className="text-gray-700 whitespace-pre-wrap">{comment.message}</p>
-                  </div>
-                ))
-              ) : (
-                <p className="text-gray-500 text-center py-4">No comments yet</p>
-              )}
+                        <p className="text-gray-700 whitespace-pre-wrap">{comment.message}</p>
+                        {comment.attachments && comment.attachments.length > 0 && (
+                          <div className="mt-2 space-y-1">
+                            {comment.attachments.map((path: string, attIndex: number) => (
+                              <div key={attIndex} className="flex items-center gap-2 p-2 bg-gray-50 rounded border text-sm">
+                                <Paperclip className="w-4 h-4 text-gray-500" />
+                                <span className="text-gray-700 flex-1 truncate">{getFileName(path)}</span>
+                                <a
+                                  href={getFileUrl(path)}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="p-1 hover:bg-gray-200 rounded"
+                                >
+                                  <Download className="w-4 h-4 text-blue-600" />
+                                </a>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    ))
+                  ) : (
+                    <p className="text-gray-500 text-center py-4">No comments yet</p>
+                  )}
 
-              {canEdit && (
-                <form onSubmit={handleAddComment} className="pt-4 border-t">
-                  <Textarea
-                    value={commentText}
-                    onChange={(e) => setCommentText(e.target.value)}
-                    placeholder="Add a comment..."
-                    rows={3}
-                    className="mb-2"
-                  />
-                  <Button type="submit" size="sm">
-                    <Send className="w-4 h-4 mr-2" />
-                    Add Comment
-                  </Button>
-                </form>
-              )}
+                  {canEdit && (
+                    <form onSubmit={handleAddComment} className="pt-4 border-t">
+                      <Textarea
+                        value={commentText}
+                        onChange={(e) => setCommentText(e.target.value)}
+                        placeholder="Add a comment..."
+                        rows={3}
+                        className="mb-2"
+                      />
+                      
+                      {/* File upload for comments */}
+                      <div className="mb-2">
+                        <input
+                          type="file"
+                          id="comment-attachments"
+                          multiple
+                          onChange={handleFileSelect}
+                          className="hidden"
+                          accept="image/*,.pdf,.doc,.docx,.txt"
+                        />
+                        <label htmlFor="comment-attachments">
+                          <Button type="button" variant="outline" size="sm" asChild>
+                            <span>
+                              <Paperclip className="w-4 h-4 mr-2" />
+                              Add Files
+                            </span>
+                          </Button>
+                        </label>
+                        {commentFiles.length > 0 && (
+                          <div className="mt-2 space-y-1">
+                            {commentFiles.map((file, index) => (
+                              <div key={index} className="flex items-center justify-between p-2 bg-blue-50 rounded border text-sm">
+                                <span className="text-gray-700">{file.name}</span>
+                                <Button
+                                  type="button"
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => removeCommentFile(index)}
+                                >
+                                  <X className="w-4 h-4" />
+                                </Button>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+
+                      <Button type="submit" size="sm">
+                        <Send className="w-4 h-4 mr-2" />
+                        Add Comment
+                      </Button>
+                    </form>
+                  )}
             </CardContent>
           </Card>
         </div>

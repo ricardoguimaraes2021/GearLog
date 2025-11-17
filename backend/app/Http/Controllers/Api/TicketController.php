@@ -8,6 +8,7 @@ use App\Models\Ticket;
 use App\Services\TicketService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
 
 class TicketController extends Controller
 {
@@ -86,12 +87,30 @@ class TicketController extends Controller
             'type' => 'nullable|in:damage,maintenance,update,audit,other',
             'description' => 'required|string',
             'attachments' => 'nullable|array',
+            'attachment_files' => 'nullable|array',
+            'attachment_files.*' => 'file|max:10240|mimes:jpg,jpeg,png,gif,pdf,doc,docx,txt',
         ]);
+
+        // Handle file uploads
+        $attachmentPaths = [];
+        if ($request->hasFile('attachment_files')) {
+            foreach ($request->file('attachment_files') as $file) {
+                $path = $file->store('tickets/attachments', 'public');
+                $attachmentPaths[] = $path;
+            }
+        }
+
+        // Merge uploaded file paths with existing attachments
+        $validated['attachments'] = array_merge($validated['attachments'] ?? [], $attachmentPaths);
 
         try {
             $ticket = $this->ticketService->createTicket($validated, Auth::id());
             return response()->json($ticket, 201);
         } catch (BusinessRuleException $e) {
+            // Clean up uploaded files if ticket creation fails
+            foreach ($attachmentPaths as $path) {
+                Storage::disk('public')->delete($path);
+            }
             return response()->json([
                 'error' => $e->getUserMessage(),
             ], 400);
@@ -116,12 +135,32 @@ class TicketController extends Controller
             'priority' => 'sometimes|in:low,medium,high,critical',
             'type' => 'sometimes|in:damage,maintenance,update,audit,other',
             'description' => 'sometimes|required|string',
+            'attachments' => 'nullable|array',
+            'attachment_files' => 'nullable|array',
+            'attachment_files.*' => 'file|max:10240|mimes:jpg,jpeg,png,gif,pdf,doc,docx,txt',
         ]);
+
+        // Handle file uploads
+        $attachmentPaths = [];
+        if ($request->hasFile('attachment_files')) {
+            foreach ($request->file('attachment_files') as $file) {
+                $path = $file->store('tickets/attachments', 'public');
+                $attachmentPaths[] = $path;
+            }
+        }
+
+        // Merge uploaded file paths with existing attachments
+        $existingAttachments = $validated['attachments'] ?? $ticket->attachments ?? [];
+        $validated['attachments'] = array_merge($existingAttachments, $attachmentPaths);
 
         try {
             $ticket = $this->ticketService->updateTicket($ticket, $validated, Auth::id());
             return response()->json($ticket);
         } catch (BusinessRuleException $e) {
+            // Clean up uploaded files if update fails
+            foreach ($attachmentPaths as $path) {
+                Storage::disk('public')->delete($path);
+            }
             return response()->json([
                 'error' => $e->getUserMessage(),
             ], 400);

@@ -8,6 +8,7 @@ use App\Models\TicketComment;
 use App\Models\TicketLog;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
 
 class TicketCommentController extends Controller
 {
