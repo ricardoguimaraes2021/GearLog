@@ -100,8 +100,15 @@ class ApiClient {
         }
 
         if (error.response?.status === 401) {
-          localStorage.removeItem('auth_token');
-          window.location.href = '/login';
+          // Only clear auth if we're not already on login page
+          // and if the error is not from a protected route check
+          const token = localStorage.getItem('auth_token');
+          if (token && !window.location.pathname.includes('/login')) {
+            // Token might be expired, let authStore handle it
+            // Don't immediately redirect, let the app handle auth state
+            localStorage.removeItem('auth_token');
+            localStorage.removeItem('auth_user');
+          }
         }
         
         // Extract user-friendly error message
