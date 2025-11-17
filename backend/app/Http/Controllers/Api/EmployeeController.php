@@ -89,9 +89,6 @@ class EmployeeController extends Controller
             'assignments.product.category',
             'assignments.assignedBy',
             'assignments.returnedBy',
-            'tickets' => function ($query) {
-                $query->orderBy('created_at', 'desc')->limit(10);
-            },
             'logs.user',
         ]);
 
