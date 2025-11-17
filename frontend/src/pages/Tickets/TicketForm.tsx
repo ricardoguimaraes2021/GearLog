@@ -122,42 +122,31 @@ export default function TicketForm() {
       });
 
       if (isEditing && id) {
-        // For update, use FormData
-        const response = await fetch(`${import.meta.env.VITE_API_URL}/api/v1/tickets/${id}`, {
-          method: 'PUT',
-          headers: {
-            'Authorization': `Bearer ${localStorage.getItem('token')}`,
-            'Accept': 'application/json',
-          },
-          body: formDataToSend,
-        });
-
-        if (!response.ok) {
-          const error = await response.json();
-          throw new Error(error.error || 'Failed to update ticket');
+        // For update, use FormData with api client
+        try {
+          const response = await api.client.put(`/tickets/${id}`, formDataToSend, {
+            headers: {
+              'Content-Type': 'multipart/form-data',
+            },
+          });
+          toast.success('Ticket updated successfully');
+          navigate(`/tickets/${id}`);
+        } catch (error: any) {
+          throw new Error(error.response?.data?.error || 'Failed to update ticket');
         }
-
-        toast.success('Ticket updated successfully');
-        navigate(`/tickets/${id}`);
       } else {
-        // For create, use FormData
-        const response = await fetch(`${import.meta.env.VITE_API_URL}/api/v1/tickets`, {
-          method: 'POST',
-          headers: {
-            'Authorization': `Bearer ${localStorage.getItem('token')}`,
-            'Accept': 'application/json',
-          },
-          body: formDataToSend,
-        });
-
-        if (!response.ok) {
-          const error = await response.json();
-          throw new Error(error.error || 'Failed to create ticket');
+        // For create, use FormData with api client
+        try {
+          const response = await api.client.post('/tickets', formDataToSend, {
+            headers: {
+              'Content-Type': 'multipart/form-data',
+            },
+          });
+          toast.success('Ticket created successfully');
+          navigate(`/tickets/${response.data.id}`);
+        } catch (error: any) {
+          throw new Error(error.response?.data?.error || 'Failed to create ticket');
         }
-
-        const ticket = await response.json();
-        toast.success('Ticket created successfully');
-        navigate(`/tickets/${ticket.id}`);
       }
     } catch (error: any) {
       toast.error(error.message || 'Failed to save ticket');

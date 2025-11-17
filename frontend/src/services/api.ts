@@ -4,7 +4,7 @@ import type { User, Product, Category, Movement, DashboardData, PaginatedRespons
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000/api/v1';
 
 class ApiClient {
-  private client: AxiosInstance;
+  public client: AxiosInstance;
   private baseURL: string;
 
   constructor() {
@@ -378,5 +378,10 @@ class ApiClient {
     }
   }
 
-  export const api = new ApiClient();
+  const apiInstance = new ApiClient();
+  
+  // Expose client for direct access when needed (e.g., FormData uploads)
+  (apiInstance as any).client = (apiInstance as any).client;
+  
+  export const api = apiInstance;
 
