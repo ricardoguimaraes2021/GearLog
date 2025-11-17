@@ -5,7 +5,6 @@ import { Button } from '@/components/ui/button';
 import { useNotificationStore, type Notification } from '@/stores/notificationStore';
 import { Bell, Check, X, Ticket, Package, AlertTriangle, Clock } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
-import { formatDistanceToNowStrict } from 'date-fns';
 
 interface NotificationDropdownProps {
   onClose: () => void;
@@ -103,7 +102,7 @@ export default function NotificationDropdown({ onClose }: NotificationDropdownPr
                       <p className="text-sm text-gray-600 mt-1">{notification.message}</p>
                       <div className="flex items-center gap-2 mt-2 text-xs text-gray-500">
                         <Clock className="h-3 w-3" />
-                        {formatDistanceToNowStrict(new Date(notification.created_at), { addSuffix: true })}
+                        {formatDistanceToNow(new Date(notification.created_at), { addSuffix: true })}
                       </div>
                     </div>
                     <Button
