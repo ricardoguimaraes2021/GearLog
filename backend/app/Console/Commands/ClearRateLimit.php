@@ -70,11 +70,13 @@ class ClearRateLimit extends Command
         
         foreach ($commonKeys as $key) {
             RateLimiter::clear($key);
+            Cache::forget($key);
             $this->info("Cleared: {$key}");
         }
         
-        // Also try to clear by IP patterns
-        $this->info('Clearing all login-related rate limits...');
+        // Clear all cache to be sure
+        Cache::flush();
+        $this->info('All cache cleared!');
         
         $this->info('Login rate limits cleared!');
         return Command::SUCCESS;
