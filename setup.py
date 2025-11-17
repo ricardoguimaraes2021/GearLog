@@ -428,9 +428,12 @@ SANCTUM_STATEFUL_DOMAINS=localhost:5173,127.0.0.1:5173
         
         # Create database if it doesn't exist
         print_info(f"Creating database '{db_name}' if it doesn't exist...")
-        mysql_command = f"CREATE DATABASE IF NOT EXISTS {db_name};"
-        run_command(["mysql", "-u", db_user, f"-p{db_pass}" if db_pass else ""], 
-                   input=mysql_command.encode(), check=False)
+        mysql_cmd = ["mysql", "-u", db_user]
+        if db_pass:
+            mysql_cmd.append(f"-p{db_pass}")
+        mysql_cmd.append("-e")
+        mysql_cmd.append(f"CREATE DATABASE IF NOT EXISTS {db_name};")
+        run_command(mysql_cmd, check=False)
         
         print_success("Database configured")
 
