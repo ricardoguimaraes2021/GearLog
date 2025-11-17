@@ -13,6 +13,9 @@ import TicketDetail from './pages/Tickets/TicketDetail';
 import TicketForm from './pages/Tickets/TicketForm';
 import TicketDashboard from './pages/Tickets/TicketDashboard';
 import Notifications from './pages/Notifications/Notifications';
+import Employees from './pages/Employees/Employees';
+import EmployeeDetail from './pages/Employees/EmployeeDetail';
+import EmployeeForm from './pages/Employees/EmployeeForm';
 import Layout from './components/layout/Layout';
 import { Toaster } from './components/ui/toast';
 import ErrorBoundary from './components/ErrorBoundary';
@@ -78,6 +81,10 @@ function App() {
               <Route path="tickets/:id" element={<TicketDetail />} />
               <Route path="tickets/:id/edit" element={<TicketForm />} />
               <Route path="notifications" element={<Notifications />} />
+              <Route path="employees" element={<Employees />} />
+              <Route path="employees/new" element={<EmployeeForm />} />
+              <Route path="employees/:id" element={<EmployeeDetail />} />
+              <Route path="employees/:id/edit" element={<EmployeeForm />} />
             </Route>
           </Routes>
       </BrowserRouter>

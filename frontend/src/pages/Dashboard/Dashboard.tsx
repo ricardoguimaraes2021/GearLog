@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useDashboardStore } from '@/stores/dashboardStore';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Package, AlertTriangle, DollarSign, TrendingDown, ChevronDown, ChevronUp, Ticket, Clock, User } from 'lucide-react';
+import { Package, AlertTriangle, DollarSign, TrendingDown, ChevronDown, ChevronUp, Ticket, Clock, User, Users, Briefcase } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -144,6 +144,27 @@ export default function Dashboard() {
     },
   ] : [];
 
+  const employeeKpiCards = data.employees ? [
+    {
+      title: 'Total Employees',
+      value: data.employees.total_employees,
+      icon: Users,
+      color: 'text-blue-600',
+    },
+    {
+      title: 'Active Employees',
+      value: data.employees.active_employees,
+      icon: User,
+      color: 'text-green-600',
+    },
+    {
+      title: 'Active Assignments',
+      value: data.employees.total_assignments,
+      icon: Briefcase,
+      color: 'text-purple-600',
+    },
+  ] : [];
+
   return (
     <div className="space-y-6">
       <div>
@@ -185,6 +206,36 @@ export default function Dashboard() {
           </div>
           <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
             {ticketKpiCards.map((kpi) => {
+              const Icon = kpi.icon;
+              return (
+                <Card key={kpi.title}>
+                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                    <CardTitle className="text-sm font-medium">{kpi.title}</CardTitle>
+                    <Icon className={`h-4 w-4 ${kpi.color}`} />
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-2xl font-bold">{kpi.value}</div>
+                  </CardContent>
+                </Card>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      {/* Employee KPIs */}
+      {employeeKpiCards.length > 0 && (
+        <div>
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-xl font-semibold text-gray-900">Employees Overview</h2>
+            <Link to="/employees">
+              <Button variant="outline" size="sm">
+                View All Employees
+              </Button>
+            </Link>
+          </div>
+          <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
+            {employeeKpiCards.map((kpi) => {
               const Icon = kpi.icon;
               return (
                 <Card key={kpi.title}>

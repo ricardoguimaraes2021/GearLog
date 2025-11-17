@@ -6,6 +6,8 @@ use App\Http\Controllers\Controller;
 use App\Models\Movement;
 use App\Models\Product;
 use App\Models\Ticket;
+use App\Models\Employee;
+use App\Models\AssetAssignment;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -107,6 +109,11 @@ class DashboardController extends Controller
                 ];
             });
 
+        // Employee metrics
+        $totalEmployees = Employee::count();
+        $activeEmployees = Employee::where('status', 'active')->count();
+        $totalAssignments = AssetAssignment::whereNull('returned_at')->count();
+
         // Alerts
         $alerts = [
             'low_stock' => $lowStockProducts,
@@ -130,6 +137,11 @@ class DashboardController extends Controller
                 'in_progress_tickets' => $inProgressTickets,
                 'critical_tickets' => $criticalTickets,
                 'unassigned_tickets' => $unassignedTickets,
+            ],
+            'employees' => [
+                'total_employees' => $totalEmployees,
+                'active_employees' => $activeEmployees,
+                'total_assignments' => $totalAssignments,
             ],
             'products_by_category' => $productsByCategory,
             'recent_movements' => $recentMovements,

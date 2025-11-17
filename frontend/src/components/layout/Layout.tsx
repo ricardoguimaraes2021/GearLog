@@ -1,7 +1,7 @@
 import { Outlet, Link, useLocation } from 'react-router-dom';
 import { useAuthStore } from '@/stores/authStore';
 import { Button } from '@/components/ui/button';
-import { LayoutDashboard, Package, FolderTree, Ticket, LogOut, Menu, X } from 'lucide-react';
+import { LayoutDashboard, Package, FolderTree, Ticket, Users, LogOut, Menu, X } from 'lucide-react';
 import { useState } from 'react';
 import NotificationBell from '@/components/notifications/NotificationBell';
 
@@ -14,6 +14,7 @@ export default function Layout() {
     { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
     { name: 'Products', href: '/products', icon: Package },
     { name: 'Categories', href: '/categories', icon: FolderTree },
+    { name: 'Employees', href: '/employees', icon: Users },
     { name: 'Tickets', href: '/tickets', icon: Ticket },
   ];
 
