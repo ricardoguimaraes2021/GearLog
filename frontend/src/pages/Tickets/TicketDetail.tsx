@@ -11,7 +11,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { useAuthStore } from '@/stores/authStore';
 import { api } from '@/services/api';
-import type { User } from '@/types';
+import type { User as UserType } from '@/types';
 
 export default function TicketDetail() {
   const { id } = useParams<{ id: string }>();
@@ -22,7 +22,7 @@ export default function TicketDetail() {
   const [showResolveForm, setShowResolveForm] = useState(false);
   const [resolutionText, setResolutionText] = useState('');
   const [showAssignForm, setShowAssignForm] = useState(false);
-  const [users, setUsers] = useState<User[]>([]);
+  const [users, setUsers] = useState<UserType[]>([]);
   const [selectedUserId, setSelectedUserId] = useState<number | null>(null);
 
   useEffect(() => {
