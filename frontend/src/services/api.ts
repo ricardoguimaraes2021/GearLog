@@ -293,6 +293,12 @@ class ApiClient {
       return response.data;
     }
 
+    // Users
+    async getUsers(params?: { role?: string; search?: string }) {
+      const response = await this.client.get<User[]>('/users', { params });
+      return response.data;
+    }
+
     // Tickets
     async getTickets(params?: Record<string, any>) {
       const response = await this.client.get('/tickets', { params });

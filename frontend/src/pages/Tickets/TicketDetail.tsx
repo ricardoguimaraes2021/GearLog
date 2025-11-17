@@ -10,6 +10,8 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { useAuthStore } from '@/stores/authStore';
+import { api } from '@/services/api';
+import type { User } from '@/types';
 
 export default function TicketDetail() {
   const { id } = useParams<{ id: string }>();
@@ -19,12 +21,29 @@ export default function TicketDetail() {
   const [commentText, setCommentText] = useState('');
   const [showResolveForm, setShowResolveForm] = useState(false);
   const [resolutionText, setResolutionText] = useState('');
+  const [showAssignForm, setShowAssignForm] = useState(false);
+  const [users, setUsers] = useState<User[]>([]);
+  const [selectedUserId, setSelectedUserId] = useState<number | null>(null);
 
   useEffect(() => {
     if (id) {
       fetchTicket(parseInt(id));
     }
-  }, [id]);
+    // Load users if user can assign
+    const userRoles = user?.roles?.map(r => r.name) || [];
+    if (userRoles.some(r => ['admin', 'gestor'].includes(r))) {
+      loadUsers();
+    }
+  }, [id, user]);
+
+  const loadUsers = async () => {
+    try {
+      const usersList = await api.getUsers();
+      setUsers(usersList);
+    } catch (error) {
+      console.error('Failed to load users:', error);
+    }
+  };
 
   const getPriorityColor = (priority: string) => {
     const colors = {
@@ -77,6 +96,18 @@ export default function TicketDetail() {
   const handleClose = async () => {
     if (!id) return;
     await closeTicket(parseInt(id), currentTicket?.resolution);
+  };
+
+  const handleAssign = async () => {
+    if (!id) return;
+    await assignTicket(parseInt(id), selectedUserId);
+    setShowAssignForm(false);
+    setSelectedUserId(null);
+  };
+
+  const handleUnassign = async () => {
+    if (!id) return;
+    await assignTicket(parseInt(id), null);
   };
 
   const canEdit = currentTicket && currentTicket.status !== 'closed';
@@ -277,12 +308,41 @@ export default function TicketDetail() {
                 <p className="mt-1">{currentTicket.openedBy?.name || 'Unknown'}</p>
               </div>
 
-              {currentTicket.assignedTo && (
-                <div>
-                  <Label className="text-gray-500">Assigned To</Label>
-                  <p className="mt-1">{currentTicket.assignedTo.name}</p>
-                </div>
-              )}
+              <div>
+                <Label className="text-gray-500">Assigned To</Label>
+                {currentTicket.assignedTo ? (
+                  <div className="mt-1">
+                    <p className="mb-2">{currentTicket.assignedTo.name}</p>
+                    {canAssign && canEdit && (
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="w-full"
+                        onClick={handleUnassign}
+                      >
+                        Unassign
+                      </Button>
+                    )}
+                  </div>
+                ) : (
+                  <div className="mt-1">
+                    <p className="text-gray-400 mb-2">Not assigned</p>
+                    {canAssign && canEdit && (
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="w-full"
+                        onClick={() => {
+                          setSelectedUserId(null);
+                          setShowAssignForm(true);
+                        }}
+                      >
+                        Assign User
+                      </Button>
+                    )}
+                  </div>
+                )}
+              </div>
 
               <div>
                 <Label className="text-gray-500">Created</Label>
@@ -312,6 +372,46 @@ export default function TicketDetail() {
                     Resolve
                   </Button>
                   <Button variant="outline" onClick={() => setShowResolveForm(false)}>
+                    Cancel
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
+          {showAssignForm && (
+            <Card>
+              <CardHeader>
+                <CardTitle>Assign Ticket</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div>
+                  <Label>Select User *</Label>
+                  <select
+                    value={selectedUserId || ''}
+                    onChange={(e) => setSelectedUserId(e.target.value ? parseInt(e.target.value) : null)}
+                    className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm mt-1"
+                  >
+                    <option value="">Select a user...</option>
+                    {users.map((u) => (
+                      <option key={u.id} value={u.id}>
+                        {u.name} ({u.email})
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <div className="flex gap-2">
+                  <Button 
+                    onClick={handleAssign} 
+                    className="flex-1"
+                    disabled={!selectedUserId}
+                  >
+                    Assign
+                  </Button>
+                  <Button variant="outline" onClick={() => {
+                    setShowAssignForm(false);
+                    setSelectedUserId(null);
+                  }}>
                     Cancel
                   </Button>
                 </div>

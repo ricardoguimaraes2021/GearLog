@@ -7,6 +7,7 @@ use App\Http\Controllers\Api\MovementController;
 use App\Http\Controllers\Api\ProductController;
 use App\Http\Controllers\Api\TicketController;
 use App\Http\Controllers\Api\TicketCommentController;
+use App\Http\Controllers\Api\UserController;
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('v1')->middleware('throttle:60,1')->group(function () {
@@ -30,6 +31,9 @@ Route::prefix('v1')->middleware('throttle:60,1')->group(function () {
 
         // Dashboard
         Route::get('/dashboard', [DashboardController::class, 'index']);
+
+        // Users (for assignment)
+        Route::get('/users', [UserController::class, 'index']);
 
         // Tickets
         Route::apiResource('tickets', TicketController::class);
