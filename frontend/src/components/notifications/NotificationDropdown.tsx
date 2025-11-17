@@ -19,6 +19,7 @@ export default function NotificationDropdown({ onClose }: NotificationDropdownPr
     markAsRead,
     markAllAsRead,
     deleteNotification,
+    testNotification,
   } = useNotificationStore();
 
   useEffect(() => {
@@ -130,15 +131,25 @@ export default function NotificationDropdown({ onClose }: NotificationDropdownPr
             })}
           </div>
         )}
-        {notifications.length > 0 && (
-          <div className="p-2 border-t text-center">
-            <Link to="/notifications">
+        <div className="p-2 border-t space-y-2">
+          {notifications.length > 0 && (
+            <Link to="/notifications" className="block">
               <Button variant="ghost" size="sm" className="w-full" onClick={onClose}>
                 View all notifications
               </Button>
             </Link>
-          </div>
-        )}
+          )}
+          <Button
+            variant="outline"
+            size="sm"
+            className="w-full"
+            onClick={async () => {
+              await testNotification();
+            }}
+          >
+            🧪 Test Notification
+          </Button>
+        </div>
       </CardContent>
     </Card>
   );

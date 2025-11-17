@@ -32,6 +32,7 @@ interface NotificationStore {
   markAllAsRead: () => Promise<void>;
   deleteNotification: (id: number) => Promise<void>;
   addNotification: (notification: Notification) => void;
+  testNotification: () => Promise<any>;
   initializeEcho: (token: string) => void;
   disconnectEcho: () => void;
 }
@@ -48,13 +49,30 @@ export const useNotificationStore = create<NotificationStore>((set, get) => ({
       const response = await api.client.get('/notifications', {
         params: { page, per_page: 20 },
       });
+      // Handle paginated response
+      const notifications = response.data.data || response.data || [];
       set({
-        notifications: response.data.data || response.data || [],
+        notifications: Array.isArray(notifications) ? notifications : [],
         isLoading: false,
       });
     } catch (error: any) {
       console.error('Failed to fetch notifications:', error);
       set({ isLoading: false });
+    }
+  },
+
+  testNotification: async () => {
+    try {
+      const response = await api.client.post('/notifications/test');
+      toast.success('Test notification created!');
+      // Refresh notifications and count
+      await get().fetchNotifications(1);
+      await get().fetchUnreadCount();
+      return response.data;
+    } catch (error: any) {
+      toast.error('Failed to create test notification');
+      console.error(error);
+      return null;
     }
   },
 

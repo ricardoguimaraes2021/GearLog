@@ -16,6 +16,7 @@ export default function Notifications() {
     markAsRead,
     markAllAsRead,
     deleteNotification,
+    testNotification,
   } = useNotificationStore();
 
   const [page, setPage] = useState(1);
@@ -75,12 +76,22 @@ export default function Notifications() {
             {unreadCount > 0 ? `${unreadCount} unread notification${unreadCount !== 1 ? 's' : ''}` : 'All caught up!'}
           </p>
         </div>
-        {unreadCount > 0 && (
-          <Button onClick={markAllAsRead} variant="outline">
-            <Check className="w-4 h-4 mr-2" />
-            Mark all as read
+        <div className="flex gap-2">
+          <Button
+            onClick={async () => {
+              await testNotification();
+            }}
+            variant="outline"
+          >
+            🧪 Test
           </Button>
-        )}
+          {unreadCount > 0 && (
+            <Button onClick={markAllAsRead} variant="outline">
+              <Check className="w-4 h-4 mr-2" />
+              Mark all as read
+            </Button>
+          )}
+        </div>
       </div>
 
       {/* Filters */}
