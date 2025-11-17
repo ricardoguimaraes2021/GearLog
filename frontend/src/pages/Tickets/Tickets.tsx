@@ -179,6 +179,24 @@ export default function Tickets() {
                     <option value="other">Other</option>
                   </select>
                 </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Employee</label>
+                  <select
+                    value={filters.employee_id || ''}
+                    onChange={(e) =>
+                      handleFilterChange('employee_id', e.target.value ? parseInt(e.target.value) : undefined)
+                    }
+                    className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+                  >
+                    <option value="">All Employees</option>
+                    {employees.filter(emp => emp.status === 'active').map((employee) => (
+                      <option key={employee.id} value={employee.id}>
+                        {employee.name} ({employee.employee_code})
+                      </option>
+                    ))}
+                  </select>
+                </div>
               </div>
             )}
           </div>
