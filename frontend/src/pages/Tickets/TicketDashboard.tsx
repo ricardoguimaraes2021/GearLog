@@ -5,6 +5,7 @@ import { Ticket, AlertTriangle, Clock, User, TrendingUp, Package, FolderTree, Sh
 import { Skeleton } from '@/components/ui/skeleton';
 import { api } from '@/services/api';
 import { toast } from 'sonner';
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 
 interface TicketDashboardData {
   kpis: {
@@ -30,6 +31,12 @@ interface TicketDashboardData {
   by_category: Array<{ name: string; count: number }>;
   recent_tickets: any[];
   urgent_tickets: any[];
+  compliance_trend?: Array<{
+    date: string;
+    compliance_rate: number | null;
+    total_resolved: number;
+    within_sla: number;
+  }>;
 }
 
 export default function TicketDashboard() {

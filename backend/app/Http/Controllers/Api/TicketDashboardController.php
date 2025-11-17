@@ -145,6 +145,34 @@ class TicketDashboardController extends Controller
                 ? round(($resolvedWithinSla / $totalResolved) * 100, 2) 
                 : 0;
 
+            // SLA Compliance Trend (last 30 days)
+            $complianceTrend = [];
+            for ($i = 29; $i >= 0; $i--) {
+                $date = now()->subDays($i)->startOfDay();
+                $endDate = $date->copy()->endOfDay();
+                
+                $resolvedOnDate = Ticket::whereIn('status', ['resolved', 'closed'])
+                    ->whereNotNull('resolution_deadline')
+                    ->whereBetween('updated_at', [$date, $endDate])
+                    ->get();
+                
+                $resolvedWithinSlaOnDate = $resolvedOnDate->filter(function ($ticket) {
+                    return $ticket->updated_at && $ticket->updated_at->lte($ticket->resolution_deadline);
+                })->count();
+                
+                $totalResolvedOnDate = $resolvedOnDate->count();
+                $complianceRate = $totalResolvedOnDate > 0 
+                    ? round(($resolvedWithinSlaOnDate / $totalResolvedOnDate) * 100, 2) 
+                    : null;
+                
+                $complianceTrend[] = [
+                    'date' => $date->format('Y-m-d'),
+                    'compliance_rate' => $complianceRate,
+                    'total_resolved' => $totalResolvedOnDate,
+                    'within_sla' => $resolvedWithinSlaOnDate,
+                ];
+            }
+
             return response()->json([
                 'kpis' => [
                     'total_tickets' => $totalTickets,
@@ -169,6 +197,7 @@ class TicketDashboardController extends Controller
             'by_category' => $ticketsByCategory,
             'recent_tickets' => $recentTickets,
             'urgent_tickets' => $urgentTickets,
+            'compliance_trend' => $complianceTrend,
         ]);
     }
 }
