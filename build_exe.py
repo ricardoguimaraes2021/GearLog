@@ -20,13 +20,13 @@ def check_pyinstaller():
 
 def install_pyinstaller():
     """Install PyInstaller."""
-    print("Installing PyInstaller...")
+    print_info("Installing PyInstaller...")
     subprocess.check_call([sys.executable, "-m", "pip", "install", "pyinstaller"])
-    print("PyInstaller installed successfully!")
+    print_success("PyInstaller installed successfully!")
 
 def build_exe():
     """Build the executable using PyInstaller."""
-    print("Building executable...")
+    print_info("Building executable...")
     
     # PyInstaller command
     cmd = [
@@ -46,11 +46,11 @@ def build_exe():
     
     try:
         subprocess.check_call(cmd)
-        print("\n✓ Executable built successfully!")
+        print_success("\nExecutable built successfully!")
         print(f"  Location: dist/GearLogSetup.exe")
         return True
     except subprocess.CalledProcessError as e:
-        print(f"\n✗ Error building executable: {e}")
+        print_error(f"\nError building executable: {e}")
         return False
 
 def main():
@@ -62,16 +62,16 @@ def main():
     
     # Check if setup.py exists
     if not Path("setup.py").exists():
-        print("✗ Error: setup.py not found in current directory")
+        print_error("setup.py not found in current directory")
         sys.exit(1)
     
     # Check/install PyInstaller
     if not check_pyinstaller():
-        print("PyInstaller not found. Installing...")
+        print_info("PyInstaller not found. Installing...")
         try:
             install_pyinstaller()
         except Exception as e:
-            print(f"✗ Error installing PyInstaller: {e}")
+            print_error(f"Error installing PyInstaller: {e}")
             print("\nPlease install PyInstaller manually:")
             print("  pip install pyinstaller")
             sys.exit(1)
