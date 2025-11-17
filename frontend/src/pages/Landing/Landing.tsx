@@ -468,6 +468,17 @@ export default function Landing() {
           </div>
           <div className="border-t pt-8 text-center text-gray-600">
             <p>&copy; {new Date().getFullYear()} GearLog. All rights reserved.</p>
+            <p className="mt-2">
+              Developed by{' '}
+              <a
+                href="https://github.com/ricardoguimaraes2021"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-blue-600 hover:text-blue-700 hover:underline transition-colors font-medium"
+              >
+                @ricardoguimaraes2021
+              </a>
+            </p>
           </div>
         </div>
       </footer>
