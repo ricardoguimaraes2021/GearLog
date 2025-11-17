@@ -365,7 +365,7 @@ def check_and_enable_php_extensions() -> Tuple[bool, List[str]]:
     Verifica e habilita extensões PHP necessárias.
     Retorna (all_ok, missing_extensions).
     """
-    required_extensions = ["fileinfo", "gd"]
+    required_extensions = ["fileinfo", "gd", "zip"]
     missing = []
     
     print_info("Verificando extensões PHP necessárias...")
@@ -957,13 +957,36 @@ SANCTUM_STATEFUL_DOMAINS=localhost:5173,127.0.0.1:5173
             ok, out = run_command(["composer", "install", "--no-interaction"], check=False, capture_output=True)
             if not ok:
                 # Verificar se o erro é relacionado a extensões PHP
-                if "ext-fileinfo" in out or "ext-gd" in out or "missing from your system" in out:
-                    print_error("composer install FALHOU devido a extensões PHP em falta.")
-                    print_error("O Composer precisa das extensões 'fileinfo' e 'gd' habilitadas.")
+                if "ext-" in out and "missing from your system" in out:
+                    # Extrair extensões faltantes do erro do composer
+                    import re
+                    missing_exts = re.findall(r'ext-(\w+)\s*\*', out)
+                    if not missing_exts:
+                        # Fallback: procurar por padrões comuns
+                        if "ext-fileinfo" in out:
+                            missing_exts.append("fileinfo")
+                        if "ext-gd" in out:
+                            missing_exts.append("gd")
+                        if "ext-zip" in out:
+                            missing_exts.append("zip")
                     
-                    # Tentar novamente habilitar as extensões
-                    print_info("Tentando habilitar extensões PHP novamente...")
-                    extensions_ok, missing = check_and_enable_php_extensions()
+                    if missing_exts:
+                        missing_exts = list(set(missing_exts))  # Remove duplicados
+                        print_error("composer install FALHOU devido a extensões PHP em falta.")
+                        print_error(f"O Composer precisa das extensões: {', '.join(missing_exts)}")
+                        
+                        # Tentar habilitar as extensões faltantes
+                        print_info(f"Tentando habilitar extensões PHP em falta: {', '.join(missing_exts)}")
+                        for ext in missing_exts:
+                            if not check_php_extension(ext):
+                                success, message = enable_php_extension(ext)
+                                if success:
+                                    print_success(f"Extensão '{ext}': {message}")
+                                else:
+                                    print_warning(f"Extensão '{ext}': {message}")
+                        
+                        # Verificar novamente
+                        extensions_ok, missing = check_and_enable_php_extensions()
                     
                     if missing:
                         php_ini_path = get_php_ini_path()
