@@ -76,7 +76,8 @@ export default function Layout() {
                 </Button>
               </div>
             </div>
-            <div className="flex items-center space-x-4">
+            {/* Desktop user info and logout */}
+            <div className="hidden sm:flex items-center space-x-4">
               <span className="text-sm text-gray-700">{user?.name}</span>
               <Button variant="ghost" size="sm" onClick={handleLogout}>
                 <LogOut className="w-4 h-4 mr-2" />
