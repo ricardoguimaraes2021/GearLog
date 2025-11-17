@@ -354,6 +354,11 @@ class ApiClient {
       return response.data;
     }
 
+    async getTicketDashboard() {
+      const response = await this.client.get('/tickets/dashboard');
+      return response.data;
+    }
+
     // Helper method to get full URL for storage files
     getStorageUrl(path: string | null | undefined): string | null {
       if (!path) return null;

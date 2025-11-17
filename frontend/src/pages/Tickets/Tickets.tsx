@@ -4,7 +4,7 @@ import { useTicketStore } from '@/stores/ticketStore';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Plus, Search, Filter, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Plus, Search, Filter, ChevronLeft, ChevronRight, BarChart3 } from 'lucide-react';
 // Toast is handled by store
 import { Skeleton } from '@/components/ui/skeleton';
 import type { Ticket } from '@/stores/ticketStore';
@@ -77,12 +77,20 @@ export default function Tickets() {
           <h1 className="text-3xl font-bold text-gray-900">Tickets</h1>
           <p className="mt-1 text-sm text-gray-500">Manage support tickets and maintenance requests</p>
         </div>
-        <Link to="/tickets/new">
-          <Button>
-            <Plus className="w-4 h-4 mr-2" />
-            New Ticket
-          </Button>
-        </Link>
+        <div className="flex gap-2">
+          <Link to="/tickets/dashboard">
+            <Button variant="outline">
+              <BarChart3 className="w-4 h-4 mr-2" />
+              Dashboard
+            </Button>
+          </Link>
+          <Link to="/tickets/new">
+            <Button>
+              <Plus className="w-4 h-4 mr-2" />
+              New Ticket
+            </Button>
+          </Link>
+        </div>
       </div>
 
       {/* Search and Filters */}

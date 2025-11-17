@@ -8,6 +8,7 @@ use App\Http\Controllers\Api\ProductController;
 use App\Http\Controllers\Api\TicketController;
 use App\Http\Controllers\Api\TicketCommentController;
 use App\Http\Controllers\Api\UserController;
+use App\Http\Controllers\Api\TicketDashboardController;
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('v1')->middleware('throttle:60,1')->group(function () {
@@ -37,6 +38,7 @@ Route::prefix('v1')->middleware('throttle:60,1')->group(function () {
 
         // Tickets
         Route::apiResource('tickets', TicketController::class);
+        Route::get('/tickets/dashboard', [TicketDashboardController::class, 'index']);
         Route::post('/tickets/{ticket}/assign', [TicketController::class, 'assign']);
         Route::post('/tickets/{ticket}/status', [TicketController::class, 'updateStatus']);
         Route::post('/tickets/{ticket}/resolve', [TicketController::class, 'resolve']);
