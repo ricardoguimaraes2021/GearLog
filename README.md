@@ -1,5 +1,7 @@
 # GearLog - IT Equipment Inventory Management System
 
+**Version 1.0.0** - First Stable Release 🎉
+
 A comprehensive, full-stack inventory management system designed specifically for IT teams to track, manage, and optimize their equipment efficiently.
 
 ## 🎯 Overview
