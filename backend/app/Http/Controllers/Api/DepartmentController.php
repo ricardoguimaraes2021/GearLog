@@ -40,6 +40,12 @@ class DepartmentController extends Controller
 
         $departments = $query->get();
 
+        // Add computed attributes for each department
+        $departments->each(function ($department) {
+            $department->total_assigned_assets = $department->total_assigned_assets;
+            $department->total_asset_value = $department->total_asset_value;
+        });
+
         return response()->json($departments);
     }
 
