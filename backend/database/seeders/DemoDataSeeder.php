@@ -491,7 +491,12 @@ class DemoDataSeeder extends Seeder
         $statuses = ['open', 'in_progress', 'waiting_parts', 'resolved', 'closed'];
         $types = ['damage', 'maintenance', 'update', 'audit', 'other'];
         $adminUser = $users->first();
-        $techUser = $users->where('email', 'tecnico@gearlog.local')->first() ?? $users->first();
+        
+        // Get all technician users (including any created by migrations)
+        $techUsers = \App\Models\User::role('tecnico')->get();
+        if ($techUsers->isEmpty()) {
+            $techUsers = collect([$users->where('email', 'tecnico@gearlog.local')->first() ?? $users->first()]);
+        }
 
         $ticketData = [
             // Critical tickets (open/in progress)
@@ -502,7 +507,7 @@ class DemoDataSeeder extends Seeder
                 'status' => 'open',
                 'type' => 'damage',
                 'description' => 'The cooling system in the server room has completely failed. Temperature is rising rapidly. Immediate attention required.',
-                'assigned_to' => $techUser->id,
+                'assigned_to' => $techUsers->random()->id,
                 'created_at' => Carbon::now()->subHours(1),
             ],
             [
@@ -512,7 +517,7 @@ class DemoDataSeeder extends Seeder
                 'status' => 'in_progress',
                 'type' => 'damage',
                 'description' => 'Multiple ports on the main network switch are not responding. Affecting several departments.',
-                'assigned_to' => $techUser->id,
+                'assigned_to' => $techUsers->random()->id,
                 'created_at' => Carbon::now()->subHours(3),
             ],
             
@@ -524,7 +529,7 @@ class DemoDataSeeder extends Seeder
                 'status' => 'in_progress',
                 'type' => 'damage',
                 'description' => 'Employee dropped laptop and screen is completely cracked. Needs immediate replacement for work continuity.',
-                'assigned_to' => $techUser->id,
+                'assigned_to' => $techUsers->random()->id,
                 'created_at' => Carbon::now()->subHours(5),
             ],
             [
@@ -546,7 +551,7 @@ class DemoDataSeeder extends Seeder
                 'status' => 'in_progress',
                 'type' => 'maintenance',
                 'description' => 'Several keys on the keyboard are not responding properly. Needs cleaning or replacement.',
-                'assigned_to' => $techUser->id,
+                'assigned_to' => $techUsers->random()->id,
                 'created_at' => Carbon::now()->subDays(1),
             ],
             [
@@ -566,7 +571,7 @@ class DemoDataSeeder extends Seeder
                 'status' => 'waiting_parts',
                 'type' => 'maintenance',
                 'description' => 'Scroll wheel is not working smoothly. Waiting for replacement part.',
-                'assigned_to' => $techUser->id,
+                'assigned_to' => $techUsers->random()->id,
                 'created_at' => Carbon::now()->subDays(3),
             ],
             
@@ -601,7 +606,7 @@ class DemoDataSeeder extends Seeder
                 'type' => 'other',
                 'description' => 'Network printer was not connecting. Issue resolved by updating drivers.',
                 'resolution' => 'Updated printer drivers and reconfigured network settings. Printer is now working correctly.',
-                'assigned_to' => $techUser->id,
+                'assigned_to' => $techUsers->random()->id,
                 'created_at' => Carbon::now()->subDays(10),
                 'first_response_at' => Carbon::now()->subDays(10)->addHours(2),
             ],
@@ -613,7 +618,7 @@ class DemoDataSeeder extends Seeder
                 'type' => 'maintenance',
                 'description' => 'Monitor colors were not displaying correctly. Needed calibration.',
                 'resolution' => 'Calibrated monitor using color calibration tool. Colors now accurate.',
-                'assigned_to' => $techUser->id,
+                'assigned_to' => $techUsers->random()->id,
                 'created_at' => Carbon::now()->subDays(15),
                 'first_response_at' => Carbon::now()->subDays(15)->addHours(4),
             ],

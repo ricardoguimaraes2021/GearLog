@@ -453,7 +453,7 @@ export default function TicketDashboard() {
                   <div className="flex-1">
                     <div className="font-medium text-gray-900">{ticket.title}</div>
                     <div className="text-sm text-gray-500">
-                      {ticket.product?.name || 'No product'} • {ticket.assigned_to?.name || 'Unassigned'}
+                      {ticket.product?.name || 'No product'} • {ticket.assignedTo?.name || 'Unassigned'}
                     </div>
                   </div>
                   <span className={`px-2 py-1 text-xs font-medium rounded-full ${getStatusColor(ticket.status)}`}>

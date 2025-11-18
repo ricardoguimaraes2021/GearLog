@@ -564,10 +564,10 @@ export default function TicketDetail() {
 
               <div>
                 <Label className="text-gray-500">Assigned To</Label>
-                {(currentTicket.assignedTo || (currentTicket as any).assigned_to) ? (
+                {currentTicket.assignedTo ? (
                   <div className="mt-1">
                     <p className="mb-2">
-                      {(currentTicket.assignedTo || (currentTicket as any).assigned_to)?.name || 'Unknown'}
+                      {currentTicket.assignedTo.name}
                     </p>
                     {canAssign && canEdit && (
                       <Button
