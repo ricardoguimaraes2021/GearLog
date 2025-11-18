@@ -36,6 +36,7 @@ export default function ProductForm() {
   const [image, setImage] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [specsEntries, setSpecsEntries] = useState<Array<{ key: string; value: string }>>([]);
 
   useEffect(() => {
     fetchCategories();
@@ -61,6 +62,17 @@ export default function ProductForm() {
       });
       if (currentProduct.image_url) {
         setImagePreview(api.getStorageUrl(currentProduct.image_url) || '');
+      }
+      // Load specs into editable format
+      if (currentProduct.specs && Object.keys(currentProduct.specs).length > 0) {
+        setSpecsEntries(
+          Object.entries(currentProduct.specs).map(([key, value]) => ({
+            key,
+            value: String(value),
+          }))
+        );
+      } else {
+        setSpecsEntries([]);
       }
     }
   }, [currentProduct, isEditing]);
@@ -106,7 +118,7 @@ export default function ProductForm() {
     try {
       const formDataToSend = new FormData();
       Object.entries(formData).forEach(([key, value]) => {
-        // Skip specs completely - it's not used in the form
+        // Skip specs - we'll handle it separately
         if (key === 'specs') {
           return;
         }
@@ -116,6 +128,27 @@ export default function ProductForm() {
           formDataToSend.append(key, value.toString());
         }
       });
+
+      // Handle specs: convert specsEntries to JSON object
+      const specsObject: Record<string, any> = {};
+      specsEntries.forEach((entry) => {
+        if (entry.key.trim() && entry.value.trim()) {
+          // Try to parse value as number or boolean, otherwise keep as string
+          const trimmedValue = entry.value.trim();
+          if (trimmedValue === 'true' || trimmedValue === 'false') {
+            specsObject[entry.key.trim()] = trimmedValue === 'true';
+          } else if (!isNaN(Number(trimmedValue)) && trimmedValue !== '') {
+            specsObject[entry.key.trim()] = Number(trimmedValue);
+          } else {
+            specsObject[entry.key.trim()] = trimmedValue;
+          }
+        }
+      });
+      
+      if (Object.keys(specsObject).length > 0) {
+        formDataToSend.append('specs', JSON.stringify(specsObject));
+      }
+
       if (image) {
         formDataToSend.append('image', image);
       }
@@ -344,6 +377,68 @@ export default function ProductForm() {
                   className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
                   rows={4}
                 />
+              </div>
+
+              <div className="md:col-span-2">
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Specifications
+                </label>
+                <div className="space-y-2 border rounded-md p-4 bg-gray-50">
+                  {specsEntries.length === 0 ? (
+                    <p className="text-sm text-gray-500 text-center py-2">
+                      No specifications added. Click "Add Specification" to add one.
+                    </p>
+                  ) : (
+                    specsEntries.map((entry, index) => (
+                      <div key={index} className="flex gap-2 items-start">
+                        <Input
+                          placeholder="Key (e.g., RAM, Storage, CPU)"
+                          value={entry.key}
+                          onChange={(e) => {
+                            const newEntries = [...specsEntries];
+                            newEntries[index].key = e.target.value;
+                            setSpecsEntries(newEntries);
+                          }}
+                          className="flex-1"
+                        />
+                        <Input
+                          placeholder="Value (e.g., 16GB, 512GB SSD, Intel i7)"
+                          value={entry.value}
+                          onChange={(e) => {
+                            const newEntries = [...specsEntries];
+                            newEntries[index].value = e.target.value;
+                            setSpecsEntries(newEntries);
+                          }}
+                          className="flex-1"
+                        />
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          onClick={() => {
+                            setSpecsEntries(specsEntries.filter((_, i) => i !== index));
+                          }}
+                        >
+                          Remove
+                        </Button>
+                      </div>
+                    ))
+                  )}
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => {
+                      setSpecsEntries([...specsEntries, { key: '', value: '' }]);
+                    }}
+                    className="w-full mt-2"
+                  >
+                    + Add Specification
+                  </Button>
+                </div>
+                <p className="text-xs text-gray-500 mt-1">
+                  Add key-value pairs for product specifications (e.g., RAM: 16GB, Storage: 512GB)
+                </p>
               </div>
             </div>
 
