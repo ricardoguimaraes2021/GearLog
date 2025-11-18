@@ -183,12 +183,12 @@ This is the first stable release of GearLog, a comprehensive IT equipment invent
 
 ### 📦 Installation
 
-See [README.md](README.md) for complete installation instructions.
+See [README.md](../README.md) for complete installation instructions.
 
 ### 🔗 Links
 - [GitHub Repository](https://github.com/ricardoguimaraes2021/GearLog)
 - [API Documentation](http://localhost:8000/api/documentation) (when running locally)
-- [Documentation](./docs/README.md)
+- [Documentation](./README.md)
 
 ### ⚠️ Breaking Changes
 None in this initial release.

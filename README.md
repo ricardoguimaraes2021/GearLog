@@ -253,11 +253,17 @@ GearLog/
 │   │   └── utils/                # Utility functions
 │   └── public/                   # Static assets
 ├── docs/                         # Documentation
-│   └── TICKET_SYSTEM_ROADMAP.md  # Ticket system documentation
+│   ├── API_REFERENCE.md          # Complete API reference
+│   ├── CHANGELOG.md              # Version history
+│   ├── IMPROVEMENTS.md           # Future roadmap
+│   ├── MIGRATION_ORDER.md        # Migration dependencies
+│   ├── NOTIFICATIONS.md          # Notifications guide
+│   ├── PRD.md                    # Product Requirements Document
+│   ├── PROJECT_GAPS.md           # Project gaps analysis
+│   ├── PROJECT_PLAN.md           # Architecture & design
+│   └── README.md                 # Documentation index
 ├── .github/                      # GitHub workflows
-├── README.md                     # This file
-├── PROJECT_PLAN.md               # Architecture & design
-└── IMPROVEMENTS.md               # Future roadmap
+└── README.md                     # This file
 ```
 
 ## 🔧 Development

@@ -44,8 +44,13 @@ Migration order and dependencies guide, including:
 The main project documentation is located in the root directory:
 
 - **[README.md](../README.md)** - Project overview, features, and quick start guide
-- **[PROJECT_PLAN.md](../PROJECT_PLAN.md)** - Architecture and technical details
-- **[IMPROVEMENTS.md](../IMPROVEMENTS.md)** - Future roadmap and planned features
+
+Additional documentation files in this directory:
+
+- **[CHANGELOG.md](./CHANGELOG.md)** - Version history and release notes
+- **[IMPROVEMENTS.md](./IMPROVEMENTS.md)** - Future roadmap and planned features
+- **[PROJECT_PLAN.md](./PROJECT_PLAN.md)** - Architecture and technical details
+- **[PROJECT_GAPS.md](./PROJECT_GAPS.md)** - Analysis of missing features and improvements
 
 ## 🎯 Quick Links
 
