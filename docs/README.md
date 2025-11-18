@@ -31,6 +31,14 @@ Complete guide to the real-time notifications system, including:
 - Troubleshooting
 - API endpoints
 
+### [MIGRATION_ORDER.md](./MIGRATION_ORDER.md)
+Migration order and dependencies guide, including:
+- Complete migration execution order
+- Dependency graph
+- Foreign key relationships
+- Migration issues and fixes
+- Verification procedures
+
 ## 📖 Main Documentation
 
 The main project documentation is located in the root directory:

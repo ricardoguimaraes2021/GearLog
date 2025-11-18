@@ -146,18 +146,57 @@ class TicketDashboardController extends Controller
                 : 0;
 
             // SLA Compliance Trend (last 30 days)
+            // Use TicketLog to find when tickets were actually resolved/closed
             $complianceTrend = [];
+            
+            // Get all resolved/closed tickets with their resolution dates from logs
+            $allResolvedTickets = Ticket::whereIn('status', ['resolved', 'closed'])
+                ->whereNotNull('resolution_deadline')
+                ->with('logs')
+                ->get()
+                ->map(function ($ticket) {
+                    // Find the first log entry where status changed to resolved or closed
+                    // Use the loaded relationship (logs) instead of querying again
+                    $resolutionLog = $ticket->logs
+                        ->whereIn('action', ['status_changed', 'resolved', 'closed'])
+                        ->sortBy('created_at')
+                        ->first(function ($log) {
+                            if ($log->action === 'resolved' || $log->action === 'closed') {
+                                return true;
+                            }
+                            if ($log->action === 'status_changed' && $log->new_value) {
+                                $newStatus = is_array($log->new_value) 
+                                    ? ($log->new_value['status'] ?? null)
+                                    : (json_decode($log->new_value, true)['status'] ?? null);
+                                return in_array($newStatus, ['resolved', 'closed']);
+                            }
+                            return false;
+                        });
+                    
+                    return [
+                        'ticket' => $ticket,
+                        'resolved_at' => $resolutionLog ? $resolutionLog->created_at : $ticket->updated_at,
+                    ];
+                })
+                ->filter(function ($item) {
+                    return $item['resolved_at'] !== null;
+                });
+            
+            // Group by date and calculate compliance
             for ($i = 29; $i >= 0; $i--) {
                 $date = now()->subDays($i)->startOfDay();
                 $endDate = $date->copy()->endOfDay();
                 
-                $resolvedOnDate = Ticket::whereIn('status', ['resolved', 'closed'])
-                    ->whereNotNull('resolution_deadline')
-                    ->whereBetween('updated_at', [$date, $endDate])
-                    ->get();
+                // Filter tickets resolved on this date
+                $resolvedOnDate = $allResolvedTickets->filter(function ($item) use ($date, $endDate) {
+                    $resolvedAt = \Carbon\Carbon::parse($item['resolved_at']);
+                    return $resolvedAt->between($date, $endDate);
+                });
                 
-                $resolvedWithinSlaOnDate = $resolvedOnDate->filter(function ($ticket) {
-                    return $ticket->updated_at && $ticket->updated_at->lte($ticket->resolution_deadline);
+                $resolvedWithinSlaOnDate = $resolvedOnDate->filter(function ($item) {
+                    $ticket = $item['ticket'];
+                    $resolvedAt = \Carbon\Carbon::parse($item['resolved_at']);
+                    return $resolvedAt->lte($ticket->resolution_deadline);
                 })->count();
                 
                 $totalResolvedOnDate = $resolvedOnDate->count();

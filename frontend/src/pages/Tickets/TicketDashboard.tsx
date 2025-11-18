@@ -259,54 +259,75 @@ export default function TicketDashboard() {
       )}
 
       {/* SLA Compliance Trend Chart */}
-      {data.compliance_trend && data.compliance_trend.length > 0 && (
-        <Card>
-          <CardHeader>
-            <CardTitle>SLA Compliance Trend (Last 30 Days)</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <ResponsiveContainer width="100%" height={300}>
-              <LineChart data={data.compliance_trend}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis 
-                  dataKey="date" 
-                  tickFormatter={(value) => {
-                    const date = new Date(value);
-                    return `${date.getMonth() + 1}/${date.getDate()}`;
-                  }}
-                />
-                <YAxis 
-                  domain={[0, 100]}
-                  label={{ value: 'Compliance Rate (%)', angle: -90, position: 'insideLeft' }}
-                />
-                <Tooltip 
-                  formatter={(value: any) => {
-                    if (value === null) return 'No data';
-                    return `${value}%`;
-                  }}
-                  labelFormatter={(label) => {
-                    const date = new Date(label);
-                    return date.toLocaleDateString();
-                  }}
-                />
-                <Legend />
-                <Line 
-                  type="monotone" 
-                  dataKey="compliance_rate" 
-                  stroke="#10b981" 
-                  strokeWidth={2}
-                  name="Compliance Rate (%)"
-                  dot={{ r: 4 }}
-                  connectNulls={false}
-                />
-              </LineChart>
-            </ResponsiveContainer>
-            <div className="mt-4 text-sm text-gray-600">
-              <p>Shows the daily SLA compliance rate for resolved tickets over the last 30 days.</p>
-            </div>
-          </CardContent>
-        </Card>
-      )}
+      {data.compliance_trend && data.compliance_trend.length > 0 && (() => {
+        // Filter out days with no data (null compliance_rate and total_resolved = 0)
+        const chartData = data.compliance_trend.filter(
+          (item) => item.compliance_rate !== null || item.total_resolved > 0
+        );
+        
+        // Only show chart if there's at least one day with data
+        if (chartData.length === 0) {
+          return null;
+        }
+        
+        return (
+          <Card>
+            <CardHeader>
+              <CardTitle>SLA Compliance Trend (Last 30 Days)</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <ResponsiveContainer width="100%" height={300}>
+                <LineChart data={chartData}>
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis 
+                    dataKey="date" 
+                    tickFormatter={(value) => {
+                      const date = new Date(value);
+                      return `${date.getMonth() + 1}/${date.getDate()}`;
+                    }}
+                  />
+                  <YAxis 
+                    domain={[0, 100]}
+                    label={{ value: 'Compliance Rate (%)', angle: -90, position: 'insideLeft' }}
+                  />
+                  <Tooltip 
+                    formatter={(value: any, name: string, props: any) => {
+                      if (value === null || value === undefined) return 'No data';
+                      if (name === 'compliance_rate') {
+                        return `${value}%`;
+                      }
+                      return value;
+                    }}
+                    labelFormatter={(label) => {
+                      const date = new Date(label);
+                      return date.toLocaleDateString();
+                    }}
+                    contentStyle={{ backgroundColor: 'white', border: '1px solid #e5e7eb' }}
+                  />
+                  <Legend />
+                  <Line 
+                    type="monotone" 
+                    dataKey="compliance_rate" 
+                    stroke="#10b981" 
+                    strokeWidth={2}
+                    name="Compliance Rate (%)"
+                    dot={{ r: 4 }}
+                    connectNulls={false}
+                  />
+                </LineChart>
+              </ResponsiveContainer>
+              <div className="mt-4 text-sm text-gray-600">
+                <p>Shows the daily SLA compliance rate for resolved tickets over the last 30 days.</p>
+                {chartData.length < data.compliance_trend.length && (
+                  <p className="text-xs text-gray-500 mt-1">
+                    Only days with resolved tickets are shown.
+                  </p>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+        );
+      })()}
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Tickets by Status */}
