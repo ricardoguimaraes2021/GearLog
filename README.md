@@ -4,26 +4,9 @@
 
 A comprehensive, full-stack inventory management system designed specifically for IT teams to track, manage, and optimize their equipment efficiently.
 
-## 📸 Screenshots
+## 🖼️ Gallery
 
-### Main Dashboard
-![Dashboard](docs/images/screenshots/dashboard.png)
-
-### Core Features Overview
-| Dashboard | Products | Tickets | Departments |
-|-----------|----------|---------|-------------|
-| ![Dashboard](docs/images/screenshots/dashboard.png) | ![Products](docs/images/screenshots/products.png) | ![Tickets](docs/images/screenshots/tickets.png) | ![Departments](docs/images/screenshots/departments.png) |
-
-### Additional Features
-| Categories | Employees | Product Details | Ticket Dashboard |
-|------------|-----------|-----------------|------------------|
-| ![Categories](docs/images/screenshots/categories.png) | ![Employees](docs/images/screenshots/employees.png) | ![Product Details](docs/images/screenshots/product-detail.png) | ![Ticket Dashboard](docs/images/screenshots/ticket-dashboard.png) |
-
-### Forms & Management
-<div align="center">
-  <img src="docs/images/screenshots/new-product.png" alt="New Product Form" width="600"/>
-  <img src="docs/images/screenshots/new-department.png" alt="New Department Form" width="600"/>
-</div>
+Check out the [**Live Gallery**](https://gearlogallery.vercel.app/) to see screenshots and features of the application.
 
 ## 🎯 Overview
 
@@ -233,6 +216,7 @@ Frontend will run on: **http://localhost:5173**
 - **Frontend**: http://localhost:5173
 - **API Documentation**: http://localhost:8000/api/documentation
 - **Landing Page**: http://localhost:5173/landing
+- **Live Gallery**: [https://gearlogallery.vercel.app/](https://gearlogallery.vercel.app/)
 
 ## 🔑 Default Credentials
 
