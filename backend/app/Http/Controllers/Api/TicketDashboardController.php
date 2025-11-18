@@ -7,7 +7,9 @@ use App\Models\Ticket;
 use App\Services\SlaService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use OpenApi\Attributes as OA;
 
+#[OA\Tag(name: 'Ticket Dashboard', description: 'Ticket dashboard analytics endpoints')]
 class TicketDashboardController extends Controller
 {
     public function __construct(
@@ -15,6 +17,32 @@ class TicketDashboardController extends Controller
     ) {
     }
 
+    #[OA\Get(
+        path: '/api/v1/tickets/dashboard',
+        summary: 'Get ticket dashboard data with KPIs and analytics',
+        tags: ['Ticket Dashboard'],
+        security: [['bearerAuth' => []]],
+        responses: [
+            new OA\Response(
+                response: 200,
+                description: 'Ticket dashboard data',
+                content: new OA\JsonContent(
+                    properties: [
+                        new OA\Property(property: 'kpis', type: 'object'),
+                        new OA\Property(property: 'by_status', type: 'object'),
+                        new OA\Property(property: 'by_priority', type: 'object'),
+                        new OA\Property(property: 'by_type', type: 'object'),
+                        new OA\Property(property: 'by_technician', type: 'array', items: new OA\Items(type: 'object')),
+                        new OA\Property(property: 'by_product', type: 'array', items: new OA\Items(type: 'object')),
+                        new OA\Property(property: 'by_category', type: 'array', items: new OA\Items(type: 'object')),
+                        new OA\Property(property: 'recent_tickets', type: 'array', items: new OA\Items(type: 'object')),
+                        new OA\Property(property: 'urgent_tickets', type: 'array', items: new OA\Items(type: 'object')),
+                        new OA\Property(property: 'compliance_trend', type: 'array', items: new OA\Items(type: 'object')),
+                    ]
+                )
+            ),
+        ]
+    )]
     public function index()
     {
         // Total tickets by status

@@ -7,7 +7,9 @@ use App\Http\Controllers\Controller;
 use App\Models\Product;
 use App\Services\MovementService;
 use Illuminate\Http\Request;
+use OpenApi\Attributes as OA;
 
+#[OA\Tag(name: 'Movements', description: 'Product movement tracking endpoints')]
 class MovementController extends Controller
 {
     public function __construct(
@@ -15,6 +17,29 @@ class MovementController extends Controller
     ) {
     }
 
+    #[OA\Get(
+        path: '/api/v1/products/{productId}/movements',
+        summary: 'Get movements for a product',
+        tags: ['Movements'],
+        security: [['bearerAuth' => []]],
+        parameters: [
+            new OA\Parameter(name: 'productId', in: 'path', required: true, schema: new OA\Schema(type: 'integer')),
+            new OA\Parameter(name: 'page', in: 'query', required: false, schema: new OA\Schema(type: 'integer')),
+        ],
+        responses: [
+            new OA\Response(
+                response: 200,
+                description: 'Paginated list of movements',
+                content: new OA\JsonContent(
+                    properties: [
+                        new OA\Property(property: 'data', type: 'array', items: new OA\Items(type: 'object')),
+                        new OA\Property(property: 'current_page', type: 'integer'),
+                        new OA\Property(property: 'total', type: 'integer'),
+                    ]
+                )
+            ),
+        ]
+    )]
     public function index(Product $product)
     {
         $movements = $product->movements()
@@ -24,6 +49,37 @@ class MovementController extends Controller
         return response()->json($movements);
     }
 
+    #[OA\Post(
+        path: '/api/v1/products/{productId}/movements',
+        summary: 'Create a new movement for a product',
+        tags: ['Movements'],
+        security: [['bearerAuth' => []]],
+        parameters: [
+            new OA\Parameter(name: 'productId', in: 'path', required: true, schema: new OA\Schema(type: 'integer')),
+        ],
+        requestBody: new OA\RequestBody(
+            required: true,
+            content: new OA\JsonContent(
+                required: ['type', 'quantity'],
+                properties: [
+                    new OA\Property(property: 'type', type: 'string', enum: ['entry', 'exit', 'allocation', 'return'], example: 'entry'),
+                    new OA\Property(property: 'quantity', type: 'integer', minimum: 1, example: 5),
+                    new OA\Property(property: 'assigned_to', type: 'string', nullable: true, maxLength: 255),
+                    new OA\Property(property: 'employee_id', type: 'integer', nullable: true, description: 'Required for allocation type'),
+                    new OA\Property(property: 'notes', type: 'string', nullable: true),
+                ]
+            )
+        ),
+        responses: [
+            new OA\Response(
+                response: 201,
+                description: 'Movement created successfully',
+                content: new OA\JsonContent(type: 'object')
+            ),
+            new OA\Response(response: 400, description: 'Business rule violation'),
+            new OA\Response(response: 422, description: 'Validation error'),
+        ]
+    )]
     public function store(Request $request, Product $product)
     {
         $validated = $request->validate([

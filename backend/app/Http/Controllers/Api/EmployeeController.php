@@ -12,7 +12,9 @@ use Maatwebsite\Excel\Concerns\FromCollection;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 use Maatwebsite\Excel\Concerns\WithMapping;
 use Barryvdh\DomPDF\Facade\Pdf;
+use OpenApi\Attributes as OA;
 
+#[OA\Tag(name: 'Employees', description: 'Employee management endpoints')]
 class EmployeeController extends Controller
 {
     public function __construct(
@@ -20,6 +22,28 @@ class EmployeeController extends Controller
     ) {
     }
 
+    #[OA\Get(
+        path: '/api/v1/employees',
+        summary: 'List employees with filters',
+        tags: ['Employees'],
+        security: [['bearerAuth' => []]],
+        parameters: [
+            new OA\Parameter(name: 'search', in: 'query', required: false, schema: new OA\Schema(type: 'string')),
+            new OA\Parameter(name: 'status', in: 'query', required: false, schema: new OA\Schema(type: 'string', enum: ['active', 'inactive'])),
+            new OA\Parameter(name: 'department_id', in: 'query', required: false, schema: new OA\Schema(type: 'integer')),
+            new OA\Parameter(name: 'sort_by', in: 'query', required: false, schema: new OA\Schema(type: 'string')),
+            new OA\Parameter(name: 'sort_order', in: 'query', required: false, schema: new OA\Schema(type: 'string', enum: ['asc', 'desc'])),
+            new OA\Parameter(name: 'per_page', in: 'query', required: false, schema: new OA\Schema(type: 'integer')),
+        ],
+        responses: [
+            new OA\Response(
+                response: 200,
+                description: 'Paginated list of employees',
+                content: new OA\JsonContent(type: 'object')
+            ),
+            new OA\Response(response: 403, description: 'Unauthorized'),
+        ]
+    )]
     public function index(Request $request)
     {
         $request->user()->can('employees.view') || abort(403, 'Unauthorized');
@@ -59,6 +83,34 @@ class EmployeeController extends Controller
         return response()->json($employees);
     }
 
+    #[OA\Post(
+        path: '/api/v1/employees',
+        summary: 'Create a new employee',
+        tags: ['Employees'],
+        security: [['bearerAuth' => []]],
+        requestBody: new OA\RequestBody(
+            required: true,
+            content: new OA\JsonContent(
+                required: ['name', 'email', 'position'],
+                properties: [
+                    new OA\Property(property: 'employee_code', type: 'string', nullable: true),
+                    new OA\Property(property: 'name', type: 'string', maxLength: 255),
+                    new OA\Property(property: 'email', type: 'string', format: 'email'),
+                    new OA\Property(property: 'phone', type: 'string', nullable: true, maxLength: 20),
+                    new OA\Property(property: 'department_id', type: 'integer', nullable: true),
+                    new OA\Property(property: 'position', type: 'string', maxLength: 255),
+                    new OA\Property(property: 'status', type: 'string', enum: ['active', 'inactive'], nullable: true),
+                    new OA\Property(property: 'notes', type: 'string', nullable: true),
+                ]
+            )
+        ),
+        responses: [
+            new OA\Response(response: 201, description: 'Employee created successfully'),
+            new OA\Response(response: 400, description: 'Business rule violation'),
+            new OA\Response(response: 403, description: 'Unauthorized'),
+            new OA\Response(response: 422, description: 'Validation error'),
+        ]
+    )]
     public function store(Request $request)
     {
         $request->user()->can('employees.create') || abort(403, 'Unauthorized');
@@ -90,6 +142,23 @@ class EmployeeController extends Controller
         }
     }
 
+    #[OA\Get(
+        path: '/api/v1/employees/{id}',
+        summary: 'Get employee details',
+        tags: ['Employees'],
+        security: [['bearerAuth' => []]],
+        parameters: [
+            new OA\Parameter(name: 'id', in: 'path', required: true, schema: new OA\Schema(type: 'integer')),
+        ],
+        responses: [
+            new OA\Response(
+                response: 200,
+                description: 'Employee details with assignments and tickets',
+                content: new OA\JsonContent(type: 'object')
+            ),
+            new OA\Response(response: 403, description: 'Unauthorized'),
+        ]
+    )]
     public function show(Request $request, Employee $employee)
     {
         $request->user()->can('employees.view') || abort(403, 'Unauthorized');
@@ -106,6 +175,34 @@ class EmployeeController extends Controller
         return response()->json($employee);
     }
 
+    #[OA\Put(
+        path: '/api/v1/employees/{id}',
+        summary: 'Update an employee',
+        tags: ['Employees'],
+        security: [['bearerAuth' => []]],
+        parameters: [
+            new OA\Parameter(name: 'id', in: 'path', required: true, schema: new OA\Schema(type: 'integer')),
+        ],
+        requestBody: new OA\RequestBody(
+            required: true,
+            content: new OA\JsonContent(
+                properties: [
+                    new OA\Property(property: 'name', type: 'string', maxLength: 255),
+                    new OA\Property(property: 'email', type: 'string', format: 'email'),
+                    new OA\Property(property: 'phone', type: 'string', nullable: true),
+                    new OA\Property(property: 'department_id', type: 'integer', nullable: true),
+                    new OA\Property(property: 'position', type: 'string', maxLength: 255),
+                    new OA\Property(property: 'status', type: 'string', enum: ['active', 'inactive']),
+                    new OA\Property(property: 'notes', type: 'string', nullable: true),
+                ]
+            )
+        ),
+        responses: [
+            new OA\Response(response: 200, description: 'Employee updated successfully'),
+            new OA\Response(response: 400, description: 'Business rule violation'),
+            new OA\Response(response: 403, description: 'Unauthorized'),
+        ]
+    )]
     public function update(Request $request, Employee $employee)
     {
         $request->user()->can('employees.update') || abort(403, 'Unauthorized');
@@ -136,6 +233,20 @@ class EmployeeController extends Controller
         }
     }
 
+    #[OA\Delete(
+        path: '/api/v1/employees/{id}',
+        summary: 'Delete an employee',
+        tags: ['Employees'],
+        security: [['bearerAuth' => []]],
+        parameters: [
+            new OA\Parameter(name: 'id', in: 'path', required: true, schema: new OA\Schema(type: 'integer')),
+        ],
+        responses: [
+            new OA\Response(response: 200, description: 'Employee deleted successfully'),
+            new OA\Response(response: 400, description: 'Business rule violation'),
+            new OA\Response(response: 403, description: 'Unauthorized'),
+        ]
+    )]
     public function destroy(Request $request, Employee $employee)
     {
         $request->user()->can('employees.delete') || abort(403, 'Unauthorized');
@@ -156,6 +267,19 @@ class EmployeeController extends Controller
         }
     }
 
+    #[OA\Post(
+        path: '/api/v1/employees/{id}/deactivate',
+        summary: 'Deactivate an employee',
+        tags: ['Employees'],
+        security: [['bearerAuth' => []]],
+        parameters: [
+            new OA\Parameter(name: 'id', in: 'path', required: true, schema: new OA\Schema(type: 'integer')),
+        ],
+        responses: [
+            new OA\Response(response: 200, description: 'Employee deactivated successfully'),
+            new OA\Response(response: 400, description: 'Business rule violation'),
+        ]
+    )]
     public function deactivate(Employee $employee)
     {
         try {
@@ -174,6 +298,19 @@ class EmployeeController extends Controller
         }
     }
 
+    #[OA\Post(
+        path: '/api/v1/employees/{id}/reactivate',
+        summary: 'Reactivate an employee',
+        tags: ['Employees'],
+        security: [['bearerAuth' => []]],
+        parameters: [
+            new OA\Parameter(name: 'id', in: 'path', required: true, schema: new OA\Schema(type: 'integer')),
+        ],
+        responses: [
+            new OA\Response(response: 200, description: 'Employee reactivated successfully'),
+            new OA\Response(response: 400, description: 'Business rule violation'),
+        ]
+    )]
     public function reactivate(Employee $employee)
     {
         try {
@@ -192,6 +329,23 @@ class EmployeeController extends Controller
         }
     }
 
+    #[OA\Get(
+        path: '/api/v1/employees/export/{format}',
+        summary: 'Export employees to CSV, Excel, or PDF',
+        tags: ['Employees'],
+        security: [['bearerAuth' => []]],
+        parameters: [
+            new OA\Parameter(name: 'format', in: 'path', required: true, schema: new OA\Schema(type: 'string', enum: ['csv', 'excel', 'pdf'])),
+            new OA\Parameter(name: 'search', in: 'query', required: false, schema: new OA\Schema(type: 'string')),
+            new OA\Parameter(name: 'status', in: 'query', required: false, schema: new OA\Schema(type: 'string')),
+            new OA\Parameter(name: 'department_id', in: 'query', required: false, schema: new OA\Schema(type: 'integer')),
+        ],
+        responses: [
+            new OA\Response(response: 200, description: 'Export file'),
+            new OA\Response(response: 400, description: 'Invalid format'),
+            new OA\Response(response: 403, description: 'Unauthorized'),
+        ]
+    )]
     public function export(Request $request, string $format)
     {
         $request->user()->can('employees.view') || abort(403, 'Unauthorized');

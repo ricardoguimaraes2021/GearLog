@@ -10,7 +10,9 @@ use App\Services\SlaService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
+use OpenApi\Attributes as OA;
 
+#[OA\Tag(name: 'Ticket Comments', description: 'Ticket comment management endpoints')]
 class TicketCommentController extends Controller
 {
     public function __construct(
@@ -18,6 +20,23 @@ class TicketCommentController extends Controller
     ) {
     }
 
+    #[OA\Get(
+        path: '/api/v1/tickets/{ticketId}/comments',
+        summary: 'Get comments for a ticket',
+        tags: ['Ticket Comments'],
+        security: [['bearerAuth' => []]],
+        parameters: [
+            new OA\Parameter(name: 'ticketId', in: 'path', required: true, schema: new OA\Schema(type: 'integer')),
+        ],
+        responses: [
+            new OA\Response(
+                response: 200,
+                description: 'List of ticket comments',
+                content: new OA\JsonContent(type: 'array', items: new OA\Items(type: 'object'))
+            ),
+            new OA\Response(response: 403, description: 'Unauthorized'),
+        ]
+    )]
     public function index(Ticket $ticket)
     {
         $this->authorize('view', $ticket);
@@ -26,6 +45,29 @@ class TicketCommentController extends Controller
         return response()->json($comments);
     }
 
+    #[OA\Post(
+        path: '/api/v1/tickets/{ticketId}/comments',
+        summary: 'Add a comment to a ticket',
+        tags: ['Ticket Comments'],
+        security: [['bearerAuth' => []]],
+        parameters: [
+            new OA\Parameter(name: 'ticketId', in: 'path', required: true, schema: new OA\Schema(type: 'integer')),
+        ],
+        requestBody: new OA\RequestBody(
+            required: true,
+            content: new OA\JsonContent(
+                required: ['message'],
+                properties: [
+                    new OA\Property(property: 'message', type: 'string'),
+                    new OA\Property(property: 'attachments', type: 'array', items: new OA\Items(type: 'string'), nullable: true),
+                ]
+            )
+        ),
+        responses: [
+            new OA\Response(response: 201, description: 'Comment created successfully'),
+            new OA\Response(response: 403, description: 'Unauthorized'),
+        ]
+    )]
     public function store(Request $request, Ticket $ticket)
     {
         // Authorization for creating comments is handled by TicketPolicy@update

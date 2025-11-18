@@ -10,7 +10,9 @@ use App\Services\SlaService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
+use OpenApi\Attributes as OA;
 
+#[OA\Tag(name: 'Tickets', description: 'Ticket management endpoints')]
 class TicketController extends Controller
 {
     public function __construct(
@@ -19,6 +21,29 @@ class TicketController extends Controller
     ) {
     }
 
+    #[OA\Get(
+        path: '/api/v1/tickets',
+        summary: 'List tickets with filters',
+        tags: ['Tickets'],
+        security: [['bearerAuth' => []]],
+        parameters: [
+            new OA\Parameter(name: 'status', in: 'query', required: false, schema: new OA\Schema(type: 'string', enum: ['open', 'in_progress', 'waiting_parts', 'resolved', 'closed'])),
+            new OA\Parameter(name: 'priority', in: 'query', required: false, schema: new OA\Schema(type: 'string', enum: ['low', 'medium', 'high', 'critical'])),
+            new OA\Parameter(name: 'type', in: 'query', required: false, schema: new OA\Schema(type: 'string', enum: ['damage', 'maintenance', 'update', 'audit', 'other'])),
+            new OA\Parameter(name: 'assigned_to', in: 'query', required: false, schema: new OA\Schema(type: 'integer')),
+            new OA\Parameter(name: 'product_id', in: 'query', required: false, schema: new OA\Schema(type: 'integer')),
+            new OA\Parameter(name: 'employee_id', in: 'query', required: false, schema: new OA\Schema(type: 'integer')),
+            new OA\Parameter(name: 'search', in: 'query', required: false, schema: new OA\Schema(type: 'string')),
+            new OA\Parameter(name: 'per_page', in: 'query', required: false, schema: new OA\Schema(type: 'integer')),
+        ],
+        responses: [
+            new OA\Response(
+                response: 200,
+                description: 'Paginated list of tickets',
+                content: new OA\JsonContent(type: 'object')
+            ),
+        ]
+    )]
     public function index(Request $request)
     {
         $this->authorize('viewAny', Ticket::class);
@@ -84,6 +109,33 @@ class TicketController extends Controller
         return response()->json($tickets);
     }
 
+    #[OA\Post(
+        path: '/api/v1/tickets',
+        summary: 'Create a new ticket',
+        tags: ['Tickets'],
+        security: [['bearerAuth' => []]],
+        requestBody: new OA\RequestBody(
+            required: true,
+            content: new OA\JsonContent(
+                required: ['title', 'description'],
+                properties: [
+                    new OA\Property(property: 'title', type: 'string', maxLength: 255),
+                    new OA\Property(property: 'product_id', type: 'integer', nullable: true),
+                    new OA\Property(property: 'employee_id', type: 'integer', nullable: true),
+                    new OA\Property(property: 'assigned_to', type: 'integer', nullable: true),
+                    new OA\Property(property: 'priority', type: 'string', enum: ['low', 'medium', 'high', 'critical'], nullable: true),
+                    new OA\Property(property: 'type', type: 'string', enum: ['damage', 'maintenance', 'update', 'audit', 'other'], nullable: true),
+                    new OA\Property(property: 'description', type: 'string'),
+                    new OA\Property(property: 'attachments', type: 'array', items: new OA\Items(type: 'string'), nullable: true),
+                ]
+            )
+        ),
+        responses: [
+            new OA\Response(response: 201, description: 'Ticket created successfully'),
+            new OA\Response(response: 400, description: 'Business rule violation'),
+            new OA\Response(response: 422, description: 'Validation error'),
+        ]
+    )]
     public function store(Request $request)
     {
         $this->authorize('create', Ticket::class);
@@ -150,6 +202,23 @@ class TicketController extends Controller
         }
     }
 
+    #[OA\Get(
+        path: '/api/v1/tickets/{id}',
+        summary: 'Get ticket details',
+        tags: ['Tickets'],
+        security: [['bearerAuth' => []]],
+        parameters: [
+            new OA\Parameter(name: 'id', in: 'path', required: true, schema: new OA\Schema(type: 'integer')),
+        ],
+        responses: [
+            new OA\Response(
+                response: 200,
+                description: 'Ticket details with SLA information',
+                content: new OA\JsonContent(type: 'object')
+            ),
+            new OA\Response(response: 403, description: 'Unauthorized'),
+        ]
+    )]
     public function show(Ticket $ticket)
     {
         $this->authorize('view', $ticket);
@@ -171,6 +240,32 @@ class TicketController extends Controller
         return response()->json($ticketData);
     }
 
+    #[OA\Put(
+        path: '/api/v1/tickets/{id}',
+        summary: 'Update a ticket',
+        tags: ['Tickets'],
+        security: [['bearerAuth' => []]],
+        parameters: [
+            new OA\Parameter(name: 'id', in: 'path', required: true, schema: new OA\Schema(type: 'integer')),
+        ],
+        requestBody: new OA\RequestBody(
+            required: true,
+            content: new OA\JsonContent(
+                properties: [
+                    new OA\Property(property: 'title', type: 'string', maxLength: 255),
+                    new OA\Property(property: 'product_id', type: 'integer', nullable: true),
+                    new OA\Property(property: 'priority', type: 'string', enum: ['low', 'medium', 'high', 'critical']),
+                    new OA\Property(property: 'type', type: 'string', enum: ['damage', 'maintenance', 'update', 'audit', 'other']),
+                    new OA\Property(property: 'description', type: 'string'),
+                ]
+            )
+        ),
+        responses: [
+            new OA\Response(response: 200, description: 'Ticket updated successfully'),
+            new OA\Response(response: 400, description: 'Business rule violation'),
+            new OA\Response(response: 403, description: 'Unauthorized'),
+        ]
+    )]
     public function update(Request $request, Ticket $ticket)
     {
         $this->authorize('update', $ticket);
@@ -236,6 +331,20 @@ class TicketController extends Controller
         }
     }
 
+    #[OA\Delete(
+        path: '/api/v1/tickets/{id}',
+        summary: 'Delete a ticket',
+        tags: ['Tickets'],
+        security: [['bearerAuth' => []]],
+        parameters: [
+            new OA\Parameter(name: 'id', in: 'path', required: true, schema: new OA\Schema(type: 'integer')),
+        ],
+        responses: [
+            new OA\Response(response: 200, description: 'Ticket deleted successfully'),
+            new OA\Response(response: 400, description: 'Business rule violation'),
+            new OA\Response(response: 403, description: 'Unauthorized'),
+        ]
+    )]
     public function destroy(Ticket $ticket)
     {
         $this->authorize('delete', $ticket);
@@ -250,6 +359,28 @@ class TicketController extends Controller
         }
     }
 
+    #[OA\Post(
+        path: '/api/v1/tickets/{id}/assign',
+        summary: 'Assign ticket to a technician',
+        tags: ['Tickets'],
+        security: [['bearerAuth' => []]],
+        parameters: [
+            new OA\Parameter(name: 'id', in: 'path', required: true, schema: new OA\Schema(type: 'integer')),
+        ],
+        requestBody: new OA\RequestBody(
+            required: true,
+            content: new OA\JsonContent(
+                properties: [
+                    new OA\Property(property: 'assigned_to', type: 'integer', nullable: true),
+                ]
+            )
+        ),
+        responses: [
+            new OA\Response(response: 200, description: 'Ticket assigned successfully'),
+            new OA\Response(response: 400, description: 'Business rule violation'),
+            new OA\Response(response: 403, description: 'Unauthorized'),
+        ]
+    )]
     public function assign(Request $request, Ticket $ticket)
     {
         $this->authorize('assign', $ticket);
@@ -268,6 +399,30 @@ class TicketController extends Controller
         }
     }
 
+    #[OA\Post(
+        path: '/api/v1/tickets/{id}/status',
+        summary: 'Update ticket status',
+        tags: ['Tickets'],
+        security: [['bearerAuth' => []]],
+        parameters: [
+            new OA\Parameter(name: 'id', in: 'path', required: true, schema: new OA\Schema(type: 'integer')),
+        ],
+        requestBody: new OA\RequestBody(
+            required: true,
+            content: new OA\JsonContent(
+                required: ['status'],
+                properties: [
+                    new OA\Property(property: 'status', type: 'string', enum: ['open', 'in_progress', 'waiting_parts', 'resolved', 'closed']),
+                    new OA\Property(property: 'resolution', type: 'string', nullable: true),
+                ]
+            )
+        ),
+        responses: [
+            new OA\Response(response: 200, description: 'Status updated successfully'),
+            new OA\Response(response: 400, description: 'Business rule violation'),
+            new OA\Response(response: 403, description: 'Unauthorized'),
+        ]
+    )]
     public function updateStatus(Request $request, Ticket $ticket)
     {
         $this->authorize('changeStatus', $ticket);
@@ -292,6 +447,29 @@ class TicketController extends Controller
         }
     }
 
+    #[OA\Post(
+        path: '/api/v1/tickets/{id}/resolve',
+        summary: 'Resolve a ticket',
+        tags: ['Tickets'],
+        security: [['bearerAuth' => []]],
+        parameters: [
+            new OA\Parameter(name: 'id', in: 'path', required: true, schema: new OA\Schema(type: 'integer')),
+        ],
+        requestBody: new OA\RequestBody(
+            required: true,
+            content: new OA\JsonContent(
+                required: ['resolution'],
+                properties: [
+                    new OA\Property(property: 'resolution', type: 'string'),
+                ]
+            )
+        ),
+        responses: [
+            new OA\Response(response: 200, description: 'Ticket resolved successfully'),
+            new OA\Response(response: 400, description: 'Business rule violation'),
+            new OA\Response(response: 403, description: 'Unauthorized'),
+        ]
+    )]
     public function resolve(Request $request, Ticket $ticket)
     {
         $this->authorize('changeStatus', $ticket);
@@ -315,6 +493,28 @@ class TicketController extends Controller
         }
     }
 
+    #[OA\Post(
+        path: '/api/v1/tickets/{id}/close',
+        summary: 'Close a ticket',
+        tags: ['Tickets'],
+        security: [['bearerAuth' => []]],
+        parameters: [
+            new OA\Parameter(name: 'id', in: 'path', required: true, schema: new OA\Schema(type: 'integer')),
+        ],
+        requestBody: new OA\RequestBody(
+            required: false,
+            content: new OA\JsonContent(
+                properties: [
+                    new OA\Property(property: 'resolution', type: 'string', nullable: true),
+                ]
+            )
+        ),
+        responses: [
+            new OA\Response(response: 200, description: 'Ticket closed successfully'),
+            new OA\Response(response: 400, description: 'Business rule violation'),
+            new OA\Response(response: 403, description: 'Unauthorized'),
+        ]
+    )]
     public function close(Request $request, Ticket $ticket)
     {
         $this->authorize('close', $ticket);
@@ -338,6 +538,23 @@ class TicketController extends Controller
         }
     }
 
+    #[OA\Get(
+        path: '/api/v1/tickets/{id}/logs',
+        summary: 'Get ticket activity logs',
+        tags: ['Tickets'],
+        security: [['bearerAuth' => []]],
+        parameters: [
+            new OA\Parameter(name: 'id', in: 'path', required: true, schema: new OA\Schema(type: 'integer')),
+        ],
+        responses: [
+            new OA\Response(
+                response: 200,
+                description: 'List of ticket activity logs',
+                content: new OA\JsonContent(type: 'array', items: new OA\Items(type: 'object'))
+            ),
+            new OA\Response(response: 403, description: 'Unauthorized'),
+        ]
+    )]
     public function logs(Ticket $ticket)
     {
         $this->authorize('view', $ticket);

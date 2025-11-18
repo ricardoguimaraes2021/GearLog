@@ -11,13 +11,38 @@ use App\Models\AssetAssignment;
 use App\Services\SlaService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use OpenApi\Attributes as OA;
 
+#[OA\Tag(name: 'Dashboard', description: 'Dashboard data and analytics endpoints')]
 class DashboardController extends Controller
 {
     public function __construct(
         protected SlaService $slaService
     ) {}
 
+    #[OA\Get(
+        path: '/api/v1/dashboard',
+        summary: 'Get dashboard data including KPIs, alerts, and recent activities',
+        tags: ['Dashboard'],
+        security: [['bearerAuth' => []]],
+        responses: [
+            new OA\Response(
+                response: 200,
+                description: 'Dashboard data',
+                content: new OA\JsonContent(
+                    properties: [
+                        new OA\Property(property: 'kpis', type: 'object'),
+                        new OA\Property(property: 'tickets', type: 'object'),
+                        new OA\Property(property: 'employees', type: 'object'),
+                        new OA\Property(property: 'products_by_category', type: 'array', items: new OA\Items(type: 'object')),
+                        new OA\Property(property: 'recent_movements', type: 'array', items: new OA\Items(type: 'object')),
+                        new OA\Property(property: 'recent_tickets', type: 'array', items: new OA\Items(type: 'object')),
+                        new OA\Property(property: 'alerts', type: 'object'),
+                    ]
+                )
+            ),
+        ]
+    )]
     public function index()
     {
         $totalProducts = Product::count();

@@ -9,7 +9,9 @@ use App\Models\AssetAssignment;
 use App\Services\DepartmentService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use OpenApi\Attributes as OA;
 
+#[OA\Tag(name: 'Departments', description: 'Department management endpoints')]
 class DepartmentController extends Controller
 {
     public function __construct(
@@ -17,6 +19,25 @@ class DepartmentController extends Controller
     ) {
     }
 
+    #[OA\Get(
+        path: '/api/v1/departments',
+        summary: 'List departments',
+        tags: ['Departments'],
+        security: [['bearerAuth' => []]],
+        parameters: [
+            new OA\Parameter(name: 'search', in: 'query', required: false, schema: new OA\Schema(type: 'string')),
+            new OA\Parameter(name: 'sort_by', in: 'query', required: false, schema: new OA\Schema(type: 'string')),
+            new OA\Parameter(name: 'sort_order', in: 'query', required: false, schema: new OA\Schema(type: 'string', enum: ['asc', 'desc'])),
+        ],
+        responses: [
+            new OA\Response(
+                response: 200,
+                description: 'List of departments with computed asset counts',
+                content: new OA\JsonContent(type: 'array', items: new OA\Items(type: 'object'))
+            ),
+            new OA\Response(response: 403, description: 'Unauthorized'),
+        ]
+    )]
     public function index(Request $request)
     {
         $request->user()->can('departments.manage') || abort(403, 'Unauthorized');
@@ -49,6 +70,29 @@ class DepartmentController extends Controller
         return response()->json($departments);
     }
 
+    #[OA\Post(
+        path: '/api/v1/departments',
+        summary: 'Create a new department',
+        tags: ['Departments'],
+        security: [['bearerAuth' => []]],
+        requestBody: new OA\RequestBody(
+            required: true,
+            content: new OA\JsonContent(
+                required: ['name'],
+                properties: [
+                    new OA\Property(property: 'name', type: 'string', maxLength: 255),
+                    new OA\Property(property: 'description', type: 'string', nullable: true),
+                    new OA\Property(property: 'manager_employee_id', type: 'integer', nullable: true),
+                    new OA\Property(property: 'cost_center', type: 'string', nullable: true, maxLength: 255),
+                ]
+            )
+        ),
+        responses: [
+            new OA\Response(response: 201, description: 'Department created successfully'),
+            new OA\Response(response: 403, description: 'Unauthorized'),
+            new OA\Response(response: 422, description: 'Validation error'),
+        ]
+    )]
     public function store(Request $request)
     {
         $request->user()->can('departments.manage') || abort(403, 'Unauthorized');
@@ -71,6 +115,23 @@ class DepartmentController extends Controller
         }
     }
 
+    #[OA\Get(
+        path: '/api/v1/departments/{id}',
+        summary: 'Get department details',
+        tags: ['Departments'],
+        security: [['bearerAuth' => []]],
+        parameters: [
+            new OA\Parameter(name: 'id', in: 'path', required: true, schema: new OA\Schema(type: 'integer')),
+        ],
+        responses: [
+            new OA\Response(
+                response: 200,
+                description: 'Department details with employees and asset counts',
+                content: new OA\JsonContent(type: 'object')
+            ),
+            new OA\Response(response: 403, description: 'Unauthorized'),
+        ]
+    )]
     public function show(Request $request, Department $department)
     {
         $request->user()->can('departments.manage') || abort(403, 'Unauthorized');
@@ -89,6 +150,30 @@ class DepartmentController extends Controller
         return response()->json($department);
     }
 
+    #[OA\Put(
+        path: '/api/v1/departments/{id}',
+        summary: 'Update a department',
+        tags: ['Departments'],
+        security: [['bearerAuth' => []]],
+        parameters: [
+            new OA\Parameter(name: 'id', in: 'path', required: true, schema: new OA\Schema(type: 'integer')),
+        ],
+        requestBody: new OA\RequestBody(
+            required: true,
+            content: new OA\JsonContent(
+                properties: [
+                    new OA\Property(property: 'name', type: 'string', maxLength: 255),
+                    new OA\Property(property: 'description', type: 'string', nullable: true),
+                    new OA\Property(property: 'manager_employee_id', type: 'integer', nullable: true),
+                    new OA\Property(property: 'cost_center', type: 'string', nullable: true, maxLength: 255),
+                ]
+            )
+        ),
+        responses: [
+            new OA\Response(response: 200, description: 'Department updated successfully'),
+            new OA\Response(response: 403, description: 'Unauthorized'),
+        ]
+    )]
     public function update(Request $request, Department $department)
     {
         $request->user()->can('departments.manage') || abort(403, 'Unauthorized');
@@ -111,6 +196,20 @@ class DepartmentController extends Controller
         }
     }
 
+    #[OA\Delete(
+        path: '/api/v1/departments/{id}',
+        summary: 'Delete a department',
+        tags: ['Departments'],
+        security: [['bearerAuth' => []]],
+        parameters: [
+            new OA\Parameter(name: 'id', in: 'path', required: true, schema: new OA\Schema(type: 'integer')),
+        ],
+        responses: [
+            new OA\Response(response: 200, description: 'Department deleted successfully'),
+            new OA\Response(response: 400, description: 'Business rule violation'),
+            new OA\Response(response: 403, description: 'Unauthorized'),
+        ]
+    )]
     public function destroy(Request $request, Department $department)
     {
         $request->user()->can('departments.manage') || abort(403, 'Unauthorized');
@@ -131,6 +230,25 @@ class DepartmentController extends Controller
         }
     }
 
+    #[OA\Get(
+        path: '/api/v1/departments/stats/usage',
+        summary: 'Get department usage statistics',
+        tags: ['Departments'],
+        security: [['bearerAuth' => []]],
+        responses: [
+            new OA\Response(
+                response: 200,
+                description: 'Department usage statistics',
+                content: new OA\JsonContent(
+                    properties: [
+                        new OA\Property(property: 'asset_usage', type: 'array', items: new OA\Items(type: 'object')),
+                        new OA\Property(property: 'ticket_usage', type: 'array', items: new OA\Items(type: 'object')),
+                    ]
+                )
+            ),
+            new OA\Response(response: 403, description: 'Unauthorized'),
+        ]
+    )]
     public function usageStats(Request $request)
     {
         $request->user()->can('departments.manage') || abort(403, 'Unauthorized');
