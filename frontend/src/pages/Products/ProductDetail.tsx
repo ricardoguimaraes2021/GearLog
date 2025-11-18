@@ -6,8 +6,9 @@ import { api } from '@/services/api';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { ArrowLeft, Save, Plus, Edit, AlertTriangle } from 'lucide-react';
-import type { Movement } from '@/types';
+import type { Movement, Employee } from '@/types';
 import { toast } from 'sonner';
 import { Skeleton } from '@/components/ui/skeleton';
 
@@ -22,9 +23,12 @@ export default function ProductDetail() {
     type: 'entry' as Movement['type'],
     quantity: 1,
     assigned_to: '',
+    employee_id: '',
     notes: '',
   });
   const [isUpdatingStatus, setIsUpdatingStatus] = useState(false);
+  const [employees, setEmployees] = useState<Employee[]>([]);
+  const [loadingEmployees, setLoadingEmployees] = useState(false);
 
   useEffect(() => {
     if (id) {
@@ -32,7 +36,20 @@ export default function ProductDetail() {
       loadMovements();
     }
     fetchCategories();
+    loadEmployees();
   }, [id]);
+
+  const loadEmployees = async () => {
+    try {
+      setLoadingEmployees(true);
+      const response = await api.getEmployees({ status: 'active', per_page: 100 });
+      setEmployees(response.data || []);
+    } catch (error) {
+      console.error('Failed to load employees:', error);
+    } finally {
+      setLoadingEmployees(false);
+    }
+  };
 
   const loadMovements = async () => {
     if (!id) return;
@@ -62,6 +79,12 @@ export default function ProductDetail() {
       }
     }
 
+    // Validate employee selection for allocation
+    if (movementData.type === 'allocation' && !movementData.employee_id) {
+      toast.error('Please select an employee for allocation');
+      return;
+    }
+
     try {
       await api.createMovement(parseInt(id), movementData);
       await loadMovements();
@@ -71,6 +94,7 @@ export default function ProductDetail() {
         type: 'entry',
         quantity: 1,
         assigned_to: '',
+        employee_id: '',
         notes: '',
       });
       toast.success('Movement created successfully');
@@ -361,7 +385,13 @@ export default function ProductDetail() {
                           if (['exit', 'allocation'].includes(newType) && currentProduct) {
                             newQuantity = Math.min(movementData.quantity, currentProduct.quantity) || 1;
                           }
-                          setMovementData({ ...movementData, type: newType, quantity: newQuantity });
+                          // Reset employee_id when changing type
+                          setMovementData({ 
+                            ...movementData, 
+                            type: newType, 
+                            quantity: newQuantity,
+                            employee_id: newType === 'allocation' ? movementData.employee_id : '',
+                          });
                         }}
                         className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
                         required
@@ -412,15 +442,48 @@ export default function ProductDetail() {
                           </p>
                         )}
                     </div>
-                    <div className="col-span-2">
-                      <label className="block text-sm font-medium mb-1">Assigned To</label>
-                      <Input
-                        value={movementData.assigned_to}
-                        onChange={(e) =>
-                          setMovementData({ ...movementData, assigned_to: e.target.value })
-                        }
-                      />
-                    </div>
+                    {movementData.type === 'allocation' ? (
+                      <div className="col-span-2">
+                        <label className="block text-sm font-medium mb-1">
+                          Assign to Employee <span className="text-red-500">*</span>
+                        </label>
+                        <Select
+                          value={movementData.employee_id}
+                          onValueChange={(value) =>
+                            setMovementData({ ...movementData, employee_id: value })
+                          }
+                          disabled={loadingEmployees}
+                        >
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select an employee" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {employees.length === 0 ? (
+                              <SelectItem value="" disabled>
+                                {loadingEmployees ? 'Loading employees...' : 'No employees available'}
+                              </SelectItem>
+                            ) : (
+                              employees.map((employee) => (
+                                <SelectItem key={employee.id} value={employee.id.toString()}>
+                                  {employee.name} {employee.employee_code && `(${employee.employee_code})`}
+                                </SelectItem>
+                              ))
+                            )}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    ) : (
+                      <div className="col-span-2">
+                        <label className="block text-sm font-medium mb-1">Assigned To</label>
+                        <Input
+                          value={movementData.assigned_to}
+                          onChange={(e) =>
+                            setMovementData({ ...movementData, assigned_to: e.target.value })
+                          }
+                          placeholder="Enter department, location, or description"
+                        />
+                      </div>
+                    )}
                     <div className="col-span-2">
                       <label className="block text-sm font-medium mb-1">Notes</label>
                       <textarea

@@ -17,7 +17,10 @@ class MovementController extends Controller
 
     public function index(Product $product)
     {
-        $movements = $product->movements()->with('product')->paginate(15);
+        $movements = $product->movements()
+            ->with('product')
+            ->orderBy('created_at', 'desc')
+            ->paginate(15);
         return response()->json($movements);
     }
 
@@ -27,8 +30,16 @@ class MovementController extends Controller
             'type' => 'required|in:entry,exit,allocation,return',
             'quantity' => 'required|integer|min:1',
             'assigned_to' => 'nullable|string|max:255',
+            'employee_id' => 'nullable|integer|exists:employees,id',
             'notes' => 'nullable|string',
         ]);
+
+        // For allocation type, employee_id is required
+        if ($validated['type'] === 'allocation' && empty($validated['employee_id'])) {
+            return response()->json([
+                'error' => 'Employee selection is required for allocation movements.',
+            ], 422);
+        }
 
         try {
             $movement = $this->movementService->createMovement($product, $validated);
