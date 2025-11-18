@@ -4,6 +4,27 @@
 
 A comprehensive, full-stack inventory management system designed specifically for IT teams to track, manage, and optimize their equipment efficiently.
 
+## 📸 Screenshots
+
+### Main Dashboard
+![Dashboard](docs/images/screenshots/dashboard.png)
+
+### Core Features Overview
+| Dashboard | Products | Tickets | Departments |
+|-----------|----------|---------|-------------|
+| ![Dashboard](docs/images/screenshots/dashboard.png) | ![Products](docs/images/screenshots/products.png) | ![Tickets](docs/images/screenshots/tickets.png) | ![Departments](docs/images/screenshots/departments.png) |
+
+### Additional Features
+| Categories | Employees | Product Details | Ticket Dashboard |
+|------------|-----------|-----------------|------------------|
+| ![Categories](docs/images/screenshots/categories.png) | ![Employees](docs/images/screenshots/employees.png) | ![Product Details](docs/images/screenshots/product-detail.png) | ![Ticket Dashboard](docs/images/screenshots/ticket-dashboard.png) |
+
+### Forms & Management
+<div align="center">
+  <img src="docs/images/screenshots/new-product.png" alt="New Product Form" width="600"/>
+  <img src="docs/images/screenshots/new-department.png" alt="New Department Form" width="600"/>
+</div>
+
 ## 🎯 Overview
 
 GearLog is a modern, feature-rich inventory management solution that combines powerful backend capabilities with an intuitive, responsive frontend interface. Built with Laravel 11 and React 18, it provides everything you need to manage IT equipment from a single, unified platform.
