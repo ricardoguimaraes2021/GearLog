@@ -3,8 +3,10 @@
 namespace App\Services;
 
 use App\Models\Product;
+use App\Models\Movement;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
 use Intervention\Image\Laravel\Facades\Image;
 
@@ -34,6 +36,18 @@ class ProductService
         $this->qrCodeService->generateForProduct($product);
 
         $product->refresh();
+
+        // Create initial entry movement if quantity > 0
+        if (isset($data['quantity']) && $data['quantity'] > 0) {
+            Movement::create([
+                'product_id' => $product->id,
+                'company_id' => Auth::user()->company_id ?? $product->company_id,
+                'type' => 'entry',
+                'quantity' => $data['quantity'],
+                'assigned_to' => null,
+                'notes' => 'Initial stock entry',
+            ]);
+        }
 
         // Fire notification events
         // If product is created as damaged
