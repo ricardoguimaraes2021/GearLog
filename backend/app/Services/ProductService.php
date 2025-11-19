@@ -15,11 +15,16 @@ class ProductService
     ) {
     }
 
-    public function createProduct(array $data, ?UploadedFile $image = null): Product
+    public function createProduct(array $data, ?UploadedFile $image = null, ?UploadedFile $invoice = null): Product
     {
         // Handle image upload
         if ($image) {
             $data['image_url'] = $this->storeImage($image);
+        }
+
+        // Handle invoice upload
+        if ($invoice) {
+            $data['invoice_url'] = $this->storeInvoice($invoice);
         }
 
         // Create product
@@ -44,7 +49,7 @@ class ProductService
         return $product->fresh();
     }
 
-    public function updateProduct(Product $product, array $data, ?UploadedFile $image = null): Product
+    public function updateProduct(Product $product, array $data, ?UploadedFile $image = null, ?UploadedFile $invoice = null): Product
     {
         $oldStatus = $product->status;
         $oldQuantity = $product->quantity;
@@ -56,6 +61,15 @@ class ProductService
                 Storage::disk('public')->delete($product->image_url);
             }
             $data['image_url'] = $this->storeImage($image);
+        }
+
+        // Handle invoice upload
+        if ($invoice) {
+            // Delete old invoice if exists
+            if ($product->invoice_url) {
+                Storage::disk('public')->delete($product->invoice_url);
+            }
+            $data['invoice_url'] = $this->storeInvoice($invoice);
         }
 
         $product->update($data);
@@ -93,6 +107,9 @@ class ProductService
         if ($product->qr_code_url) {
             Storage::disk('public')->delete($product->qr_code_url);
         }
+        if ($product->invoice_url) {
+            Storage::disk('public')->delete($product->invoice_url);
+        }
 
         return $product->delete();
     }
@@ -124,6 +141,33 @@ class ProductService
         $img->toJpeg(85)->save($path);
 
         return 'products/' . $filename;
+    }
+
+    protected function storeInvoice(UploadedFile $invoice): string
+    {
+        // Generate unique filename
+        try {
+            $originalName = pathinfo($invoice->getClientOriginalName(), PATHINFO_FILENAME);
+            $extension = $invoice->getClientOriginalExtension();
+            $filename = Str::slug($originalName) . '_' . Str::uuid() . '.' . $extension;
+        } catch (\Exception $e) {
+            // Fallback if UUID generation fails
+            $extension = $invoice->getClientOriginalExtension();
+            $filename = 'invoice_' . uniqid('', true) . '_' . time() . '.' . $extension;
+        }
+        
+        $path = storage_path('app/public/invoices/' . $filename);
+        
+        // Ensure directory exists
+        $directory = dirname($path);
+        if (!is_dir($directory)) {
+            mkdir($directory, 0755, true);
+        }
+
+        // Store the file
+        $invoice->move($directory, $filename);
+
+        return 'invoices/' . $filename;
     }
 }
 

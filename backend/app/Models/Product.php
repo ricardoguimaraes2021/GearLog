@@ -26,6 +26,7 @@ class Product extends Model
         'description',
         'image_url',
         'qr_code_url',
+        'invoice_url',
     ];
 
     protected $casts = [
@@ -110,6 +111,53 @@ class Product extends Model
         }
 
         return Storage::url($value);
+    }
+
+    public function getInvoiceUrlAttribute($value): ?string
+    {
+        if (!$value) {
+            return null;
+        }
+
+        if (filter_var($value, FILTER_VALIDATE_URL)) {
+            return $value;
+        }
+
+        return Storage::url($value);
+    }
+
+    /**
+     * Calculate warranty expiration date (3 years from purchase date)
+     */
+    public function getWarrantyExpiresAtAttribute(): ?string
+    {
+        if (!$this->purchase_date) {
+            return null;
+        }
+
+        $purchaseDate = is_string($this->purchase_date) 
+            ? \Carbon\Carbon::parse($this->purchase_date) 
+            : \Carbon\Carbon::instance($this->purchase_date);
+        
+        // Use copy() to avoid modifying the original date
+        return $purchaseDate->copy()->addYears(3)->format('Y-m-d');
+    }
+
+    /**
+     * Check if warranty is still valid
+     */
+    public function isWarrantyValid(): bool
+    {
+        if (!$this->purchase_date) {
+            return false;
+        }
+
+        $warrantyExpires = $this->warranty_expires_at;
+        if (!$warrantyExpires) {
+            return false;
+        }
+
+        return \Carbon\Carbon::parse($warrantyExpires)->isFuture();
     }
 }
 

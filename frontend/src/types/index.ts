@@ -41,6 +41,9 @@ export interface Product {
   description?: string;
   image_url?: string;
   qr_code_url?: string;
+  invoice_url?: string;
+  warranty_expires_at?: string;
+  is_warranty_valid?: boolean;
   movements?: Movement[];
   created_at: string;
   updated_at: string;

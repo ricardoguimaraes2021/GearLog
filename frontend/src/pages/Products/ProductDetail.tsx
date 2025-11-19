@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { useParams, Link, useNavigate } from 'react-router-dom';
+import { useParams, Link } from 'react-router-dom';
 import { useProductStore } from '@/stores/productStore';
 import { useCategoryStore } from '@/stores/categoryStore';
 import { api } from '@/services/api';
@@ -7,16 +7,15 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { ArrowLeft, Save, Plus, Edit, AlertTriangle } from 'lucide-react';
+import { ArrowLeft, Save, Plus, Edit } from 'lucide-react';
 import type { Movement, Employee } from '@/types';
 import { toast } from 'sonner';
 import { Skeleton } from '@/components/ui/skeleton';
 
 export default function ProductDetail() {
   const { id } = useParams<{ id: string }>();
-  const navigate = useNavigate();
   const { currentProduct, fetchProduct, updateProduct, isLoading } = useProductStore();
-  const { categories, fetchCategories } = useCategoryStore();
+  const { fetchCategories } = useCategoryStore();
   const [movements, setMovements] = useState<Movement[]>([]);
   const [showMovementForm, setShowMovementForm] = useState(false);
   const [movementData, setMovementData] = useState({
@@ -258,6 +257,44 @@ export default function ProductDetail() {
                     </p>
                   </div>
                 )}
+                {currentProduct.warranty_expires_at && (
+                  <div>
+                    <label className="text-sm font-medium text-gray-500">Warranty Expires</label>
+                    {(() => {
+                      const warrantyExpires = new Date(currentProduct.warranty_expires_at);
+                      const isWarrantyValid = warrantyExpires > new Date();
+                      return (
+                        <p className={`mt-1 font-semibold ${
+                          isWarrantyValid
+                            ? 'text-green-600' 
+                            : 'text-red-600'
+                        }`}>
+                          {warrantyExpires.toLocaleDateString()}
+                          {isWarrantyValid ? (
+                            <span className="ml-2 text-xs">✓ Valid</span>
+                          ) : (
+                            <span className="ml-2 text-xs">✗ Expired</span>
+                          )}
+                        </p>
+                      );
+                    })()}
+                  </div>
+                )}
+                {currentProduct.invoice_url && (
+                  <div className="col-span-2">
+                    <label className="text-sm font-medium text-gray-500">Invoice</label>
+                    <div className="mt-1">
+                      <a
+                        href={api.getStorageUrl(currentProduct.invoice_url) || '#'}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-blue-600 hover:underline text-sm"
+                      >
+                        View Invoice
+                      </a>
+                    </div>
+                  </div>
+                )}
                 {currentProduct.description && (
                   <div className="col-span-2">
                     <label className="text-sm font-medium text-gray-500">Description</label>
@@ -342,13 +379,39 @@ export default function ProductDetail() {
 
               {currentProduct.qr_code_url && (
                 <div className="mt-6 pt-6 border-t">
-                  <label className="text-sm font-medium text-gray-500">QR Code</label>
-                  <div className="mt-2">
+                  <label className="text-sm font-medium text-gray-500 mb-3 block">QR Code</label>
+                  <div className="mt-2 flex flex-col gap-3">
                     <img
                       src={api.getStorageUrl(currentProduct.qr_code_url) || ''}
                       alt="QR Code"
                       className="w-32 h-32"
                     />
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={async () => {
+                        try {
+                          const qrCodeUrl = api.getStorageUrl(currentProduct.qr_code_url);
+                          if (!qrCodeUrl) return;
+                          
+                          const response = await fetch(qrCodeUrl);
+                          const blob = await response.blob();
+                          const url = window.URL.createObjectURL(blob);
+                          const a = document.createElement('a');
+                          a.href = url;
+                          a.download = `qr-code-${currentProduct.name.replace(/\s+/g, '-')}-${currentProduct.id}.svg`;
+                          document.body.appendChild(a);
+                          a.click();
+                          window.URL.revokeObjectURL(url);
+                          document.body.removeChild(a);
+                          toast.success('QR Code downloaded successfully');
+                        } catch (error) {
+                          toast.error('Failed to download QR Code');
+                        }
+                      }}
+                    >
+                      Download QR Code
+                    </Button>
                   </div>
                 </div>
               )}

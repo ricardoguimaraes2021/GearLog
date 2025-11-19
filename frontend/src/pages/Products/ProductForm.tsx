@@ -35,6 +35,8 @@ export default function ProductForm() {
   });
   const [image, setImage] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [invoice, setInvoice] = useState<File | null>(null);
+  const [invoicePreview, setInvoicePreview] = useState<string | null>(null);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [specsEntries, setSpecsEntries] = useState<Array<{ key: string; value: string }>>([]);
 
@@ -63,6 +65,9 @@ export default function ProductForm() {
       if (currentProduct.image_url) {
         setImagePreview(api.getStorageUrl(currentProduct.image_url) || '');
       }
+      if (currentProduct.invoice_url) {
+        setInvoicePreview(api.getStorageUrl(currentProduct.invoice_url) || '');
+      }
       // Load specs into editable format
       if (currentProduct.specs && Object.keys(currentProduct.specs).length > 0) {
         setSpecsEntries(
@@ -86,6 +91,43 @@ export default function ProductForm() {
         setImagePreview(reader.result as string);
       };
       reader.readAsDataURL(file);
+    }
+  };
+
+  const handleRemoveImage = () => {
+    setImage(null);
+    setImagePreview(null);
+    // Reset file input
+    const fileInput = document.getElementById('image-input') as HTMLInputElement;
+    if (fileInput) {
+      fileInput.value = '';
+    }
+  };
+
+  const handleInvoiceChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setInvoice(file);
+      // For PDFs, we can't preview, but for images we can
+      if (file.type.startsWith('image/')) {
+        const reader = new FileReader();
+        reader.onloadend = () => {
+          setInvoicePreview(reader.result as string);
+        };
+        reader.readAsDataURL(file);
+      } else {
+        setInvoicePreview(null);
+      }
+    }
+  };
+
+  const handleRemoveInvoice = () => {
+    setInvoice(null);
+    setInvoicePreview(null);
+    // Reset file input
+    const fileInput = document.getElementById('invoice-input') as HTMLInputElement;
+    if (fileInput) {
+      fileInput.value = '';
     }
   };
 
@@ -151,6 +193,10 @@ export default function ProductForm() {
 
       if (image) {
         formDataToSend.append('image', image);
+      }
+
+      if (invoice) {
+        formDataToSend.append('invoice', invoice);
       }
 
       if (isEditing && id) {
@@ -361,10 +407,74 @@ export default function ProductForm() {
 
               <div className="md:col-span-2">
                 <label className="block text-sm font-medium text-gray-700 mb-1">Image</label>
-                <Input type="file" accept="image/*" onChange={handleImageChange} />
+                <Input 
+                  id="image-input"
+                  type="file" 
+                  accept="image/*" 
+                  onChange={handleImageChange} 
+                />
                 {imagePreview && (
-                  <div className="mt-2">
+                  <div className="mt-2 flex items-start gap-3">
                     <img src={imagePreview} alt="Preview" className="w-32 h-32 object-cover rounded" />
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={handleRemoveImage}
+                      className="mt-2"
+                    >
+                      Remove Image
+                    </Button>
+                  </div>
+                )}
+              </div>
+
+              <div className="md:col-span-2">
+                <label className="block text-sm font-medium text-gray-700 mb-1">Invoice (PDF or Image)</label>
+                <Input 
+                  id="invoice-input"
+                  type="file" 
+                  accept=".pdf,image/*" 
+                  onChange={handleInvoiceChange} 
+                />
+                {invoicePreview && (
+                  <div className="mt-2 flex items-start gap-3">
+                    <img src={invoicePreview} alt="Invoice Preview" className="w-32 h-32 object-cover rounded" />
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={handleRemoveInvoice}
+                      className="mt-2"
+                    >
+                      Remove Invoice
+                    </Button>
+                  </div>
+                )}
+                {invoice && !invoicePreview && (
+                  <div className="mt-2 flex items-center gap-3">
+                    <span className="text-sm text-gray-600">{invoice.name}</span>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={handleRemoveInvoice}
+                    >
+                      Remove Invoice
+                    </Button>
+                  </div>
+                )}
+                {invoicePreview && !invoice && currentProduct?.invoice_url && (
+                  <div className="mt-2">
+                    <p className="text-sm text-gray-600 mb-2">Current invoice:</p>
+                    <a
+                      href={invoicePreview}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-blue-600 hover:underline text-sm"
+                    >
+                      View Invoice
+                    </a>
                   </div>
                 )}
               </div>

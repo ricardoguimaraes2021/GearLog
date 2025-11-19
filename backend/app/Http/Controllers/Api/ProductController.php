@@ -78,6 +78,14 @@ class ProductController extends Controller
         $perPage = $request->get('per_page', 15);
         $products = $query->paginate($perPage);
 
+        // Add warranty info to each product
+        $products->getCollection()->transform(function ($product) {
+            $productData = $product->toArray();
+            $productData['warranty_expires_at'] = $product->warranty_expires_at;
+            $productData['is_warranty_valid'] = $product->isWarrantyValid();
+            return $productData;
+        });
+
         return response()->json($products);
     }
 
@@ -97,7 +105,11 @@ class ProductController extends Controller
     public function show(Product $product)
     {
         $product->load(['category', 'movements']);
-        return response()->json($product);
+        // Add warranty_expires_at to response
+        $productData = $product->toArray();
+        $productData['warranty_expires_at'] = $product->warranty_expires_at;
+        $productData['is_warranty_valid'] = $product->isWarrantyValid();
+        return response()->json($productData);
     }
 
     /**
@@ -125,6 +137,9 @@ class ProductController extends Controller
             'description' => $product->description,
             'image_url' => $product->image_url,
             'qr_code_url' => $product->qr_code_url,
+            'invoice_url' => $product->invoice_url,
+            'warranty_expires_at' => $product->warranty_expires_at,
+            'is_warranty_valid' => $product->isWarrantyValid(),
             'created_at' => $product->created_at,
         ]);
     }
@@ -187,11 +202,18 @@ class ProductController extends Controller
         }
 
         $image = $request->hasFile('image') ? $request->file('image') : null;
-        unset($validated['image']);
+        $invoice = $request->hasFile('invoice') ? $request->file('invoice') : null;
+        unset($validated['image'], $validated['invoice']);
 
-        $product = $this->productService->createProduct($validated, $image);
+        $product = $this->productService->createProduct($validated, $image, $invoice);
+        $product->load('category');
+        
+        // Add warranty info to response
+        $productData = $product->toArray();
+        $productData['warranty_expires_at'] = $product->warranty_expires_at;
+        $productData['is_warranty_valid'] = $product->isWarrantyValid();
 
-        return response()->json($product->load('category'), 201);
+        return response()->json($productData, 201);
     }
 
     #[OA\Put(
@@ -222,6 +244,7 @@ class ProductController extends Controller
             'specs' => 'nullable|json',
             'description' => 'nullable|string',
             'image' => 'nullable|image|max:2048',
+            'invoice' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:5120',
         ]);
 
         // Parse specs if it's a JSON string
@@ -235,11 +258,18 @@ class ProductController extends Controller
         }
 
         $image = $request->hasFile('image') ? $request->file('image') : null;
-        unset($validated['image']);
+        $invoice = $request->hasFile('invoice') ? $request->file('invoice') : null;
+        unset($validated['image'], $validated['invoice']);
 
-        $product = $this->productService->updateProduct($product, $validated, $image);
+        $product = $this->productService->updateProduct($product, $validated, $image, $invoice);
+        $product->load('category');
+        
+        // Add warranty info to response
+        $productData = $product->toArray();
+        $productData['warranty_expires_at'] = $product->warranty_expires_at;
+        $productData['is_warranty_valid'] = $product->isWarrantyValid();
 
-        return response()->json($product->load('category'));
+        return response()->json($productData);
     }
 
     #[OA\Delete(
