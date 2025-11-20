@@ -13,6 +13,8 @@ use App\Http\Controllers\Api\NotificationController;
 use App\Http\Controllers\Api\EmployeeController;
 use App\Http\Controllers\Api\DepartmentController;
 use App\Http\Controllers\Api\AssignmentController;
+use App\Http\Controllers\Api\Admin\CompanyController as AdminCompanyController;
+use App\Http\Controllers\Api\Admin\ImpersonationController as AdminImpersonationController;
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('v1')->middleware('throttle:60,1')->group(function () {
@@ -20,10 +22,18 @@ Route::prefix('v1')->middleware('throttle:60,1')->group(function () {
     Route::post('/login', [AuthController::class, 'login'])->middleware('throttle:30,1');
     Route::get('/products/{product}/public', [ProductController::class, 'showPublic']);
 
-    // Protected routes
+    // Public auth routes (no tenant required - for registration/onboarding)
+    Route::post('/register', [AuthController::class, 'register']);
+    Route::post('/onboarding', [AuthController::class, 'onboarding'])->middleware('auth:sanctum');
+
+    // Protected routes (require auth but not tenant - for logout/user info)
     Route::middleware('auth:sanctum')->group(function () {
         Route::post('/logout', [AuthController::class, 'logout']);
         Route::get('/user', [AuthController::class, 'user']);
+    });
+
+    // Protected routes (require auth AND tenant)
+    Route::middleware(['auth:sanctum', 'tenant'])->group(function () {
 
         // Products
         Route::apiResource('products', ProductController::class);
@@ -75,5 +85,20 @@ Route::prefix('v1')->middleware('throttle:60,1')->group(function () {
             Route::get('/assignments/history/employee/{employee}', [AssignmentController::class, 'historyByEmployee']);
             Route::get('/assignments/history/asset/{product}', [AssignmentController::class, 'historyByAsset']);
         });
+
+    // Super Admin routes (no tenant middleware, but requires super admin)
+    Route::prefix('admin')->middleware(['auth:sanctum', 'superadmin'])->group(function () {
+        // Company management
+        Route::get('/companies', [AdminCompanyController::class, 'index']);
+        Route::get('/companies/{id}', [AdminCompanyController::class, 'show']);
+        Route::post('/companies/{id}/suspend', [AdminCompanyController::class, 'suspend']);
+        Route::post('/companies/{id}/activate', [AdminCompanyController::class, 'activate']);
+        Route::put('/companies/{id}/plan', [AdminCompanyController::class, 'updatePlan']);
+        Route::get('/companies/{id}/logs', [AdminCompanyController::class, 'logs']);
+
+        // User impersonation
+        Route::post('/impersonate/{userId}', [AdminImpersonationController::class, 'impersonate']);
+        Route::post('/stop-impersonation', [AdminImpersonationController::class, 'stopImpersonation']);
     });
+});
 
