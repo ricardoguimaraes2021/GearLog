@@ -2,13 +2,13 @@ import { useEffect, useState } from 'react';
 import { useAuthStore } from '@/stores/authStore';
 import { api } from '@/services/api';
 import { toast } from 'sonner';
-import { Building2, Users, Package, Ticket, TrendingUp, AlertTriangle, Edit2, Save, X } from 'lucide-react';
+import { Building2, Users, Package, Ticket, TrendingUp, AlertTriangle, Edit2, Save, X, Shield, UserCog } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Skeleton } from '@/components/ui/skeleton';
-import type { Company, CompanyUsageStats } from '@/types';
+import type { Company, CompanyUsageStats, User, Role } from '@/types';
 
 export default function CompanySettings() {
   const { user } = useAuthStore();
@@ -17,8 +17,10 @@ export default function CompanySettings() {
   const [statistics, setStatistics] = useState<any>(null);
   const [usage, setUsage] = useState<CompanyUsageStats | null>(null);
   const [plan, setPlan] = useState<any>(null);
+  const [companyUsers, setCompanyUsers] = useState<User[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isEditing, setIsEditing] = useState(false);
+  const [editingUserId, setEditingUserId] = useState<number | null>(null);
   const [formData, setFormData] = useState({
     name: '',
     country: '',
@@ -26,6 +28,7 @@ export default function CompanySettings() {
   });
 
   const canEdit = user?.is_owner || user?.roles?.some((r) => r.name === 'admin');
+  const canManageRoles = user?.is_owner || user?.roles?.some((r) => r.name === 'admin');
 
   useEffect(() => {
     loadData();
@@ -34,10 +37,11 @@ export default function CompanySettings() {
   const loadData = async () => {
     setIsLoading(true);
     try {
-      const [companyData, usageData, planData] = await Promise.all([
+      const [companyData, usageData, planData, usersData] = await Promise.all([
         api.getCompany(),
         api.getCompanyUsage(),
         api.getCompanyPlan(),
+        canManageRoles ? api.getUsers() : Promise.resolve([]),
       ]);
 
       setCompany(companyData.company);
@@ -45,6 +49,9 @@ export default function CompanySettings() {
       setStatistics(companyData.statistics);
       setUsage(usageData.usage);
       setPlan(planData.plan);
+      if (canManageRoles) {
+        setCompanyUsers(usersData);
+      }
 
       setFormData({
         name: companyData.company.name,
@@ -57,6 +64,24 @@ export default function CompanySettings() {
       setIsLoading(false);
     }
   };
+
+  const handleUpdateUserRoles = async (userId: number, roles: string[]) => {
+    try {
+      await api.updateUserRoles(userId, roles);
+      await loadData(); // Reload to get updated data
+      setEditingUserId(null);
+      toast.success('User roles updated successfully');
+    } catch (error: any) {
+      toast.error(error.response?.data?.error || 'Failed to update user roles');
+    }
+  };
+
+  const availableRoles = [
+    { value: 'admin', label: 'Admin' },
+    { value: 'gestor', label: 'Manager' },
+    { value: 'tecnico', label: 'Technician' },
+    { value: 'consulta', label: 'Consulta' },
+  ];
 
   const handleUpdate = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -405,6 +430,161 @@ export default function CompanySettings() {
           </CardContent>
         </Card>
       )}
+
+      {/* User Roles Management */}
+      {canManageRoles && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Shield className="w-5 h-5" />
+              User Roles Management
+            </CardTitle>
+            <CardDescription>
+              Manage roles for users in your company. Only owner and admin can assign roles.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            {isLoading ? (
+              <div className="space-y-2">
+                {[...Array(3)].map((_, i) => (
+                  <Skeleton key={i} className="h-16 w-full" />
+                ))}
+              </div>
+            ) : companyUsers.length === 0 ? (
+              <p className="text-sm text-gray-500 text-center py-4">No users found</p>
+            ) : (
+              <div className="space-y-4">
+                {companyUsers.map((companyUser) => {
+                  const currentRoles = companyUser.roles?.map((r) => r.name) || [];
+                  const isEditing = editingUserId === companyUser.id;
+                  
+                  return (
+                    <div
+                      key={companyUser.id}
+                      className="border rounded-lg p-4 space-y-3"
+                    >
+                      <div className="flex items-center justify-between">
+                        <div className="flex-1">
+                          <div className="flex items-center gap-2">
+                            <UserCog className="w-4 h-4 text-gray-500" />
+                            <span className="font-medium text-gray-900">{companyUser.name}</span>
+                            {companyUser.is_owner && (
+                              <span className="px-2 py-0.5 text-xs rounded bg-purple-100 text-purple-800">
+                                Owner
+                              </span>
+                            )}
+                          </div>
+                          <p className="text-sm text-gray-600 mt-1">{companyUser.email}</p>
+                          {!isEditing && currentRoles.length > 0 && (
+                            <div className="flex flex-wrap gap-2 mt-2">
+                              {currentRoles.map((role) => (
+                                <span
+                                  key={role}
+                                  className="px-2 py-1 text-xs rounded bg-blue-100 text-blue-800"
+                                >
+                                  {role}
+                                </span>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                        {!isEditing && (
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => setEditingUserId(companyUser.id)}
+                            disabled={companyUser.is_owner}
+                          >
+                            <Edit2 className="w-4 h-4 mr-2" />
+                            {companyUser.is_owner ? 'Owner (Fixed)' : 'Edit Roles'}
+                          </Button>
+                        )}
+                      </div>
+                      
+                      {isEditing && (
+                        <UserRoleEditor
+                          user={companyUser}
+                          currentRoles={currentRoles}
+                          availableRoles={availableRoles}
+                          onSave={(roles) => handleUpdateUserRoles(companyUser.id, roles)}
+                          onCancel={() => setEditingUserId(null)}
+                        />
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      )}
+    </div>
+  );
+}
+
+interface UserRoleEditorProps {
+  user: User;
+  currentRoles: string[];
+  availableRoles: { value: string; label: string }[];
+  onSave: (roles: string[]) => void;
+  onCancel: () => void;
+}
+
+function UserRoleEditor({ user, currentRoles, availableRoles, onSave, onCancel }: UserRoleEditorProps) {
+  const [selectedRoles, setSelectedRoles] = useState<string[]>(currentRoles);
+  const [isSaving, setIsSaving] = useState(false);
+
+  const handleToggleRole = (role: string) => {
+    if (selectedRoles.includes(role)) {
+      setSelectedRoles(selectedRoles.filter((r) => r !== role));
+    } else {
+      setSelectedRoles([...selectedRoles, role]);
+    }
+  };
+
+  const handleSave = async () => {
+    if (selectedRoles.length === 0) {
+      toast.error('User must have at least one role');
+      return;
+    }
+    setIsSaving(true);
+    try {
+      await onSave(selectedRoles);
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  return (
+    <div className="space-y-3 pt-3 border-t">
+      <Label>Select Roles</Label>
+      <div className="space-y-2">
+        {availableRoles.map((role) => (
+          <label key={role.value} className="flex items-center space-x-2 cursor-pointer">
+            <input
+              type="checkbox"
+              checked={selectedRoles.includes(role.value)}
+              onChange={() => handleToggleRole(role.value)}
+              disabled={user.is_owner && role.value === 'admin'} // Owner must always have admin
+              className="rounded border-gray-300"
+            />
+            <span className="text-sm text-gray-700">{role.label}</span>
+            {user.is_owner && role.value === 'admin' && (
+              <span className="text-xs text-gray-500">(Required for owner)</span>
+            )}
+          </label>
+        ))}
+      </div>
+      <div className="flex gap-2 pt-2">
+        <Button size="sm" onClick={handleSave} disabled={isSaving || selectedRoles.length === 0}>
+          <Save className="w-4 h-4 mr-2" />
+          {isSaving ? 'Saving...' : 'Save Roles'}
+        </Button>
+        <Button size="sm" variant="outline" onClick={onCancel} disabled={isSaving}>
+          <X className="w-4 h-4 mr-2" />
+          Cancel
+        </Button>
+      </div>
     </div>
   );
 }
