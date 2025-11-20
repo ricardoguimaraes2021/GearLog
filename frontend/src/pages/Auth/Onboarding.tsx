@@ -7,7 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { ThemeToggle } from '@/components/ui/theme-toggle';
 import { Label } from '@/components/ui/label';
 import { toast } from '@/utils/toast';
-import { Package, Building2, Users, UserPlus, AlertCircle } from 'lucide-react';
+import { Building2, UserPlus, AlertCircle } from 'lucide-react';
 import { api } from '@/services/api';
 
 const TIMEZONES = [
@@ -50,8 +50,15 @@ export default function Onboarding() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [validatingInvite, setValidatingInvite] = useState(false);
   const [inviteCompanyName, setInviteCompanyName] = useState<string | null>(null);
-  const { user, fetchUser } = useAuthStore();
+  const { user, fetchUser, isInitializing } = useAuthStore();
   const navigate = useNavigate();
+
+  // Wait for auth initialization
+  useEffect(() => {
+    if (!isInitializing && user) {
+      fetchUser();
+    }
+  }, [isInitializing, fetchUser]);
 
   // Redirect super admin to admin panel (super admin doesn't need onboarding)
   const isSuperAdmin = user?.email === 'admin@admin.com';
@@ -59,12 +66,35 @@ export default function Onboarding() {
     return <Navigate to="/admin" replace />;
   }
 
+  // Check if user already has a company and redirect
   useEffect(() => {
-    // Check if user already has a company
-    if (user?.company_id) {
+    if (!isInitializing && user?.company_id) {
       navigate('/dashboard', { replace: true });
     }
-  }, [user, navigate]);
+  }, [user, isInitializing, navigate]);
+
+  // Show loading while checking authentication and company status
+  if (isInitializing || !user) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <div className="text-lg text-text-primary">Loading...</div>
+      </div>
+    );
+  }
+
+  // If user has company_id, show a brief message before redirect
+  if (user?.company_id) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <Card className="w-full max-w-md">
+          <CardContent className="pt-6 text-center">
+            <p className="text-text-primary mb-4">You already belong to a company.</p>
+            <p className="text-text-secondary mb-4">Redirecting to dashboard...</p>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   const handleValidateInviteCode = async () => {
     if (!inviteCode || inviteCode.length !== 8) {
@@ -103,6 +133,15 @@ export default function Onboarding() {
       return;
     }
 
+    // Double-check user doesn't already have a company before submitting
+    if (user?.company_id) {
+      setError('You already belong to a company. Redirecting...');
+      setTimeout(() => {
+        navigate('/dashboard', { replace: true });
+      }, 2000);
+      return;
+    }
+
     setError('');
 
     if (onboardingType === 'create') {
@@ -131,20 +170,36 @@ export default function Onboarding() {
 
       const result = await api.onboarding(onboardingData);
       
-      // Refresh user data
+      // Refresh user data to get updated company_id
       await fetchUser();
       
-      if (onboardingType === 'join' && result.role_assigned === 'viewer') {
-        toast.success('You have been added to the company!', {
-          description: 'You have been assigned the "Viewer" role. An admin can update your roles later.',
-          duration: 6000,
-        });
+      // Check if joining via invite (will have role_assigned property)
+      if (onboardingType === 'join' && (result as any).role_assigned === 'viewer') {
+        toast.success('You have been added to the company!');
+        setTimeout(() => {
+          toast.info('You have been assigned the "Viewer" role. An admin can update your roles later.');
+        }, 1500);
       } else {
         toast.success('Company setup completed! Welcome to GearLog.');
       }
-      navigate('/dashboard');
+      
+      // Navigate after a brief delay to ensure state is updated
+      setTimeout(() => {
+        navigate('/dashboard', { replace: true });
+      }, 500);
     } catch (err: any) {
       const errorMessage = err.response?.data?.message || err.response?.data?.error || 'Failed to complete setup';
+      
+      // If user already belongs to a company, refresh and redirect
+      if (err.response?.status === 400 && (errorMessage.includes('already belongs') || errorMessage.includes('already has'))) {
+        setError('You already belong to a company. Redirecting to dashboard...');
+        await fetchUser();
+        setTimeout(() => {
+          navigate('/dashboard', { replace: true });
+        }, 2000);
+        return;
+      }
+      
       setError(errorMessage);
       toast.error(errorMessage);
     } finally {

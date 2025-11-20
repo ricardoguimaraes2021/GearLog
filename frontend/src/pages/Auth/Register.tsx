@@ -4,9 +4,9 @@ import { useAuthStore } from '@/stores/authStore';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { ThemeToggle } from '@/components/ui/theme-toggle';
 import { Label } from '@/components/ui/label';
 import { toast } from '@/utils/toast';
-import { Package } from 'lucide-react';
 
 export default function Register() {
   const [name, setName] = useState('');
@@ -58,13 +58,13 @@ export default function Register() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen flex items-center justify-center bg-background py-12 px-4 sm:px-6 lg:px-8 relative">
+      <div className="absolute top-4 right-4">
+        <ThemeToggle />
+      </div>
       <Card className="w-full max-w-md">
         <CardHeader>
-          <div className="flex items-center justify-center gap-2 mb-4">
-            <Package className="h-8 w-8 text-blue-600" />
-            <CardTitle className="text-2xl">GearLog</CardTitle>
-          </div>
+          <CardTitle className="text-2xl text-center">GearLog</CardTitle>
           <CardDescription className="text-center">
             Create your free account
           </CardDescription>
@@ -72,12 +72,14 @@ export default function Register() {
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
             {error && (
-              <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded">
+              <div className="bg-danger/10 border border-danger/20 text-danger px-4 py-3 rounded-md">
                 {error}
               </div>
             )}
             <div>
-              <Label htmlFor="name">Full Name</Label>
+              <Label htmlFor="name" className="block text-sm font-medium text-text-primary">
+                Full Name
+              </Label>
               <Input
                 id="name"
                 type="text"
@@ -91,7 +93,9 @@ export default function Register() {
               />
             </div>
             <div>
-              <Label htmlFor="email">Email</Label>
+              <Label htmlFor="email" className="block text-sm font-medium text-text-primary">
+                Email
+              </Label>
               <Input
                 id="email"
                 type="email"
@@ -105,7 +109,9 @@ export default function Register() {
               />
             </div>
             <div>
-              <Label htmlFor="password">Password</Label>
+              <Label htmlFor="password" className="block text-sm font-medium text-text-primary">
+                Password
+              </Label>
               <Input
                 id="password"
                 type="password"
@@ -118,10 +124,12 @@ export default function Register() {
                 minLength={8}
                 className="mt-1"
               />
-              <p className="text-xs text-gray-500 mt-1">Must be at least 8 characters</p>
+              <p className="text-xs text-text-muted mt-1">Must be at least 8 characters</p>
             </div>
             <div>
-              <Label htmlFor="password_confirmation">Confirm Password</Label>
+              <Label htmlFor="password_confirmation" className="block text-sm font-medium text-text-primary">
+                Confirm Password
+              </Label>
               <Input
                 id="password_confirmation"
                 type="password"
@@ -138,11 +146,12 @@ export default function Register() {
               {isSubmitting ? 'Creating account...' : 'Create Account'}
             </Button>
           </form>
-          <div className="mt-4 text-center text-sm text-gray-600">
-            Already have an account?{' '}
-            <Link to="/login" className="text-blue-600 hover:text-blue-700 font-medium">
-              Sign in
-            </Link>
+          <div className="mt-4 text-center text-sm text-text-secondary">
+            <p>Already have an account?{' '}
+              <Link to="/login" className="text-accent-primary hover:text-accent-primary/80 font-medium">
+                Sign in
+              </Link>
+            </p>
           </div>
         </CardContent>
       </Card>

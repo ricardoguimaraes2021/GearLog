@@ -135,5 +135,22 @@
     @apply bg-background text-foreground;
     font-family: var(--gearlog-font-family-primary);
   }
+
+  /* Select elements styling for dark/light mode */
+  select {
+    @apply bg-background text-text-primary;
+  }
+
+  select option {
+    @apply bg-background text-text-primary;
+  }
+
+  .dark select {
+    @apply bg-surface text-text-primary;
+  }
+
+  .dark select option {
+    @apply bg-surface text-text-primary;
+  }
 }
 
