@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Navigate } from 'react-router-dom';
 import { useAuthStore } from '@/stores/authStore';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -47,6 +47,12 @@ export default function Onboarding() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { user, fetchUser } = useAuthStore();
   const navigate = useNavigate();
+
+  // Redirect super admin to admin panel (super admin doesn't need onboarding)
+  const isSuperAdmin = user?.email === 'admin@admin.com';
+  if (isSuperAdmin) {
+    return <Navigate to="/admin" replace />;
+  }
 
   useEffect(() => {
     // Check if user already has a company

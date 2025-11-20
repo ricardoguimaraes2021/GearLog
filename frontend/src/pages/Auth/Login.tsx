@@ -16,10 +16,16 @@ export default function Login() {
   const { login, isLoading, isAuthenticated, isInitializing } = useAuthStore();
   const navigate = useNavigate();
 
-  // Redirect to dashboard if already authenticated
+  // Redirect to dashboard or admin panel if already authenticated
   useEffect(() => {
     if (!isInitializing && isAuthenticated) {
-      navigate('/dashboard', { replace: true });
+      const user = useAuthStore.getState().user;
+      const isSuperAdmin = user?.email === 'admin@admin.com';
+      if (isSuperAdmin) {
+        navigate('/admin', { replace: true });
+      } else {
+        navigate('/dashboard', { replace: true });
+      }
     }
   }, [isAuthenticated, isInitializing, navigate]);
 
@@ -64,7 +70,13 @@ export default function Login() {
       if (user && !user.company_id) {
         navigate('/onboarding');
       } else {
-        navigate('/dashboard');
+        // Check if user is super admin
+        const isSuperAdmin = user?.email === 'admin@admin.com';
+        if (isSuperAdmin) {
+          navigate('/admin');
+        } else {
+          navigate('/dashboard');
+        }
       }
     } catch (err: any) {
       const errorMessage = err.response?.data?.message || err.response?.data?.error || 'Invalid credentials';
