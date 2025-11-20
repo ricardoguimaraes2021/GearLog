@@ -86,9 +86,14 @@ export const useAdminStore = create<AdminStore>((set, get) => ({
   fetchCompany: async (id: number) => {
     set({ isLoading: true, error: null });
     try {
-      const response = await api.getCompany(id);
+      const response = await api.getAdminCompany(id);
+      // Ensure owner is included in company object (backend may return it separately)
+      const companyWithOwner = {
+        ...response.company,
+        owner: response.company.owner || response.owner || null,
+      };
       set({
-        currentCompany: response.company,
+        currentCompany: companyWithOwner,
         companyStats: response.statistics,
         isLoading: false,
       });
