@@ -45,7 +45,7 @@ GearLog is a modern, feature-rich inventory management solution that combines po
 - **Ticket Types** - Support for damage, maintenance, update, audit, and other ticket types
 - **Priority Levels** - Low, medium, high, and critical priorities
 - **Status Workflow** - Open → In Progress → Waiting Parts → Resolved → Closed
-- **File Attachments** - Attach images, PDFs, and documents to tickets and comments
+- **File Attachments** - Attach images, PDFs, DOC, DOCX, and TXT files to tickets and comments
 - **Comments & Collaboration** - Add comments with attachments for team communication
 - **Assignment System** - Assign tickets to technicians (users) and link to employees
 - **Activity Logs** - Complete audit trail of all ticket actions
@@ -108,9 +108,15 @@ GearLog is a modern, feature-rich inventory management solution that combines po
   - **Manager (Gestor)** - Manage products, categories, movements, and tickets
   - **Technician (Tecnico)** - View and create movements, manage assigned tickets
   - **Read-only (Consulta)** - View-only access
+- **Role Management** - Company owners and admins can assign roles to users
+- **Ticket Permissions** - Fine-grained permissions for ticket operations:
+  - Only assigned users can change ticket status
+  - Ticket creators can always view and edit their tickets
+  - Admin and Manager have full ticket management access
 - **Laravel Sanctum Authentication** - Secure API authentication
 - **CSRF Protection** - Built-in CSRF token protection
 - **API Rate Limiting** - Protect against abuse with configurable rate limits
+- **Tenant Isolation** - Strict data separation between companies
 
 ### 🏢 Multi-Tenancy (SaaS)
 - **Company Isolation** - Complete data separation between tenants
@@ -122,13 +128,29 @@ GearLog is a modern, feature-rich inventory management solution that combines po
 - **Usage Statistics** - Track resource usage per company
 
 ### 👨‍💼 Super Admin Panel
+- **Complete Admin Console** - Dedicated interface accessible only at `/admin` route
+- **Global Dashboard** - System-wide metrics with filtering capabilities
+  - Filter by company, role, plan type, and date range
+  - Real-time system health monitoring
+  - Daily and monthly active users tracking
 - **Company Management** - List, view, and manage all companies
-- **Usage Analytics** - View detailed usage statistics per company
-- **Plan Management** - Upgrade/downgrade company plans
-- **Company Suspension** - Suspend or activate tenant accounts
-- **Activity Logs** - View recent activity (tickets, products, users)
-- **User Impersonation** - Impersonate users for support purposes
-- **Search & Filters** - Search companies by name, filter by plan and status
+  - View company details with user roles overview
+  - Usage analytics per company
+  - Plan management (upgrade/downgrade)
+  - Company suspension/activation
+  - Activity logs (tickets, products, users)
+- **Global User Management** - View all users across all companies
+  - Search by name or email
+  - View user roles and company associations
+  - User impersonation for support
+- **Analytics & Reports** - System-wide analytics
+  - Total companies, users, products, and tickets
+  - Plan distribution statistics
+  - Growth metrics and trends
+- **Security & Audit Logs** - View security events and audit trails
+- **System Settings** - Configure global system settings
+- **Isolated Navigation** - Super admin never sees regular user interface
+- **Profile Management** - Dedicated profile page without regular layout
 
 ### 🎨 User Experience
 - **Modern UI** - Built with shadcn/ui components and TailwindCSS
