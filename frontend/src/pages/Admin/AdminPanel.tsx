@@ -2,6 +2,9 @@ import { useEffect, useState } from 'react';
 import { useAdminStore } from '@/stores/adminStore';
 import { useAuthStore } from '@/stores/authStore';
 import { Navigate } from 'react-router-dom';
+import { Card, CardContent } from '@/components/ui/card';
+import { Skeleton } from '@/components/ui/skeleton';
+import { toast } from 'sonner';
 import CompanyList from './components/CompanyList';
 import CompanyDetails from './components/CompanyDetails';
 
@@ -21,6 +24,7 @@ export default function AdminPanel() {
 
   useEffect(() => {
     if (error) {
+      toast.error(error);
       const timer = setTimeout(() => clearError(), 5000);
       return () => clearTimeout(timer);
     }
@@ -32,45 +36,36 @@ export default function AdminPanel() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="bg-white shadow-sm border-b">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          <h1 className="text-2xl font-bold text-gray-900">Super Admin Panel</h1>
-          <p className="text-sm text-gray-600 mt-1">Manage all companies and tenants</p>
-        </div>
+    <div className="space-y-6">
+      <div>
+        <h1 className="text-3xl font-bold text-gray-900">Super Admin Panel</h1>
+        <p className="mt-1 text-sm text-gray-500">Manage all companies and tenants</p>
       </div>
 
-      {error && (
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-4">
-          <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded">
-            {error}
-          </div>
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="lg:col-span-1">
+          <CompanyList
+            onSelectCompany={(id) => setSelectedCompanyId(id)}
+            selectedCompanyId={selectedCompanyId}
+          />
         </div>
-      )}
-
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <div className="lg:col-span-1">
-            <CompanyList
-              onSelectCompany={(id) => setSelectedCompanyId(id)}
-              selectedCompanyId={selectedCompanyId}
+        <div className="lg:col-span-2">
+          {selectedCompanyId ? (
+            <CompanyDetails
+              companyId={selectedCompanyId}
+              onClose={() => setSelectedCompanyId(null)}
             />
-          </div>
-          <div className="lg:col-span-2">
-            {selectedCompanyId ? (
-              <CompanyDetails
-                companyId={selectedCompanyId}
-                onClose={() => setSelectedCompanyId(null)}
-              />
-            ) : (
-              <div className="bg-white rounded-lg shadow p-8 text-center text-gray-500">
-                Select a company to view details
-              </div>
-            )}
-          </div>
+          ) : (
+            <Card>
+              <CardContent className="pt-6">
+                <div className="text-center text-gray-500 py-12">
+                  Select a company to view details
+                </div>
+              </CardContent>
+            </Card>
+          )}
         </div>
       </div>
     </div>
   );
 }
-

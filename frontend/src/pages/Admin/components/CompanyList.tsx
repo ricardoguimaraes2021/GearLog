@@ -1,10 +1,32 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { useAdminStore } from '@/stores/adminStore';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Skeleton } from '@/components/ui/skeleton';
+import { Search, ChevronLeft, ChevronRight } from 'lucide-react';
 import type { CompanyWithStats } from '@/types';
 
 interface CompanyListProps {
   onSelectCompany: (id: number) => void;
   selectedCompanyId: number | null;
+}
+
+// Debounce hook
+function useDebounce<T>(value: T, delay: number): T {
+  const [debouncedValue, setDebouncedValue] = useState<T>(value);
+
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedValue(value);
+    }, delay);
+
+    return () => {
+      clearTimeout(handler);
+    };
+  }, [value, delay]);
+
+  return debouncedValue;
 }
 
 export default function CompanyList({ onSelectCompany, selectedCompanyId }: CompanyListProps) {
@@ -18,14 +40,32 @@ export default function CompanyList({ onSelectCompany, selectedCompanyId }: Comp
   } = useAdminStore();
 
   const [searchTerm, setSearchTerm] = useState(filters.search || '');
+  const debouncedSearchTerm = useDebounce(searchTerm, 500);
 
   useEffect(() => {
     fetchCompanies({ page: 1 });
   }, [fetchCompanies]);
 
+  // Update search filter when debounced term changes
+  useEffect(() => {
+    if (debouncedSearchTerm !== filters.search) {
+      const newFilters = { ...filters, search: debouncedSearchTerm || undefined };
+      setFilters(newFilters);
+      fetchCompanies({ page: 1, ...newFilters });
+    }
+  }, [debouncedSearchTerm]);
+
+  // Sync searchTerm with filters when filters change externally
+  useEffect(() => {
+    if (filters.search !== searchTerm && filters.search !== undefined) {
+      setSearchTerm(filters.search);
+    }
+  }, [filters.search]);
+
   const handleSearch = () => {
-    setFilters({ ...filters, search: searchTerm || undefined });
-    fetchCompanies({ page: 1, search: searchTerm || undefined });
+    const newFilters = { ...filters, search: searchTerm || undefined };
+    setFilters(newFilters);
+    fetchCompanies({ page: 1, ...newFilters });
   };
 
   const handleFilterChange = (key: string, value: any) => {
@@ -52,22 +92,23 @@ export default function CompanyList({ onSelectCompany, selectedCompanyId }: Comp
   };
 
   return (
-    <div className="bg-white rounded-lg shadow">
-      <div className="p-4 border-b">
-        <h2 className="text-lg font-semibold text-gray-900">Companies</h2>
-      </div>
-
-      <div className="p-4 space-y-4">
+    <Card>
+      <CardHeader>
+        <CardTitle>Companies</CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-4">
         {/* Search */}
-        <div>
-          <input
+        <div className="flex gap-2">
+          <Input
             type="text"
             placeholder="Search companies..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
+          <Button variant="outline" onClick={handleSearch}>
+            <Search className="w-4 h-4" />
+          </Button>
         </div>
 
         {/* Filters */}
@@ -75,7 +116,7 @@ export default function CompanyList({ onSelectCompany, selectedCompanyId }: Comp
           <select
             value={filters.plan_type || ''}
             onChange={(e) => handleFilterChange('plan_type', e.target.value || undefined)}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
           >
             <option value="">All Plans</option>
             <option value="FREE">FREE</option>
@@ -86,7 +127,7 @@ export default function CompanyList({ onSelectCompany, selectedCompanyId }: Comp
           <select
             value={filters.is_active === undefined ? '' : filters.is_active ? 'true' : 'false'}
             onChange={(e) => handleFilterChange('is_active', e.target.value === '' ? undefined : e.target.value === 'true')}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
           >
             <option value="">All Status</option>
             <option value="true">Active</option>
@@ -96,7 +137,11 @@ export default function CompanyList({ onSelectCompany, selectedCompanyId }: Comp
 
         {/* Company List */}
         {isLoading ? (
-          <div className="text-center py-8 text-gray-500">Loading...</div>
+          <div className="space-y-2">
+            {[...Array(3)].map((_, i) => (
+              <Skeleton key={i} className="h-20 w-full" />
+            ))}
+          </div>
         ) : companies.length === 0 ? (
           <div className="text-center py-8 text-gray-500">No companies found</div>
         ) : (
@@ -145,27 +190,30 @@ export default function CompanyList({ onSelectCompany, selectedCompanyId }: Comp
         {/* Pagination */}
         {pagination && pagination.last_page > 1 && (
           <div className="flex items-center justify-between pt-4 border-t">
-            <button
+            <Button
+              variant="outline"
+              size="sm"
               onClick={() => handlePageChange(pagination.current_page - 1)}
               disabled={pagination.current_page === 1}
-              className="px-3 py-1 border rounded disabled:opacity-50 disabled:cursor-not-allowed"
             >
+              <ChevronLeft className="w-4 h-4 mr-1" />
               Previous
-            </button>
+            </Button>
             <span className="text-sm text-gray-600">
               Page {pagination.current_page} of {pagination.last_page}
             </span>
-            <button
+            <Button
+              variant="outline"
+              size="sm"
               onClick={() => handlePageChange(pagination.current_page + 1)}
               disabled={pagination.current_page === pagination.last_page}
-              className="px-3 py-1 border rounded disabled:opacity-50 disabled:cursor-not-allowed"
             >
               Next
-            </button>
+              <ChevronRight className="w-4 h-4 ml-1" />
+            </Button>
           </div>
         )}
-      </div>
-    </div>
+      </CardContent>
+    </Card>
   );
 }
-
