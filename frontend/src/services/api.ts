@@ -32,10 +32,13 @@ class ApiClient {
     // Request interceptor to add auth token and CSRF token
     this.client.interceptors.request.use(
       async (config) => {
-        // Add auth token
+        // Add auth token only if it exists
         const token = localStorage.getItem('auth_token');
         if (token) {
           config.headers.Authorization = `Bearer ${token}`;
+        } else {
+          // Remove Authorization header if no token exists
+          delete config.headers.Authorization;
         }
 
         // For FormData, let browser set Content-Type with boundary
@@ -100,10 +103,12 @@ class ApiClient {
         }
 
         if (error.response?.status === 401) {
-          // Only clear auth if we're not already on login page
-          // Let authStore handle the cleanup to ensure state consistency
+          // Only clear auth if we're not already on login page or logout endpoint
+          const isLoginPage = window.location.pathname.includes('/login');
+          const isLogoutEndpoint = error.config?.url?.includes('/logout');
           const token = localStorage.getItem('auth_token');
-          if (token && !window.location.pathname.includes('/login')) {
+          
+          if (token && !isLoginPage && !isLogoutEndpoint) {
             // Token is expired or invalid - clear it
             // The authStore will handle state updates on next API call
             localStorage.removeItem('auth_token');
@@ -111,6 +116,12 @@ class ApiClient {
             // Dispatch a custom event that authStore can listen to if needed
             window.dispatchEvent(new CustomEvent('auth:token-expired'));
           }
+        }
+        
+        // Handle rate limiting errors (429)
+        if (error.response?.status === 429) {
+          const retryAfter = error.response.headers['retry-after'] || 60;
+          error.message = `Too many attempts. Please try again after ${retryAfter} seconds.`;
         }
         
         // Extract user-friendly error message
@@ -185,8 +196,34 @@ class ApiClient {
   }
 
   async logout() {
-    await this.client.post('/logout');
+    const token = localStorage.getItem('auth_token');
+    
+    // Only try to call logout endpoint if we have a token
+    if (token) {
+      try {
+        // Try to logout on server, but don't fail if it errors
+        // (token might already be invalid, which is fine)
+        await this.client.post('/logout');
+      } catch (error: any) {
+        // If logout fails with 401, that's fine - token was already invalid
+        // For other errors, log but continue with cleanup
+        if (error.response?.status !== 401) {
+          console.warn('Logout API call failed, but continuing with cleanup:', error);
+        }
+      }
+    }
+    
+    // Always clean up local storage and state, regardless of API call result
     localStorage.removeItem('auth_token');
+    localStorage.removeItem('auth_user');
+    
+    // Clear any CSRF tokens
+    document.cookie.split(";").forEach((c) => {
+      const cookieName = c.trim().split("=")[0];
+      if (cookieName === 'XSRF-TOKEN' || cookieName.startsWith('XSRF-TOKEN')) {
+        document.cookie = `${cookieName}=;expires=Thu, 01 Jan 1970 00:00:00 UTC;path=/;`;
+      }
+    });
   }
 
   async getCurrentUser() {

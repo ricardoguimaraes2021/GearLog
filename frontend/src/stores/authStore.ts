@@ -72,15 +72,39 @@ export const useAuthStore = create<AuthState>((set, get) => {
   },
 
   logout: async () => {
+    // Prevent multiple simultaneous logout attempts
+    if (get().isLoading) {
+      return;
+    }
+
+    set({ isLoading: true });
+    
     try {
+      // Call API logout (it handles cleanup even if it fails)
       await api.logout();
     } catch (error) {
-      console.error('Logout error:', error);
+      // Logout API might fail if token is invalid, but that's okay
+      // The api.logout() method already handles cleanup
+      console.warn('Logout API call had issues, but cleanup completed:', error);
     } finally {
-      // Disconnect Echo
-      useNotificationStore.getState().disconnectEcho();
+      // Always ensure complete cleanup, regardless of API call result
+      // Disconnect Echo first
+      try {
+        useNotificationStore.getState().disconnectEcho();
+      } catch (echoError) {
+        console.warn('Error disconnecting Echo:', echoError);
+      }
       
-      set({ user: null, token: null, isAuthenticated: false });
+      // Clear all auth state
+      set({ 
+        user: null, 
+        token: null, 
+        isAuthenticated: false, 
+        isLoading: false,
+        isInitializing: false 
+      });
+      
+      // Ensure localStorage is cleared (api.logout() already does this, but be safe)
       localStorage.removeItem('auth_token');
       localStorage.removeItem('auth_user');
     }

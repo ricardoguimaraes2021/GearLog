@@ -73,7 +73,16 @@ class AuthController extends Controller
     )]
     public function logout(Request $request)
     {
-        $request->user()->currentAccessToken()->delete();
+        // Delete the current access token if it exists
+        // If token was already deleted or doesn't exist, that's fine - user is already logged out
+        try {
+            if ($request->user() && $request->user()->currentAccessToken()) {
+                $request->user()->currentAccessToken()->delete();
+            }
+        } catch (\Exception $e) {
+            // Token might already be deleted or invalid - that's okay
+            // User is effectively logged out anyway
+        }
 
         return response()->json(['message' => 'Logged out successfully']);
     }
