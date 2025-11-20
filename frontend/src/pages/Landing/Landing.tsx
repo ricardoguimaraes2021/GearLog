@@ -157,8 +157,63 @@ export default function Landing() {
   const stats = [
     { value: '100%', label: 'Open Source' },
     { value: '24/7', label: 'Available' },
-    { value: '∞', label: 'Unlimited Items' },
-    { value: 'Free', label: 'Forever' },
+    { value: '500', label: 'Products (Free)' },
+    { value: '3', label: 'Users (Free)' },
+  ];
+
+  const plans = [
+    {
+      name: 'Free',
+      price: '0',
+      priceUnit: '€',
+      period: 'forever',
+      description: 'Perfect for small teams getting started',
+      features: [
+        'Up to 3 users',
+        'Up to 500 products',
+        'Up to 150 tickets/month',
+        'All core features',
+        'Community support',
+      ],
+      highlighted: false,
+      comingSoon: false,
+    },
+    {
+      name: 'Pro',
+      price: '19.99',
+      priceUnit: '€',
+      period: '/month',
+      description: 'Ideal for growing businesses',
+      features: [
+        'Up to 10 users',
+        'Up to 2,000 products',
+        'Up to 500 tickets/month',
+        'All core features',
+        'Priority support',
+        'Advanced analytics',
+      ],
+      highlighted: true,
+      comingSoon: true,
+    },
+    {
+      name: 'Enterprise',
+      price: '29.99',
+      priceUnit: '€',
+      period: '/month',
+      description: 'For large organizations',
+      features: [
+        'Unlimited users',
+        'Unlimited products',
+        'Unlimited tickets',
+        'All core features',
+        '24/7 priority support',
+        'Advanced analytics',
+        'Custom integrations',
+        'Dedicated account manager',
+      ],
+      highlighted: false,
+      comingSoon: true,
+    },
   ];
 
   return (
@@ -324,6 +379,82 @@ export default function Landing() {
         </div>
       </section>
 
+      {/* Pricing Section */}
+      <section id="pricing" className="bg-surface-alt py-20 scroll-mt-20">
+        <div className="container mx-auto px-4">
+          <div className="text-center mb-16">
+            <h2 className="text-4xl font-bold text-text-primary mb-4">
+              Choose Your Plan
+            </h2>
+            <p className="text-xl text-text-secondary max-w-2xl mx-auto">
+              Flexible pricing plans to suit teams of all sizes. Start free and upgrade as you grow.
+            </p>
+          </div>
+          <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
+            {plans.map((plan, index) => (
+              <Card 
+                key={index} 
+                className={`relative flex flex-col ${plan.highlighted ? 'border-2 border-accent-primary shadow-lg scale-105' : 'border-2 border-border'} ${plan.comingSoon ? 'opacity-75' : ''}`}
+              >
+                {plan.comingSoon && (
+                  <div className="absolute -top-4 left-1/2 transform -translate-x-1/2 z-10">
+                    <span className="bg-warning text-white px-4 py-1 rounded-full text-sm font-medium">
+                      Coming Soon
+                    </span>
+                  </div>
+                )}
+                {plan.highlighted && !plan.comingSoon && (
+                  <div className="absolute -top-4 left-1/2 transform -translate-x-1/2 z-10">
+                    <span className="bg-accent-primary text-white px-4 py-1 rounded-full text-sm font-medium">
+                      Most Popular
+                    </span>
+                  </div>
+                )}
+                <CardHeader>
+                  <CardTitle className="text-2xl text-text-primary mb-2">{plan.name}</CardTitle>
+                  <div className="flex items-baseline gap-1 mb-2">
+                    <span className="text-4xl font-bold text-text-primary">{plan.priceUnit}{plan.price}</span>
+                    <span className="text-text-secondary">{plan.period}</span>
+                  </div>
+                  <CardDescription className="text-base">{plan.description}</CardDescription>
+                </CardHeader>
+                <CardContent className="flex flex-col flex-grow">
+                  <ul className="space-y-3 mb-6 flex-grow">
+                    {plan.features.map((feature, featureIndex) => (
+                      <li key={featureIndex} className="flex items-start gap-2">
+                        <CheckCircle2 className="h-5 w-5 text-accent-primary flex-shrink-0 mt-0.5" />
+                        <span className="text-text-secondary">{feature}</span>
+                      </li>
+                    ))}
+                  </ul>
+                  <div className="mt-auto">
+                    {plan.comingSoon ? (
+                      <Button 
+                        className="w-full"
+                        variant="outline"
+                        disabled
+                      >
+                        Coming Soon
+                      </Button>
+                    ) : (
+                      <Link to="/register" className="block">
+                        <Button 
+                          className="w-full"
+                          variant={plan.highlighted ? 'default' : 'outline'}
+                        >
+                          Get Started
+                          <ArrowRight className="ml-2 h-4 w-4" />
+                        </Button>
+                      </Link>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </div>
+      </section>
+
       {/* CTA Section */}
       <section className="container mx-auto px-4 py-20">
         <Card className="bg-gradient-to-r from-blue-600 via-blue-600 to-blue-700 dark:from-accent-primary dark:via-accent-primary dark:to-accent-secondary border-0">
@@ -399,6 +530,18 @@ export default function Landing() {
                     }}
                   >
                     Technology
+                  </a>
+                </li>
+                <li>
+                  <a 
+                    href="#pricing" 
+                    className="hover:text-accent-primary transition-colors"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      document.getElementById('pricing')?.scrollIntoView({ behavior: 'smooth' });
+                    }}
+                  >
+                    Pricing
                   </a>
                 </li>
                 <li>
