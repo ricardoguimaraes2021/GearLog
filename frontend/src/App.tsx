@@ -27,8 +27,10 @@ import Landing from './pages/Landing/Landing';
 import Register from './pages/Auth/Register';
 import Onboarding from './pages/Auth/Onboarding';
 import AdminPanel from './pages/Admin/AdminPanel';
+import AdminProfile from './pages/Admin/AdminProfile';
 import Profile from './pages/Profile/Profile';
 import CompanySettings from './pages/Settings/CompanySettings';
+import HomeRedirect from './components/HomeRedirect';
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { isAuthenticated, isLoading, isInitializing } = useAuthStore();
@@ -77,6 +79,7 @@ function App() {
               } 
             />
             <Route path="/products/:id/view" element={<ProductPublicView />} />
+            <Route path="/" element={<HomeRedirect />} />
             <Route
               path="/"
               element={
@@ -85,7 +88,6 @@ function App() {
                 </ProtectedRoute>
               }
             >
-              <Route index element={<Navigate to="/dashboard" replace />} />
               <Route path="dashboard" element={<Dashboard />} />
               <Route path="inventory" element={<Inventory />}>
                 <Route index element={<Navigate to="/inventory/products" replace />} />
@@ -111,8 +113,25 @@ function App() {
               <Route path="departments/:id/edit" element={<DepartmentForm />} />
               <Route path="profile" element={<Profile />} />
               <Route path="settings" element={<CompanySettings />} />
-              <Route path="admin" element={<AdminPanel />} />
             </Route>
+            
+            {/* Admin Panel - Separate routes without Layout */}
+            <Route
+              path="/admin"
+              element={
+                <ProtectedRoute>
+                  <AdminPanel />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/admin/profile"
+              element={
+                <ProtectedRoute>
+                  <AdminProfile />
+                </ProtectedRoute>
+              }
+            />
           </Routes>
       </BrowserRouter>
     </ErrorBoundary>
