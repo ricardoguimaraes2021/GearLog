@@ -75,8 +75,8 @@ export default function Categories() {
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Categories</h1>
-          <p className="mt-1 text-sm text-gray-500">Manage product categories</p>
+          <h1 className="text-3xl font-bold text-text-primary">Categories</h1>
+          <p className="mt-1 text-sm text-text-secondary">Manage product categories</p>
         </div>
         {!isViewer && (
           <Button onClick={() => setShowForm(true)}>

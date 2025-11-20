@@ -95,8 +95,8 @@ export default function Products() {
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Products</h1>
-          <p className="mt-1 text-sm text-gray-500">Manage your inventory</p>
+          <h1 className="text-3xl font-bold text-text-primary">Products</h1>
+          <p className="mt-1 text-sm text-text-secondary">Manage your inventory</p>
         </div>
         {!isViewer && (
           <Link to="/inventory/products/new">

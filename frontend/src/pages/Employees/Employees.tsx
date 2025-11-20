@@ -91,8 +91,8 @@ export default function Employees() {
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Employees</h1>
-          <p className="mt-1 text-sm text-gray-500">Manage your employee directory</p>
+          <h1 className="text-3xl font-bold text-text-primary">Employees</h1>
+          <p className="mt-1 text-sm text-text-secondary">Manage your employee directory</p>
         </div>
         {!isViewer && (
           <Link to="/employees/new">
