@@ -26,6 +26,7 @@ interface NotificationStore {
   unreadCount: number;
   isLoading: boolean;
   echoInitialized: boolean;
+  pusherWarningShown: boolean;
   fetchNotifications: (page?: number) => Promise<void>;
   fetchUnreadCount: () => Promise<void>;
   markAsRead: (id: number) => Promise<void>;
@@ -42,6 +43,7 @@ export const useNotificationStore = create<NotificationStore>((set, get) => ({
   unreadCount: 0,
   isLoading: false,
   echoInitialized: false,
+  pusherWarningShown: false,
 
   fetchNotifications: async (page = 1) => {
     set({ isLoading: true });
@@ -176,7 +178,11 @@ export const useNotificationStore = create<NotificationStore>((set, get) => ({
     // Check if Pusher is configured
     const pusherKey = import.meta.env.VITE_PUSHER_APP_KEY;
     if (!pusherKey) {
-      console.warn('Pusher not configured. Real-time notifications will not work.');
+      // Only log once to avoid console spam
+      if (!get().pusherWarningShown) {
+        console.info('Pusher not configured. Real-time notifications will not work. This is optional.');
+        set({ pusherWarningShown: true });
+      }
       return;
     }
 
