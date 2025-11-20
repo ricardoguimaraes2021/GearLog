@@ -37,6 +37,12 @@ class CategoryController extends Controller
     )]
     public function index()
     {
+        // Allow view access for viewers, manage access for others
+        $user = request()->user();
+        if (!$user->can('categories.view') && !$user->can('categories.manage')) {
+            abort(403, 'Unauthorized');
+        }
+        
         $categories = Category::withCount('products')->orderBy('name')->get();
         return response()->json($categories);
     }
@@ -72,6 +78,12 @@ class CategoryController extends Controller
     )]
     public function store(Request $request)
     {
+        // Check permissions - viewers cannot create categories
+        $user = $request->user();
+        if (!$user->can('categories.manage')) {
+            abort(403, 'Unauthorized: You do not have permission to create categories');
+        }
+        
         $validated = $request->validate([
             'name' => 'required|string|max:255|unique:categories,name',
         ]);
@@ -105,6 +117,12 @@ class CategoryController extends Controller
     )]
     public function update(Request $request, Category $category)
     {
+        // Check permissions - viewers cannot update categories
+        $user = $request->user();
+        if (!$user->can('categories.manage')) {
+            abort(403, 'Unauthorized: You do not have permission to update categories');
+        }
+        
         $validated = $request->validate([
             'name' => 'required|string|max:255|unique:categories,name,' . $category->id,
         ]);
@@ -146,6 +164,12 @@ class CategoryController extends Controller
     )]
     public function destroy(Category $category)
     {
+        // Check permissions - viewers cannot delete categories
+        $user = request()->user();
+        if (!$user->can('categories.manage')) {
+            abort(403, 'Unauthorized: You do not have permission to delete categories');
+        }
+        
         // Business rule: Deleting a category only allowed if no products use it
         if (!$category->canDelete()) {
             $productCount = $category->products()->count();

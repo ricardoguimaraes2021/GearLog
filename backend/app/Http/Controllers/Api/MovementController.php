@@ -82,6 +82,15 @@ class MovementController extends Controller
     )]
     public function store(Request $request, Product $product)
     {
+        $user = $request->user();
+        
+        // Viewers cannot create movements - they can only view them
+        if ($user->hasRole('viewer')) {
+            return response()->json([
+                'error' => 'Unauthorized: You do not have permission to create movements',
+            ], 403);
+        }
+        
         $validated = $request->validate([
             'type' => 'required|in:entry,exit,allocation,return',
             'quantity' => 'required|integer|min:1',

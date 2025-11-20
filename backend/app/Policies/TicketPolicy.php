@@ -14,9 +14,13 @@ class TicketPolicy
             return false;
         }
         
-        // Admin, Manager, Technician can view all
-        // Viewer can only view their own
-        return $user->hasAnyRole(['admin', 'gestor', 'tecnico', 'viewer']);
+        // Viewer role cannot view tickets - they can only see dashboard metrics
+        if ($user->hasRole('viewer')) {
+            return false;
+        }
+        
+        // Admin, Manager, Technician can view tickets
+        return $user->hasAnyRole(['admin', 'gestor', 'tecnico']);
     }
 
     public function view(User $user, Ticket $ticket): bool
@@ -36,9 +40,9 @@ class TicketPolicy
             return $ticket->assigned_to === $user->id || $ticket->opened_by === $user->id;
         }
 
-        // Viewer can only view tickets they opened
+        // Viewers cannot view any tickets - access denied
         if ($user->hasRole('viewer')) {
-            return $ticket->opened_by === $user->id;
+            return false;
         }
 
         return false;
@@ -47,7 +51,17 @@ class TicketPolicy
     public function create(User $user): bool
     {
         // Ensure user has a company
-        return $user->company_id !== null;
+        if ($user->company_id === null) {
+            return false;
+        }
+        
+        // Viewers cannot create tickets - access denied
+        if ($user->hasRole('viewer')) {
+            return false;
+        }
+        
+        // Admin, Manager, Technician can create tickets
+        return $user->hasAnyRole(['admin', 'gestor', 'tecnico']);
     }
 
     public function update(User $user, Ticket $ticket): bool
@@ -77,9 +91,9 @@ class TicketPolicy
             return $ticket->assigned_to === $user->id;
         }
 
-        // Viewer can only update tickets they opened
+        // Viewers cannot update any tickets - access denied
         if ($user->hasRole('viewer')) {
-            return $ticket->opened_by === $user->id;
+            return false;
         }
 
         return false;

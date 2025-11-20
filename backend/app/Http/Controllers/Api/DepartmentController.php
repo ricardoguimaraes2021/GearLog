@@ -40,7 +40,11 @@ class DepartmentController extends Controller
     )]
     public function index(Request $request)
     {
-        $request->user()->can('departments.manage') || abort(403, 'Unauthorized');
+        // Allow view access for viewers, manage access for others
+        $user = $request->user();
+        if (!$user->can('departments.view') && !$user->can('departments.manage')) {
+            abort(403, 'Unauthorized');
+        }
 
         $query = Department::with(['manager', 'employees']);
 
@@ -134,7 +138,11 @@ class DepartmentController extends Controller
     )]
     public function show(Request $request, Department $department)
     {
-        $request->user()->can('departments.manage') || abort(403, 'Unauthorized');
+        // Allow view access for viewers, manage access for others
+        $user = $request->user();
+        if (!$user->can('departments.view') && !$user->can('departments.manage')) {
+            abort(403, 'Unauthorized');
+        }
 
         $department->load([
             'manager',

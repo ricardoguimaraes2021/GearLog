@@ -45,6 +45,9 @@ class DashboardController extends Controller
     )]
     public function index()
     {
+        $user = auth()->user();
+        $isViewer = $user && $user->hasRole('viewer');
+        
         $totalProducts = Product::count();
         $totalValue = Product::sum(DB::raw('quantity * COALESCE(value, 0)'));
         $damagedProducts = Product::where('status', 'damaged')->count();
@@ -234,84 +237,92 @@ class DashboardController extends Controller
         $activeEmployees = Employee::where('status', 'active')->count();
         $totalAssignments = AssetAssignment::whereNull('returned_at')->count();
 
-        // Ticket alerts - SLA violations
-        $slaViolatedTickets = Ticket::where('sla_violated', true)
-            ->whereIn('status', ['open', 'in_progress', 'waiting_parts'])
-            ->with(['product', 'assignedTo'])
-            ->orderBy('created_at', 'desc')
-            ->get()
-            ->map(function ($ticket) {
-                return [
-                    'id' => $ticket->id,
-                    'title' => $ticket->title,
-                    'priority' => $ticket->priority,
-                    'status' => $ticket->status,
-                    'product' => $ticket->product ? $ticket->product->name : null,
-                    'assigned_to' => $ticket->assignedTo ? $ticket->assignedTo->name : null,
-                    'created_at' => $ticket->created_at,
-                ];
-            });
+        // Ticket alerts - only for non-viewer roles
+        $slaViolatedTickets = collect();
+        $slaAtRiskTickets = collect();
+        $criticalTicketsList = collect();
+        $unassignedTicketsList = collect();
 
-        // Ticket alerts - SLA at risk (80% of time elapsed)
-        $slaAtRiskTickets = Ticket::whereIn('status', ['open', 'in_progress', 'waiting_parts'])
-            ->with(['product', 'assignedTo'])
-            ->get()
-            ->filter(function ($ticket) {
-                $risks = $this->slaService->isSlaAtRisk($ticket);
-                return $risks['first_response'] || $risks['resolution'];
-            })
-            ->take(10)
-            ->map(function ($ticket) {
-                $risks = $this->slaService->isSlaAtRisk($ticket);
-                return [
-                    'id' => $ticket->id,
-                    'title' => $ticket->title,
-                    'priority' => $ticket->priority,
-                    'status' => $ticket->status,
-                    'product' => $ticket->product ? $ticket->product->name : null,
-                    'assigned_to' => $ticket->assignedTo ? $ticket->assignedTo->name : null,
-                    'first_response_at_risk' => $risks['first_response'],
-                    'resolution_at_risk' => $risks['resolution'],
-                    'created_at' => $ticket->created_at,
-                ];
-            })
-            ->values();
+        if (!$isViewer) {
+            // Ticket alerts - SLA violations
+            $slaViolatedTickets = Ticket::where('sla_violated', true)
+                ->whereIn('status', ['open', 'in_progress', 'waiting_parts'])
+                ->with(['product', 'assignedTo'])
+                ->orderBy('created_at', 'desc')
+                ->get()
+                ->map(function ($ticket) {
+                    return [
+                        'id' => $ticket->id,
+                        'title' => $ticket->title,
+                        'priority' => $ticket->priority,
+                        'status' => $ticket->status,
+                        'product' => $ticket->product ? $ticket->product->name : null,
+                        'assigned_to' => $ticket->assignedTo ? $ticket->assignedTo->name : null,
+                        'created_at' => $ticket->created_at,
+                    ];
+                });
 
-        // Critical tickets (open/in progress)
-        $criticalTicketsList = Ticket::where('priority', 'critical')
-            ->whereIn('status', ['open', 'in_progress'])
-            ->with(['product', 'assignedTo'])
-            ->orderBy('created_at', 'desc')
-            ->limit(10)
-            ->get()
-            ->map(function ($ticket) {
-                return [
-                    'id' => $ticket->id,
-                    'title' => $ticket->title,
-                    'status' => $ticket->status,
-                    'product' => $ticket->product ? $ticket->product->name : null,
-                    'assigned_to' => $ticket->assignedTo ? $ticket->assignedTo->name : null,
-                    'created_at' => $ticket->created_at,
-                ];
-            });
+            // Ticket alerts - SLA at risk (80% of time elapsed)
+            $slaAtRiskTickets = Ticket::whereIn('status', ['open', 'in_progress', 'waiting_parts'])
+                ->with(['product', 'assignedTo'])
+                ->get()
+                ->filter(function ($ticket) {
+                    $risks = $this->slaService->isSlaAtRisk($ticket);
+                    return $risks['first_response'] || $risks['resolution'];
+                })
+                ->take(10)
+                ->map(function ($ticket) {
+                    $risks = $this->slaService->isSlaAtRisk($ticket);
+                    return [
+                        'id' => $ticket->id,
+                        'title' => $ticket->title,
+                        'priority' => $ticket->priority,
+                        'status' => $ticket->status,
+                        'product' => $ticket->product ? $ticket->product->name : null,
+                        'assigned_to' => $ticket->assignedTo ? $ticket->assignedTo->name : null,
+                        'first_response_at_risk' => $risks['first_response'],
+                        'resolution_at_risk' => $risks['resolution'],
+                        'created_at' => $ticket->created_at,
+                    ];
+                })
+                ->values();
 
-        // Unassigned tickets (open/in progress)
-        $unassignedTicketsList = Ticket::whereNull('assigned_to')
-            ->whereIn('status', ['open', 'in_progress'])
-            ->with(['product'])
-            ->orderBy('created_at', 'desc')
-            ->limit(10)
-            ->get()
-            ->map(function ($ticket) {
-                return [
-                    'id' => $ticket->id,
-                    'title' => $ticket->title,
-                    'priority' => $ticket->priority,
-                    'status' => $ticket->status,
-                    'product' => $ticket->product ? $ticket->product->name : null,
-                    'created_at' => $ticket->created_at,
-                ];
-            });
+            // Critical tickets (open/in progress)
+            $criticalTicketsList = Ticket::where('priority', 'critical')
+                ->whereIn('status', ['open', 'in_progress'])
+                ->with(['product', 'assignedTo'])
+                ->orderBy('created_at', 'desc')
+                ->limit(10)
+                ->get()
+                ->map(function ($ticket) {
+                    return [
+                        'id' => $ticket->id,
+                        'title' => $ticket->title,
+                        'status' => $ticket->status,
+                        'product' => $ticket->product ? $ticket->product->name : null,
+                        'assigned_to' => $ticket->assignedTo ? $ticket->assignedTo->name : null,
+                        'created_at' => $ticket->created_at,
+                    ];
+                });
+
+            // Unassigned tickets (open/in progress)
+            $unassignedTicketsList = Ticket::whereNull('assigned_to')
+                ->whereIn('status', ['open', 'in_progress'])
+                ->with(['product'])
+                ->orderBy('created_at', 'desc')
+                ->limit(10)
+                ->get()
+                ->map(function ($ticket) {
+                    return [
+                        'id' => $ticket->id,
+                        'title' => $ticket->title,
+                        'priority' => $ticket->priority,
+                        'status' => $ticket->status,
+                        'product' => $ticket->product ? $ticket->product->name : null,
+                        'created_at' => $ticket->created_at,
+                    ];
+                });
+        }
 
         // Alerts
         $alerts = [
@@ -321,14 +332,15 @@ class DashboardController extends Controller
             'damaged_products' => $damagedProductsList,
             'inactive' => $inactiveProducts,
             'inactive_products' => $inactiveProductsList,
-            'sla_violated' => $slaViolatedTickets->count(),
-            'sla_violated_tickets' => $slaViolatedTickets,
-            'sla_at_risk' => $slaAtRiskTickets->count(),
-            'sla_at_risk_tickets' => $slaAtRiskTickets,
-            'critical_tickets' => $criticalTickets,
-            'critical_tickets_list' => $criticalTicketsList,
-            'unassigned_tickets' => $unassignedTickets,
-            'unassigned_tickets_list' => $unassignedTicketsList,
+            // Ticket alerts only for non-viewer roles
+            'sla_violated' => $isViewer ? 0 : $slaViolatedTickets->count(),
+            'sla_violated_tickets' => $isViewer ? [] : $slaViolatedTickets,
+            'sla_at_risk' => $isViewer ? 0 : $slaAtRiskTickets->count(),
+            'sla_at_risk_tickets' => $isViewer ? [] : $slaAtRiskTickets,
+            'critical_tickets' => $isViewer ? 0 : $criticalTickets,
+            'critical_tickets_list' => $isViewer ? [] : $criticalTicketsList,
+            'unassigned_tickets' => $isViewer ? 0 : $unassignedTickets,
+            'unassigned_tickets_list' => $isViewer ? [] : $unassignedTicketsList,
         ];
 
         return response()->json([
@@ -338,7 +350,7 @@ class DashboardController extends Controller
                 'damaged_products' => $damagedProducts,
                 'low_stock_products' => $lowStockProducts,
             ],
-            'tickets' => [
+            'tickets' => $isViewer ? null : [
                 'total_tickets' => $totalTickets,
                 'open_tickets' => $openTickets,
                 'in_progress_tickets' => $inProgressTickets,

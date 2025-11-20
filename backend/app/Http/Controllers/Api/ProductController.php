@@ -176,8 +176,13 @@ class ProductController extends Controller
     )]
     public function store(Request $request)
     {
-        // Check if company can create more products
+        // Check permissions - viewers cannot create products
         $user = $request->user();
+        if (!$user->can('products.create')) {
+            abort(403, 'Unauthorized: You do not have permission to create products');
+        }
+        
+        // Check if company can create more products
         if ($user->company && !$user->company->canCreateProduct()) {
             return response()->json([
                 'error' => 'Product limit reached. Please upgrade your plan to add more products.',
@@ -239,6 +244,11 @@ class ProductController extends Controller
     )]
     public function update(Request $request, Product $product)
     {
+        // Check permissions - viewers cannot update products
+        if (!$request->user()->can('products.update')) {
+            abort(403, 'Unauthorized: You do not have permission to update products');
+        }
+        
         $validated = $request->validate([
             'name' => 'sometimes|required|string|max:255',
             'category_id' => 'sometimes|required|exists:categories,id',
@@ -295,6 +305,11 @@ class ProductController extends Controller
     )]
     public function destroy(Product $product)
     {
+        // Check permissions - viewers cannot delete products
+        $user = request()->user();
+        if (!$user->can('products.delete')) {
+            abort(403, 'Unauthorized: You do not have permission to delete products');
+        }
         try {
             $this->productService->deleteProduct($product);
             return response()->json(['message' => 'Product deleted successfully']);

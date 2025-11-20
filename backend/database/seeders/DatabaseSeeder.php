@@ -35,6 +35,7 @@ class DatabaseSeeder extends Seeder
             'products.create',
             'products.update',
             'products.delete',
+            'categories.view',
             'categories.manage',
             'movements.create',
             'movements.view',
@@ -45,6 +46,7 @@ class DatabaseSeeder extends Seeder
             'employees.create',
             'employees.update',
             'employees.delete',
+            'departments.view',
             'departments.manage',
             'assignments.create',
             'assignments.view',
@@ -98,6 +100,9 @@ class DatabaseSeeder extends Seeder
             'products.view',
             'movements.view',
             'dashboard.view',
+            'employees.view',
+            'departments.view',
+            'categories.view',
         ]);
 
         // Create users (update company_id if user already exists)
