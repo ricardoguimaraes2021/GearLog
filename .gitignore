@@ -41,3 +41,4 @@ dist/
 __pycache__/
 *.pyc
 
+backend/storage/framework/views/
