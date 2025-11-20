@@ -17,12 +17,14 @@ use App\Http\Controllers\Api\Admin\CompanyController as AdminCompanyController;
 use App\Http\Controllers\Api\Admin\ImpersonationController as AdminImpersonationController;
 use App\Http\Controllers\Api\ProfileController;
 use App\Http\Controllers\Api\CompanySettingsController;
+use App\Http\Controllers\Api\CompanyInviteController;
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('v1')->middleware('throttle:60,1')->group(function () {
     // Public routes
     Route::post('/login', [AuthController::class, 'login'])->middleware('throttle:30,1');
     Route::get('/products/{product}/public', [ProductController::class, 'showPublic']);
+    Route::get('/invites/{code}/validate', [CompanyInviteController::class, 'validateInvite']);
 
     // Public auth routes (no tenant required - for registration/onboarding)
     Route::post('/register', [AuthController::class, 'register']);
@@ -48,6 +50,11 @@ Route::prefix('v1')->middleware('throttle:60,1')->group(function () {
         Route::get('/company/usage', [CompanySettingsController::class, 'usage']);
         Route::get('/company/plan', [CompanySettingsController::class, 'plan']);
 
+        // Company Invites
+        Route::get('/company/invites', [CompanyInviteController::class, 'index']);
+        Route::post('/company/invites', [CompanyInviteController::class, 'store']);
+        Route::delete('/company/invites/{id}', [CompanyInviteController::class, 'destroy']);
+
         // Products
         Route::apiResource('products', ProductController::class);
         Route::post('/products/{product}/movements', [MovementController::class, 'store']);
@@ -62,6 +69,7 @@ Route::prefix('v1')->middleware('throttle:60,1')->group(function () {
 
         // Users (for assignment and role management)
         Route::get('/users', [UserController::class, 'index']);
+        Route::post('/users', [UserController::class, 'store']);
         Route::put('/users/{id}/roles', [UserController::class, 'updateRoles']);
 
         // Tickets

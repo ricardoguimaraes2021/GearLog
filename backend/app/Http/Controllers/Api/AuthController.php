@@ -196,7 +196,7 @@ class AuthController extends Controller
         ]);
 
         // Assign default role (will be updated during onboarding)
-        $user->assignRole('consulta'); // Temporary role until onboarding
+        $user->assignRole('viewer'); // Temporary role until onboarding
 
         $token = $user->createToken('auth-token')->plainTextToken;
 
@@ -218,9 +218,10 @@ class AuthController extends Controller
         requestBody: new OA\RequestBody(
             required: true,
             content: new OA\JsonContent(
-                required: ['company_name', 'country', 'timezone'],
+                required: [],
                 properties: [
-                    new OA\Property(property: 'company_name', type: 'string', example: 'Acme Corp'),
+                    new OA\Property(property: 'company_name', type: 'string', example: 'Acme Corp', description: 'Required if creating new company'),
+                    new OA\Property(property: 'invite_code', type: 'string', example: 'ABC12345', description: 'Required if joining existing company'),
                     new OA\Property(property: 'country', type: 'string', example: 'Portugal'),
                     new OA\Property(property: 'timezone', type: 'string', example: 'Europe/Lisbon'),
                 ]
@@ -269,60 +270,111 @@ class AuthController extends Controller
             ], 400);
         }
 
+        // Validate request - either company_name (new company) or invite_code (join existing)
         $request->validate([
-            'company_name' => 'required|string|max:255',
+            'company_name' => 'required_without:invite_code|string|max:255',
+            'invite_code' => 'required_without:company_name|string|size:8',
             'country' => 'nullable|string|max:255',
             'timezone' => 'nullable|string|max:255',
         ]);
 
+        $inviteCode = $request->input('invite_code');
+        $invite = null;
+
+        // If invite code is provided, validate it
+        if ($inviteCode) {
+            $invite = \App\Models\CompanyInvite::findByCode(strtoupper($inviteCode));
+            
+            if (!$invite || !$invite->isValid()) {
+                return response()->json([
+                    'error' => 'Invalid or expired invite code.',
+                ], 400);
+            }
+
+            // Check if company has reached user limit
+            $company = $invite->company;
+            $usage = \App\Models\User::where('company_id', $company->id)->count();
+            if ($usage >= $company->max_users) {
+                return response()->json([
+                    'error' => 'Company has reached its user limit.',
+                ], 400);
+            }
+        }
+
         try {
             DB::beginTransaction();
 
-            // Create company
-            $company = Company::create([
-                'name' => $request->company_name,
-                'country' => $request->country,
-                'timezone' => $request->timezone ?? 'UTC',
-                'plan_type' => 'FREE',
-                'max_users' => 3,
-                'max_products' => 500,
-                'max_tickets' => 150,
-                'is_active' => true,
-            ]);
+            if ($invite) {
+                // Join existing company using invite code
+                $company = $invite->company;
 
-            // Update user as company owner
-            $user->update([
-                'company_id' => $company->id,
-                'is_owner' => true,
-            ]);
-
-            // Assign admin role to owner
-            $user->syncRoles(['admin']);
-
-            // Create default categories for the company
-            $defaultCategories = [
-                'Computers',
-                'Monitors',
-                'Keyboards',
-                'Mice',
-                'Printers',
-                'Networking',
-                'Other',
-            ];
-
-            foreach ($defaultCategories as $categoryName) {
-                \App\Models\Category::create([
-                    'name' => $categoryName,
+                // Update user to join company (NOT as owner)
+                $user->update([
                     'company_id' => $company->id,
+                    'is_owner' => false,
+                ]);
+
+                // Assign default "viewer" role (read-only)
+                $user->syncRoles(['viewer']);
+
+                // Mark invite as used
+                $invite->markAsUsed();
+
+                DB::commit();
+
+                return response()->json([
+                    'user' => $user->load('roles', 'company'),
+                    'company' => $company,
+                    'role_assigned' => 'viewer',
+                    'message' => 'You have been added to the company with "Viewer" role. An admin can update your roles later.',
+                ]);
+            } else {
+                // Create new company
+                $company = Company::create([
+                    'name' => $request->company_name,
+                    'country' => $request->country,
+                    'timezone' => $request->timezone ?? 'UTC',
+                    'plan_type' => 'FREE',
+                    'max_users' => 3,
+                    'max_products' => 500,
+                    'max_tickets' => 150,
+                    'is_active' => true,
+                ]);
+
+                // Update user as company owner
+                $user->update([
+                    'company_id' => $company->id,
+                    'is_owner' => true,
+                ]);
+
+                // Assign admin role to owner
+                $user->syncRoles(['admin']);
+
+                // Create default categories for the company
+                $defaultCategories = [
+                    'Computers',
+                    'Monitors',
+                    'Keyboards',
+                    'Mice',
+                    'Printers',
+                    'Networking',
+                    'Other',
+                ];
+
+                foreach ($defaultCategories as $categoryName) {
+                    \App\Models\Category::create([
+                        'name' => $categoryName,
+                        'company_id' => $company->id,
+                    ]);
+                }
+
+                DB::commit();
+
+                return response()->json([
+                    'user' => $user->load('roles', 'company'),
+                    'company' => $company,
                 ]);
             }
-
-            DB::commit();
-
-            return response()->json([
-                'user' => $user->load('roles', 'company'),
-                'company' => $company,
-            ]);
         } catch (\Exception $e) {
             DB::rollBack();
             Log::error('Onboarding failed', [
