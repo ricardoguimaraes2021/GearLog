@@ -81,13 +81,13 @@ export default function CompanyList({ onSelectCompany, selectedCompanyId }: Comp
   const getPlanBadgeColor = (plan: string) => {
     switch (plan) {
       case 'FREE':
-        return 'bg-gray-100 text-gray-800';
+        return 'bg-surface-alt text-text-primary border border-border';
       case 'PRO':
-        return 'bg-blue-100 text-blue-800';
+        return 'bg-accent-primary/10 text-accent-primary border border-accent-primary/20';
       case 'ENTERPRISE':
-        return 'bg-purple-100 text-purple-800';
+        return 'bg-accent-secondary/10 text-accent-secondary border border-accent-secondary/20';
       default:
-        return 'bg-gray-100 text-gray-800';
+        return 'bg-surface-alt text-text-primary border border-border';
     }
   };
 
@@ -116,7 +116,7 @@ export default function CompanyList({ onSelectCompany, selectedCompanyId }: Comp
           <select
             value={filters.plan_type || ''}
             onChange={(e) => handleFilterChange('plan_type', e.target.value || undefined)}
-            className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+            className="flex h-10 w-full rounded-md border border-border bg-background px-3 py-2 text-sm text-text-primary focus:border-accent-primary focus:outline-none focus:ring-2 focus:ring-accent-primary/20 dark:bg-surface dark:text-text-primary"
           >
             <option value="">All Plans</option>
             <option value="FREE">FREE</option>
@@ -127,7 +127,7 @@ export default function CompanyList({ onSelectCompany, selectedCompanyId }: Comp
           <select
             value={filters.is_active === undefined ? '' : filters.is_active ? 'true' : 'false'}
             onChange={(e) => handleFilterChange('is_active', e.target.value === '' ? undefined : e.target.value === 'true')}
-            className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+            className="flex h-10 w-full rounded-md border border-border bg-background px-3 py-2 text-sm text-text-primary focus:border-accent-primary focus:outline-none focus:ring-2 focus:ring-accent-primary/20 dark:bg-surface dark:text-text-primary"
           >
             <option value="">All Status</option>
             <option value="true">Active</option>
@@ -143,7 +143,7 @@ export default function CompanyList({ onSelectCompany, selectedCompanyId }: Comp
             ))}
           </div>
         ) : companies.length === 0 ? (
-          <div className="text-center py-8 text-gray-500">No companies found</div>
+          <div className="text-center py-8 text-text-secondary">No companies found</div>
         ) : (
           <div className="space-y-2 max-h-[600px] overflow-y-auto">
             {companies.map((company) => (
@@ -152,14 +152,14 @@ export default function CompanyList({ onSelectCompany, selectedCompanyId }: Comp
                 onClick={() => onSelectCompany(company.id)}
                 className={`p-3 border rounded-lg cursor-pointer transition-colors ${
                   selectedCompanyId === company.id
-                    ? 'border-blue-500 bg-blue-50'
-                    : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50'
+                    ? 'border-accent-primary bg-accent-primary/10'
+                    : 'border-border hover:border-accent-primary/50 hover:bg-surface-alt'
                 }`}
               >
                 <div className="flex items-start justify-between">
                   <div className="flex-1">
-                    <h3 className="font-medium text-gray-900">{company.name}</h3>
-                    <p className="text-sm text-gray-600 mt-1">
+                    <h3 className="font-medium text-text-primary">{company.name}</h3>
+                    <p className="text-sm text-text-secondary mt-1">
                       {company.users_count || 0} users • {company.products_count || 0} products
                     </p>
                     <div className="flex items-center gap-2 mt-2">
@@ -167,15 +167,15 @@ export default function CompanyList({ onSelectCompany, selectedCompanyId }: Comp
                         {company.plan_type}
                       </span>
                       {company.suspended_at ? (
-                        <span className="px-2 py-1 text-xs rounded bg-red-100 text-red-800">
+                        <span className="px-2 py-1 text-xs rounded bg-danger/10 text-danger border border-danger/20">
                           Suspended
                         </span>
                       ) : company.is_active ? (
-                        <span className="px-2 py-1 text-xs rounded bg-green-100 text-green-800">
+                        <span className="px-2 py-1 text-xs rounded bg-success/10 text-success border border-success/20">
                           Active
                         </span>
                       ) : (
-                        <span className="px-2 py-1 text-xs rounded bg-gray-100 text-gray-800">
+                        <span className="px-2 py-1 text-xs rounded bg-surface-alt text-text-secondary border border-border">
                           Inactive
                         </span>
                       )}
@@ -199,7 +199,7 @@ export default function CompanyList({ onSelectCompany, selectedCompanyId }: Comp
               <ChevronLeft className="w-4 h-4 mr-1" />
               Previous
             </Button>
-            <span className="text-sm text-gray-600">
+            <span className="text-sm text-text-secondary">
               Page {pagination.current_page} of {pagination.last_page}
             </span>
             <Button

@@ -21,7 +21,7 @@ export default function CompaniesManagement() {
             onClose={() => setSelectedCompanyId(null)}
           />
         ) : (
-          <div className="text-center text-gray-500 py-12 bg-white rounded-lg border">
+          <div className="text-center text-text-secondary py-12 bg-background rounded-lg border border-border">
             Select a company to view details
           </div>
         )}

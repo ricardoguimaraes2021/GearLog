@@ -53,7 +53,7 @@ export default function UsersManagement() {
         </CardHeader>
         <CardContent>
           <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-text-muted w-4 h-4" />
             <Input
               type="text"
               placeholder="Search users by name or email..."
@@ -70,7 +70,7 @@ export default function UsersManagement() {
         {filteredUsers.length === 0 ? (
           <Card>
             <CardContent className="pt-6">
-              <p className="text-center text-gray-500 py-8">No users found</p>
+              <p className="text-center text-text-muted py-8">No users found</p>
             </CardContent>
           </Card>
         ) : (
@@ -80,27 +80,27 @@ export default function UsersManagement() {
                 <div className="flex items-center justify-between">
                   <div className="flex-1">
                     <div className="flex items-center gap-3">
-                      <UserCog className="w-5 h-5 text-gray-500" />
+                      <UserCog className="w-5 h-5 text-text-muted" />
                       <div>
-                        <div className="font-semibold text-gray-900">{user.name}</div>
-                        <div className="text-sm text-gray-600">{user.email}</div>
+                        <div className="font-semibold text-text-primary">{user.name}</div>
+                        <div className="text-sm text-text-secondary">{user.email}</div>
                         <div className="flex items-center gap-2 mt-2">
                           {user.roles?.map((role) => (
                             <span
                               key={role.id}
-                              className="px-2 py-1 text-xs rounded bg-blue-100 text-blue-800"
+                              className="px-2 py-1 text-xs rounded bg-accent-primary/10 text-accent-primary border border-accent-primary/20"
                             >
                               {role.name}
                             </span>
                           ))}
                           {user.is_owner && (
-                            <span className="px-2 py-1 text-xs rounded bg-purple-100 text-purple-800">
+                            <span className="px-2 py-1 text-xs rounded bg-accent-secondary/10 text-accent-secondary border border-accent-secondary/20">
                               Owner
                             </span>
                           )}
                         </div>
                         {user.company && (
-                          <div className="text-xs text-gray-500 mt-1">
+                          <div className="text-xs text-text-muted mt-1">
                             Company: {user.company.name}
                           </div>
                         )}

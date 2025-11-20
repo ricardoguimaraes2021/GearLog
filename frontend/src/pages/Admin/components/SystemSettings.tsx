@@ -26,13 +26,13 @@ export default function SystemSettings() {
               <Button variant="outline" disabled>
                 Enable Maintenance Mode
               </Button>
-              <span className="text-sm text-gray-500">Coming soon</span>
+              <span className="text-sm text-text-secondary">Coming soon</span>
             </div>
           </div>
 
           <div className="space-y-2">
             <Label>Feature Flags</Label>
-            <div className="text-sm text-gray-500">
+            <div className="text-sm text-text-secondary">
               Feature flag management coming soon
             </div>
           </div>
@@ -51,7 +51,7 @@ export default function SystemSettings() {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="text-sm text-gray-500">
+          <div className="text-sm text-text-secondary">
             Email configuration coming soon
           </div>
         </CardContent>
@@ -72,13 +72,13 @@ export default function SystemSettings() {
           <div className="space-y-4">
             <div className="space-y-2">
               <Label>Password Policy</Label>
-              <div className="text-sm text-gray-500">
+              <div className="text-sm text-text-secondary">
                 Password policy configuration coming soon
               </div>
             </div>
             <div className="space-y-2">
               <Label>API Rate Limits</Label>
-              <div className="text-sm text-gray-500">
+              <div className="text-sm text-text-secondary">
                 Rate limit configuration coming soon
               </div>
             </div>
@@ -98,7 +98,7 @@ export default function SystemSettings() {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="text-sm text-gray-500">
+          <div className="text-sm text-text-secondary">
             Server configuration coming soon
           </div>
         </CardContent>

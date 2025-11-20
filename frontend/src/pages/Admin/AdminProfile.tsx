@@ -76,9 +76,9 @@ export default function AdminProfile() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-background">
       {/* Top Navigation Bar */}
-      <nav className="bg-white border-b border-gray-200">
+      <nav className="bg-surface border-b border-border">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between h-16">
             <div className="flex items-center">
@@ -91,13 +91,13 @@ export default function AdminProfile() {
                 <ArrowLeft className="w-4 h-4 mr-2" />
                 Back to Admin Panel
               </Button>
-              <h1 className="text-xl font-bold text-gray-900">GearLog</h1>
+              <h1 className="text-xl font-bold text-text-primary">GearLog</h1>
               <span className="ml-4 px-2 py-1 text-xs rounded bg-purple-100 text-purple-800">
                 Super Admin
               </span>
             </div>
             <div className="flex items-center gap-4">
-              <span className="text-sm text-gray-700">{user?.name}</span>
+              <span className="text-sm text-text-primary">{user?.name}</span>
               <Button
                 variant="ghost"
                 size="sm"
@@ -115,8 +115,8 @@ export default function AdminProfile() {
 
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">Profile Settings</h1>
-          <p className="mt-1 text-sm text-gray-500">Manage your account information</p>
+          <h1 className="text-3xl font-bold text-text-primary">Profile Settings</h1>
+          <p className="mt-1 text-sm text-text-secondary">Manage your account information</p>
         </div>
 
         <div className="space-y-6">
@@ -159,9 +159,9 @@ export default function AdminProfile() {
                       type="email"
                       value={user?.email || ''}
                       disabled
-                      className="bg-gray-50"
+                      className="bg-surface-alt"
                     />
-                    <p className="text-xs text-gray-500">Email cannot be changed</p>
+                    <p className="text-xs text-text-secondary">Email cannot be changed</p>
                   </div>
                   <div className="flex gap-2 pt-4">
                     <Button type="submit" disabled={isLoading}>
@@ -184,12 +184,12 @@ export default function AdminProfile() {
               ) : (
                 <div className="space-y-4">
                   <div>
-                    <Label className="text-sm font-medium text-gray-600">Name</Label>
-                    <p className="mt-1 text-sm font-semibold text-gray-900">{user?.name}</p>
+                    <Label className="text-sm font-medium text-text-secondary">Name</Label>
+                    <p className="mt-1 text-sm font-semibold text-text-primary">{user?.name}</p>
                   </div>
                   <div>
-                    <Label className="text-sm font-medium text-gray-600">Email</Label>
-                    <p className="mt-1 text-sm text-gray-900">{user?.email}</p>
+                    <Label className="text-sm font-medium text-text-secondary">Email</Label>
+                    <p className="mt-1 text-sm text-text-primary">{user?.email}</p>
                   </div>
                 </div>
               )}

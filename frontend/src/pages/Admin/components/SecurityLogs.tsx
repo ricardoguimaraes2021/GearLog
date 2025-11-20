@@ -46,7 +46,7 @@ export default function SecurityLogs() {
       case 'rate_limit':
         return <UserX className="w-5 h-5 text-purple-500" />;
       default:
-        return <Shield className="w-5 h-5 text-gray-500" />;
+        return <Shield className="w-5 h-5 text-text-muted" />;
     }
   };
 
@@ -61,7 +61,7 @@ export default function SecurityLogs() {
       case 'rate_limit':
         return 'border-purple-200 bg-purple-50';
       default:
-        return 'border-gray-200 bg-white';
+        return 'border-border bg-background';
     }
   };
 
@@ -83,8 +83,8 @@ export default function SecurityLogs() {
         </CardHeader>
         <CardContent>
           {logs.length === 0 ? (
-            <div className="text-center text-gray-500 py-8">
-              <Shield className="w-12 h-12 mx-auto mb-4 text-gray-400" />
+            <div className="text-center text-text-muted py-8">
+              <Shield className="w-12 h-12 mx-auto mb-4 text-text-muted" />
               <p>No security logs available</p>
             </div>
           ) : (
@@ -98,15 +98,15 @@ export default function SecurityLogs() {
                     {getLogIcon(log.type)}
                     <div className="flex-1">
                       <div className="flex items-center justify-between">
-                        <span className="font-medium text-gray-900 capitalize">
+                        <span className="font-medium text-text-primary capitalize">
                           {log.type.replace('_', ' ')}
                         </span>
-                        <span className="text-xs text-gray-500">
+                        <span className="text-xs text-text-muted">
                           {new Date(log.created_at).toLocaleString()}
                         </span>
                       </div>
-                      <p className="text-sm text-gray-700 mt-1">{log.description}</p>
-                      <div className="flex items-center gap-4 mt-2 text-xs text-gray-500">
+                      <p className="text-sm text-text-primary mt-1">{log.description}</p>
+                      <div className="flex items-center gap-4 mt-2 text-xs text-text-muted">
                         {log.user_email && (
                           <span>User: {log.user_email}</span>
                         )}

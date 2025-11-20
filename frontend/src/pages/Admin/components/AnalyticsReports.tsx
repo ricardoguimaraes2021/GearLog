@@ -87,7 +87,7 @@ export default function AnalyticsReports() {
     return (
       <Card>
         <CardContent className="pt-6">
-          <p className="text-center text-gray-500">No analytics data available</p>
+          <p className="text-center text-text-secondary">No analytics data available</p>
         </CardContent>
       </Card>
     );
@@ -128,7 +128,7 @@ export default function AnalyticsReports() {
                 <select
                   value={filters.company_id || ''}
                   onChange={(e) => handleFilterChange('company_id', e.target.value ? parseInt(e.target.value) : null)}
-                  className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+                  className="flex h-10 w-full rounded-md border border-border dark:bg-surface dark:text-text-primary text-text-primary bg-background px-3 py-2 text-sm"
                 >
                   <option value="">All Companies</option>
                   {companies.map((company) => (
@@ -144,7 +144,7 @@ export default function AnalyticsReports() {
                 <select
                   value={filters.plan_type || ''}
                   onChange={(e) => handleFilterChange('plan_type', e.target.value || null)}
-                  className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+                  className="flex h-10 w-full rounded-md border border-border dark:bg-surface dark:text-text-primary text-text-primary bg-background px-3 py-2 text-sm"
                 >
                   <option value="">All Plans</option>
                   <option value="FREE">FREE</option>
@@ -208,16 +208,16 @@ export default function AnalyticsReports() {
         <CardContent>
           <div className="grid grid-cols-3 gap-4">
             <div className="text-center p-4 border rounded-lg">
-              <div className="text-2xl font-bold text-gray-900">{analytics.plan_distribution.FREE}</div>
-              <div className="text-sm text-gray-600">FREE</div>
+              <div className="text-2xl font-bold text-text-primary">{analytics.plan_distribution.FREE}</div>
+              <div className="text-sm text-text-secondary">FREE</div>
             </div>
             <div className="text-center p-4 border rounded-lg">
-              <div className="text-2xl font-bold text-blue-600">{analytics.plan_distribution.PRO}</div>
-              <div className="text-sm text-gray-600">PRO</div>
+              <div className="text-2xl font-bold text-accent-primary">{analytics.plan_distribution.PRO}</div>
+              <div className="text-sm text-text-secondary">PRO</div>
             </div>
             <div className="text-center p-4 border rounded-lg">
-              <div className="text-2xl font-bold text-purple-600">{analytics.plan_distribution.ENTERPRISE}</div>
-              <div className="text-sm text-gray-600">ENTERPRISE</div>
+              <div className="text-2xl font-bold text-accent-secondary">{analytics.plan_distribution.ENTERPRISE}</div>
+              <div className="text-sm text-text-secondary">ENTERPRISE</div>
             </div>
           </div>
         </CardContent>
@@ -229,8 +229,8 @@ export default function AnalyticsReports() {
           <CardTitle>Growth Metrics</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="text-center text-gray-500 py-8">
-            <TrendingUp className="w-12 h-12 mx-auto mb-4 text-gray-400" />
+          <div className="text-center text-text-secondary py-8">
+            <TrendingUp className="w-12 h-12 mx-auto mb-4 text-text-muted" />
             <p>Detailed charts and graphs coming soon</p>
           </div>
         </CardContent>
