@@ -4,6 +4,8 @@ namespace App\Http\Controllers\Api\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Company;
+use App\Models\Product;
+use App\Models\Ticket;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -111,12 +113,17 @@ class CompanyController extends Controller
         $usageStats = $company->getUsageStats();
 
         // Get recent activity (last 30 days)
-        $recentTickets = $company->tickets()
+        // Use withoutGlobalScopes to avoid filtering by authenticated user's company_id
+        $recentTickets = Ticket::withoutGlobalScopes()
+            ->where('company_id', $company->id)
             ->where('created_at', '>=', now()->subDays(30))
             ->count();
 
         // Get total value of products
-        $totalProductValue = $company->products()->sum(DB::raw('quantity * COALESCE(value, 0)'));
+        // Use withoutGlobalScopes to avoid filtering by authenticated user's company_id
+        $totalProductValue = Product::withoutGlobalScopes()
+            ->where('company_id', $company->id)
+            ->sum(DB::raw('quantity * COALESCE(value, 0)'));
 
         // Get active users count
         $activeUsers = $company->users()->count();
@@ -327,12 +334,15 @@ class CompanyController extends Controller
         }
 
         // Get recent tickets, products created, users added, etc.
-        $recentTickets = $company->tickets()
+        // Use withoutGlobalScopes to avoid filtering by authenticated user's company_id
+        $recentTickets = Ticket::withoutGlobalScopes()
+            ->where('company_id', $company->id)
             ->orderBy('created_at', 'desc')
             ->limit(50)
             ->get(['id', 'title', 'status', 'created_at']);
 
-        $recentProducts = $company->products()
+        $recentProducts = Product::withoutGlobalScopes()
+            ->where('company_id', $company->id)
             ->orderBy('created_at', 'desc')
             ->limit(50)
             ->get(['id', 'name', 'status', 'created_at']);

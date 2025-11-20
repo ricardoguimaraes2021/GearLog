@@ -108,7 +108,10 @@ class Company extends Model
             return false;
         }
 
-        $currentProductCount = $this->products()->count();
+        // Use withoutGlobalScopes to avoid filtering by authenticated user's company_id
+        $currentProductCount = Product::withoutGlobalScopes()
+            ->where('company_id', $this->id)
+            ->count();
         return $currentProductCount < $this->max_products;
     }
 
@@ -121,7 +124,9 @@ class Company extends Model
             return false;
         }
 
-        $currentMonthTickets = $this->tickets()
+        // Use withoutGlobalScopes to avoid filtering by authenticated user's company_id
+        $currentMonthTickets = Ticket::withoutGlobalScopes()
+            ->where('company_id', $this->id)
             ->whereMonth('created_at', now()->month)
             ->whereYear('created_at', now()->year)
             ->count();
@@ -134,32 +139,40 @@ class Company extends Model
      */
     public function getUsageStats(): array
     {
+        // Use withoutGlobalScopes to avoid filtering by authenticated user's company_id
+        // when Super Admin is viewing statistics for a specific company
+        $productsCount = Product::withoutGlobalScopes()
+            ->where('company_id', $this->id)
+            ->count();
+        
+        $ticketsCountThisMonth = Ticket::withoutGlobalScopes()
+            ->where('company_id', $this->id)
+            ->whereMonth('created_at', now()->month)
+            ->whereYear('created_at', now()->year)
+            ->count();
+        
+        $usersCount = $this->users()->count();
+        
         return [
             'users' => [
-                'current' => $this->users()->count(),
+                'current' => $usersCount,
                 'max' => $this->max_users,
                 'percentage' => $this->max_users > 0 
-                    ? round(($this->users()->count() / $this->max_users) * 100, 2) 
+                    ? round(($usersCount / $this->max_users) * 100, 2) 
                     : 0,
             ],
             'products' => [
-                'current' => $this->products()->count(),
+                'current' => $productsCount,
                 'max' => $this->max_products,
                 'percentage' => $this->max_products > 0 
-                    ? round(($this->products()->count() / $this->max_products) * 100, 2) 
+                    ? round(($productsCount / $this->max_products) * 100, 2) 
                     : 0,
             ],
             'tickets_this_month' => [
-                'current' => $this->tickets()
-                    ->whereMonth('created_at', now()->month)
-                    ->whereYear('created_at', now()->year)
-                    ->count(),
+                'current' => $ticketsCountThisMonth,
                 'max' => $this->max_tickets,
                 'percentage' => $this->max_tickets > 0 
-                    ? round(($this->tickets()
-                        ->whereMonth('created_at', now()->month)
-                        ->whereYear('created_at', now()->year)
-                        ->count() / $this->max_tickets) * 100, 2) 
+                    ? round(($ticketsCountThisMonth / $this->max_tickets) * 100, 2) 
                     : 0,
             ],
         ];
