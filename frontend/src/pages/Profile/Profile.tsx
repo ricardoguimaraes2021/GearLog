@@ -84,8 +84,8 @@ export default function Profile() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-3xl font-bold text-gray-900">Profile</h1>
-        <p className="mt-1 text-sm text-gray-500">Manage your personal information and security settings</p>
+        <h1 className="text-3xl font-bold text-text-primary">Profile</h1>
+        <p className="mt-1 text-sm text-text-secondary">Manage your personal information and security settings</p>
       </div>
 
       {/* Profile Overview */}
@@ -124,7 +124,7 @@ export default function Profile() {
                   type="email"
                   value={user.email}
                   disabled
-                  className="bg-gray-50"
+                  className="bg-surface-alt"
                 />
                 <p className="text-xs text-muted-foreground">Email cannot be changed</p>
               </div>
@@ -149,18 +149,18 @@ export default function Profile() {
           ) : (
             <div className="space-y-6">
               <div className="flex items-center gap-4">
-                <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center">
-                  <User className="w-8 h-8 text-blue-600" />
+                <div className="w-16 h-16 bg-accent-primary/10 rounded-full flex items-center justify-center">
+                  <User className="w-8 h-8 text-accent-primary" />
                 </div>
                 <div>
-                  <h3 className="text-lg font-semibold text-gray-900">{user.name}</h3>
-                  <p className="text-sm text-gray-600">{user.email}</p>
+                  <h3 className="text-lg font-semibold text-text-primary">{user.name}</h3>
+                  <p className="text-sm text-text-secondary">{user.email}</p>
                   {user.roles && user.roles.length > 0 && (
                     <div className="flex gap-2 mt-2">
                       {user.roles.map((role) => (
                         <span
                           key={role.id}
-                          className="px-2 py-1 text-xs rounded bg-gray-100 text-gray-800"
+                          className="px-2 py-1 text-xs rounded-md bg-surface-alt text-text-primary"
                         >
                           {role.name}
                         </span>
@@ -170,18 +170,18 @@ export default function Profile() {
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-4 border-t">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-4 border-t border-border">
                 <div>
-                  <dt className="text-sm font-medium text-gray-600">Name</dt>
-                  <dd className="mt-1 text-sm text-gray-900">{user.name}</dd>
+                  <dt className="text-sm font-medium text-text-secondary">Name</dt>
+                  <dd className="mt-1 text-sm text-text-primary">{user.name}</dd>
                 </div>
                 <div>
-                  <dt className="text-sm font-medium text-gray-600">Email</dt>
-                  <dd className="mt-1 text-sm text-gray-900">{user.email}</dd>
+                  <dt className="text-sm font-medium text-text-secondary">Email</dt>
+                  <dd className="mt-1 text-sm text-text-primary">{user.email}</dd>
                 </div>
                 <div>
-                  <dt className="text-sm font-medium text-gray-600">Account Created</dt>
-                  <dd className="mt-1 text-sm text-gray-900">
+                  <dt className="text-sm font-medium text-text-secondary">Account Created</dt>
+                  <dd className="mt-1 text-sm text-text-primary">
                     {user.created_at ? new Date(user.created_at).toLocaleDateString() : 'N/A'}
                   </dd>
                 </div>
@@ -207,7 +207,7 @@ export default function Profile() {
 
       {/* Password Change Modal */}
       {showPasswordModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+        <div className="fixed inset-0 bg-background/80 backdrop-blur-sm flex items-center justify-center z-50 p-4">
           <Card className="max-w-md w-full">
             <CardHeader>
               <CardTitle>Change Password</CardTitle>

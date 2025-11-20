@@ -4,6 +4,7 @@ import { useAuthStore } from '@/stores/authStore';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { ThemeToggle } from '@/components/ui/theme-toggle';
 import { toast } from '@/utils/toast';
 import { loginSchema } from '@/utils/validation';
 import { Label } from '@/components/ui/label';
@@ -32,8 +33,8 @@ export default function Login() {
   // Show loading while checking authentication status
   if (isInitializing) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <div className="text-lg">Loading...</div>
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <div className="text-lg text-text-primary">Loading...</div>
       </div>
     );
   }
@@ -88,7 +89,10 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen flex items-center justify-center bg-background py-12 px-4 sm:px-6 lg:px-8 relative">
+      <div className="absolute top-4 right-4">
+        <ThemeToggle />
+      </div>
       <Card className="w-full max-w-md">
         <CardHeader>
           <CardTitle className="text-2xl text-center">GearLog</CardTitle>
@@ -99,12 +103,12 @@ export default function Login() {
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
             {error && (
-              <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded">
+              <div className="bg-danger/10 border border-danger/20 text-danger px-4 py-3 rounded-md">
                 {error}
               </div>
             )}
             <div>
-              <Label htmlFor="email" className="block text-sm font-medium text-gray-700">
+              <Label htmlFor="email" className="block text-sm font-medium text-text-primary">
                 Email
               </Label>
               <Input
@@ -120,7 +124,7 @@ export default function Login() {
               />
             </div>
             <div>
-              <Label htmlFor="password" className="block text-sm font-medium text-gray-700">
+              <Label htmlFor="password" className="block text-sm font-medium text-text-primary">
                 Password
               </Label>
               <Input
@@ -139,9 +143,9 @@ export default function Login() {
               {isLoading || isSubmitting ? 'Signing in...' : 'Sign in'}
             </Button>
           </form>
-          <div className="mt-4 text-center text-sm text-gray-600">
+          <div className="mt-4 text-center text-sm text-text-secondary">
             <p>Don't have an account?{' '}
-              <Link to="/register" className="text-blue-600 hover:text-blue-700 font-medium">
+              <Link to="/register" className="text-accent-primary hover:text-accent-primary/80 font-medium">
                 Sign up
               </Link>
             </p>

@@ -18,44 +18,96 @@ export default {
     },
     extend: {
       colors: {
-        border: "hsl(var(--border))",
-        input: "hsl(var(--input))",
-        ring: "hsl(var(--ring))",
-        background: "hsl(var(--background))",
-        foreground: "hsl(var(--foreground))",
+        // GearLog Design System Colors
+        border: "var(--gearlog-border)",
+        input: "var(--gearlog-input-bg)",
+        ring: "var(--gearlog-accent-primary)",
+        background: "var(--gearlog-background)",
+        foreground: "var(--gearlog-text-primary)",
         primary: {
-          DEFAULT: "hsl(var(--primary))",
-          foreground: "hsl(var(--primary-foreground))",
+          DEFAULT: "var(--gearlog-accent-primary)",
+          foreground: "#FFFFFF",
         },
         secondary: {
-          DEFAULT: "hsl(var(--secondary))",
-          foreground: "hsl(var(--secondary-foreground))",
+          DEFAULT: "var(--gearlog-accent-secondary)",
+          foreground: "#FFFFFF",
         },
         destructive: {
-          DEFAULT: "hsl(var(--destructive))",
-          foreground: "hsl(var(--destructive-foreground))",
+          DEFAULT: "var(--gearlog-danger)",
+          foreground: "#FFFFFF",
         },
         muted: {
-          DEFAULT: "hsl(var(--muted))",
-          foreground: "hsl(var(--muted-foreground))",
+          DEFAULT: "var(--gearlog-text-muted)",
+          foreground: "var(--gearlog-text-secondary)",
         },
         accent: {
-          DEFAULT: "hsl(var(--accent))",
-          foreground: "hsl(var(--accent-foreground))",
+          DEFAULT: "var(--gearlog-accent-primary)",
+          foreground: "#FFFFFF",
         },
         popover: {
-          DEFAULT: "hsl(var(--popover))",
-          foreground: "hsl(var(--popover-foreground))",
+          DEFAULT: "var(--gearlog-surface)",
+          foreground: "var(--gearlog-text-primary)",
         },
         card: {
-          DEFAULT: "hsl(var(--card))",
-          foreground: "hsl(var(--card-foreground))",
+          DEFAULT: "var(--gearlog-surface)",
+          foreground: "var(--gearlog-text-primary)",
+        },
+        success: "var(--gearlog-success)",
+        warning: "var(--gearlog-warning)",
+        danger: "var(--gearlog-danger)",
+        surface: {
+          DEFAULT: "var(--gearlog-surface)",
+          alt: "var(--gearlog-surface-alt)",
+        },
+        text: {
+          primary: "var(--gearlog-text-primary)",
+          secondary: "var(--gearlog-text-secondary)",
+          muted: "var(--gearlog-text-muted)",
         },
       },
       borderRadius: {
-        lg: "var(--radius)",
-        md: "calc(var(--radius) - 2px)",
-        sm: "calc(var(--radius) - 4px)",
+        xs: "var(--gearlog-radius-xs)",
+        sm: "var(--gearlog-radius-sm)",
+        md: "var(--gearlog-radius-md)",
+        lg: "var(--gearlog-radius-lg)",
+        xl: "var(--gearlog-radius-xl)",
+        full: "var(--gearlog-radius-full)",
+      },
+      spacing: {
+        xs: "var(--gearlog-spacing-xs)",
+        sm: "var(--gearlog-spacing-sm)",
+        md: "var(--gearlog-spacing-md)",
+        lg: "var(--gearlog-spacing-lg)",
+        xl: "var(--gearlog-spacing-xl)",
+      },
+      fontFamily: {
+        primary: ["Inter", "system-ui", "sans-serif"],
+      },
+      fontSize: {
+        xs: "var(--gearlog-font-size-xs)",
+        sm: "var(--gearlog-font-size-sm)",
+        md: "var(--gearlog-font-size-md)",
+        lg: "var(--gearlog-font-size-lg)",
+        xl: "var(--gearlog-font-size-xl)",
+        xxl: "var(--gearlog-font-size-xxl)",
+      },
+      fontWeight: {
+        regular: 400,
+        medium: 500,
+        semibold: 600,
+        bold: 700,
+      },
+      boxShadow: {
+        card: "var(--gearlog-shadow-card)",
+      },
+      transitionDuration: {
+        default: "150ms",
+      },
+      transitionTimingFunction: {
+        default: "ease-in-out",
+      },
+      scale: {
+        hover: "1.02",
       },
       keyframes: {
         "accordion-down": {

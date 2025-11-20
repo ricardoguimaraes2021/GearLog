@@ -2,50 +2,127 @@
 @tailwind components;
 @tailwind utilities;
 
+/**
+ * GearLog Design System - CSS Variables
+ * Baseado no design system oficial da plataforma
+ */
+
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
-    --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
-    --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
-    --primary: 222.2 47.4% 11.2%;
-    --primary-foreground: 210 40% 98%;
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 222.2 84% 4.9%;
-    --radius: 0.5rem;
+    /* Global Tokens - Radius */
+    --gearlog-radius-xs: 4px;
+    --gearlog-radius-sm: 8px;
+    --gearlog-radius-md: 10px;
+    --gearlog-radius-lg: 14px;
+    --gearlog-radius-xl: 20px;
+    --gearlog-radius-full: 999px;
+
+    /* Global Tokens - Spacing */
+    --gearlog-spacing-xs: 4px;
+    --gearlog-spacing-sm: 8px;
+    --gearlog-spacing-md: 16px;
+    --gearlog-spacing-lg: 24px;
+    --gearlog-spacing-xl: 32px;
+
+    /* Global Tokens - Font */
+    --gearlog-font-family-primary: Inter, system-ui, sans-serif;
+    --gearlog-font-size-xs: 12px;
+    --gearlog-font-size-sm: 14px;
+    --gearlog-font-size-md: 15px;
+    --gearlog-font-size-lg: 18px;
+    --gearlog-font-size-xl: 22px;
+    --gearlog-font-size-xxl: 28px;
+    --gearlog-font-weight-regular: 400;
+    --gearlog-font-weight-medium: 500;
+    --gearlog-font-weight-semibold: 600;
+    --gearlog-font-weight-bold: 700;
+
+    /* Light Mode Colors */
+    --gearlog-background: #F8FAFC;
+    --gearlog-surface: #FFFFFF;
+    --gearlog-surface-alt: #F1F5F9;
+    --gearlog-border: #E2E8F0;
+    --gearlog-text-primary: #0F172A;
+    --gearlog-text-secondary: #475569;
+    --gearlog-text-muted: #94A3B8;
+    --gearlog-accent-primary: #2563EB;
+    --gearlog-accent-secondary: #4F46E5;
+    --gearlog-success: #22C55E;
+    --gearlog-warning: #F59E0B;
+    --gearlog-danger: #EF4444;
+    --gearlog-input-bg: #FFFFFF;
+    --gearlog-sidebar-bg: #FFFFFF;
+    --gearlog-sidebar-icon: #334155;
+
+    /* Shadows */
+    --gearlog-shadow-card: 0 4px 20px rgba(0,0,0,0.04);
+
+    /* Motion */
+    --gearlog-transition-default: 150ms ease-in-out;
+    --gearlog-hover-scale: 1.02;
+
+    /* Legacy compatibility (mantido para componentes existentes) */
+    --background: var(--gearlog-background);
+    --foreground: var(--gearlog-text-primary);
+    --card: var(--gearlog-surface);
+    --card-foreground: var(--gearlog-text-primary);
+    --popover: var(--gearlog-surface);
+    --popover-foreground: var(--gearlog-text-primary);
+    --primary: var(--gearlog-accent-primary);
+    --primary-foreground: #FFFFFF;
+    --secondary: var(--gearlog-accent-secondary);
+    --secondary-foreground: #FFFFFF;
+    --muted: var(--gearlog-text-muted);
+    --muted-foreground: var(--gearlog-text-secondary);
+    --accent: var(--gearlog-accent-primary);
+    --accent-foreground: #FFFFFF;
+    --destructive: var(--gearlog-danger);
+    --destructive-foreground: #FFFFFF;
+    --input: var(--gearlog-input-bg);
+    --ring: var(--gearlog-accent-primary);
+    --radius: var(--gearlog-radius-md);
   }
 
   .dark {
-    --background: 222.2 84% 4.9%;
-    --foreground: 210 40% 98%;
-    --card: 222.2 84% 4.9%;
-    --card-foreground: 210 40% 98%;
-    --popover: 222.2 84% 4.9%;
-    --popover-foreground: 210 40% 98%;
-    --primary: 210 40% 98%;
-    --primary-foreground: 222.2 47.4% 11.2%;
-    --secondary: 217.2 32.6% 17.5%;
-    --secondary-foreground: 210 40% 98%;
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
-    --accent: 217.2 32.6% 17.5%;
-    --accent-foreground: 210 40% 98%;
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 40% 98%;
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 212.7 26.8% 83.9%;
+    /* Dark Mode Colors */
+    --gearlog-background: #0F1117;
+    --gearlog-surface: #1A1C23;
+    --gearlog-surface-alt: #1F232A;
+    --gearlog-border: #2A2D33;
+    --gearlog-text-primary: #F8FAFC;
+    --gearlog-text-secondary: #94A3B8;
+    --gearlog-text-muted: #64748B;
+    --gearlog-accent-primary: #3B82F6;
+    --gearlog-accent-secondary: #6366F1;
+    --gearlog-success: #22C55E;
+    --gearlog-warning: #F59E0B;
+    --gearlog-danger: #EF4444;
+    --gearlog-input-bg: #1F2128;
+    --gearlog-sidebar-bg: #14161C;
+    --gearlog-sidebar-icon: #CBD5E1;
+
+    /* Shadows */
+    --gearlog-shadow-card: 0 4px 20px rgba(0,0,0,0.25);
+
+    /* Legacy compatibility */
+    --background: var(--gearlog-background);
+    --foreground: var(--gearlog-text-primary);
+    --card: var(--gearlog-surface);
+    --card-foreground: var(--gearlog-text-primary);
+    --popover: var(--gearlog-surface);
+    --popover-foreground: var(--gearlog-text-primary);
+    --primary: var(--gearlog-accent-primary);
+    --primary-foreground: #FFFFFF;
+    --secondary: var(--gearlog-accent-secondary);
+    --secondary-foreground: #FFFFFF;
+    --muted: var(--gearlog-text-muted);
+    --muted-foreground: var(--gearlog-text-secondary);
+    --accent: var(--gearlog-accent-primary);
+    --accent-foreground: #FFFFFF;
+    --destructive: var(--gearlog-danger);
+    --destructive-foreground: #FFFFFF;
+    --input: var(--gearlog-input-bg);
+    --ring: var(--gearlog-accent-primary);
   }
 }
 
@@ -53,8 +130,10 @@
   * {
     @apply border-border;
   }
+  
   body {
     @apply bg-background text-foreground;
+    font-family: var(--gearlog-font-family-primary);
   }
 }
 

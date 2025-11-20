@@ -79,28 +79,28 @@ export default function Dashboard() {
   }
 
   if (!data) {
-    return <div className="text-center py-8">No data available</div>;
+    return <div className="text-center py-8 text-text-secondary">No data available</div>;
   }
 
   const getPriorityColor = (priority: string) => {
     const colors = {
-      low: 'bg-gray-100 text-gray-800',
-      medium: 'bg-blue-100 text-blue-800',
-      high: 'bg-orange-100 text-orange-800',
-      critical: 'bg-red-100 text-red-800',
+      low: 'bg-surface-alt text-text-secondary',
+      medium: 'bg-accent-primary/10 text-accent-primary',
+      high: 'bg-warning/10 text-warning',
+      critical: 'bg-danger/10 text-danger',
     };
-    return colors[priority as keyof typeof colors] || 'bg-gray-100 text-gray-800';
+    return colors[priority as keyof typeof colors] || 'bg-surface-alt text-text-secondary';
   };
 
   const getStatusColor = (status: string) => {
     const colors = {
-      open: 'bg-green-100 text-green-800',
-      in_progress: 'bg-blue-100 text-blue-800',
-      waiting_parts: 'bg-yellow-100 text-yellow-800',
-      resolved: 'bg-purple-100 text-purple-800',
-      closed: 'bg-gray-100 text-gray-800',
+      open: 'bg-success/10 text-success',
+      in_progress: 'bg-accent-primary/10 text-accent-primary',
+      waiting_parts: 'bg-warning/10 text-warning',
+      resolved: 'bg-accent-secondary/10 text-accent-secondary',
+      closed: 'bg-surface-alt text-text-secondary',
     };
-    return colors[status as keyof typeof colors] || 'bg-gray-100 text-gray-800';
+    return colors[status as keyof typeof colors] || 'bg-surface-alt text-text-secondary';
   };
 
   const formatStatus = (status: string) => {
@@ -112,25 +112,25 @@ export default function Dashboard() {
       title: 'Total Products',
       value: data.kpis.total_products,
       icon: Package,
-      color: 'text-blue-600',
+      color: 'text-accent-primary',
     },
     {
       title: 'Total Value',
       value: `€${data.kpis.total_value.toLocaleString()}`,
       icon: DollarSign,
-      color: 'text-green-600',
+      color: 'text-success',
     },
     {
       title: 'Damaged Products',
       value: data.kpis.damaged_products,
       icon: AlertTriangle,
-      color: 'text-red-600',
+      color: 'text-danger',
     },
     {
       title: 'Low Stock',
       value: data.kpis.low_stock_products,
       icon: TrendingDown,
-      color: 'text-orange-600',
+      color: 'text-warning',
     },
   ];
 
@@ -139,25 +139,25 @@ export default function Dashboard() {
       title: 'Open Tickets',
       value: data.tickets.open_tickets,
       icon: Ticket,
-      color: 'text-green-600',
+      color: 'text-success',
     },
     {
       title: 'In Progress',
       value: data.tickets.in_progress_tickets,
       icon: Clock,
-      color: 'text-blue-600',
+      color: 'text-accent-primary',
     },
     {
       title: 'Critical Tickets',
       value: data.tickets.critical_tickets,
       icon: AlertTriangle,
-      color: 'text-red-600',
+      color: 'text-danger',
     },
     {
       title: 'Unassigned',
       value: data.tickets.unassigned_tickets,
       icon: User,
-      color: 'text-orange-600',
+      color: 'text-warning',
     },
   ] : [];
 
@@ -166,32 +166,32 @@ export default function Dashboard() {
       title: 'Total Employees',
       value: data.employees.total_employees,
       icon: Users,
-      color: 'text-blue-600',
+      color: 'text-accent-primary',
     },
     {
       title: 'Active Employees',
       value: data.employees.active_employees,
       icon: User,
-      color: 'text-green-600',
+      color: 'text-success',
     },
     {
       title: 'Active Assignments',
       value: data.employees.total_assignments,
       icon: Briefcase,
-      color: 'text-purple-600',
+      color: 'text-accent-secondary',
     },
   ] : [];
 
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-3xl font-bold text-gray-900">Dashboard</h1>
-        <p className="mt-1 text-sm text-gray-500">Overview of your inventory</p>
+        <h1 className="text-3xl font-bold text-text-primary">Dashboard</h1>
+        <p className="mt-1 text-sm text-text-secondary">Overview of your inventory</p>
       </div>
 
       {/* Product KPIs */}
       <div>
-        <h2 className="text-xl font-semibold text-gray-900 mb-4">Products Overview</h2>
+        <h2 className="text-xl font-semibold text-text-primary mb-4">Products Overview</h2>
         <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
           {kpiCards.map((kpi) => {
             const Icon = kpi.icon;
@@ -214,7 +214,7 @@ export default function Dashboard() {
       {ticketKpiCards.length > 0 && (
         <div>
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-xl font-semibold text-gray-900">Tickets Overview</h2>
+            <h2 className="text-xl font-semibold text-text-primary">Tickets Overview</h2>
             <Link to="/tickets/dashboard">
               <Button variant="outline" size="sm">
                 View Full Dashboard
@@ -244,7 +244,7 @@ export default function Dashboard() {
       {employeeKpiCards.length > 0 && (
         <div>
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-xl font-semibold text-gray-900">Employees Overview</h2>
+            <h2 className="text-xl font-semibold text-text-primary">Employees Overview</h2>
             <Link to="/employees">
               <Button variant="outline" size="sm">
                 View All Employees
@@ -288,7 +288,7 @@ export default function Dashboard() {
                 <div className="border-b pb-4 last:border-b-0 last:pb-0">
                   <button
                     onClick={() => toggleAlert('low_stock')}
-                    className="flex items-center justify-between w-full text-left text-orange-600 hover:text-orange-700"
+                    className="flex items-center justify-between w-full text-left text-warning hover:text-warning/80"
                   >
                     <div className="flex items-center">
                       <AlertTriangle className="h-4 w-4 mr-2" />
@@ -307,20 +307,20 @@ export default function Dashboard() {
                       {data.alerts.low_stock_products.map((product) => (
                         <div
                           key={product.id}
-                          className="flex items-center justify-between p-2 bg-orange-50 rounded text-sm"
+                          className="flex items-center justify-between p-2 bg-warning/10 rounded-md text-sm"
                         >
                           <div>
                             <Link
                               to={`/inventory/products/${product.id}`}
-                              className="font-medium text-gray-900 hover:text-orange-600"
+                              className="font-medium text-text-primary hover:text-warning"
                             >
                               {product.name}
                             </Link>
                             {product.category && (
-                              <span className="text-gray-500 ml-2">({product.category})</span>
+                              <span className="text-text-muted ml-2">({product.category})</span>
                             )}
                           </div>
-                          <span className="text-gray-600">Qty: {product.quantity}</span>
+                          <span className="text-text-secondary">Qty: {product.quantity}</span>
                         </div>
                       ))}
                     </div>
@@ -331,7 +331,7 @@ export default function Dashboard() {
                 <div className="border-b pb-4 last:border-b-0 last:pb-0">
                   <button
                     onClick={() => toggleAlert('damaged')}
-                    className="flex items-center justify-between w-full text-left text-red-600 hover:text-red-700"
+                    className="flex items-center justify-between w-full text-left text-danger hover:text-danger/80"
                   >
                     <div className="flex items-center">
                       <AlertTriangle className="h-4 w-4 mr-2" />
@@ -350,20 +350,20 @@ export default function Dashboard() {
                       {data.alerts.damaged_products.map((product) => (
                         <div
                           key={product.id}
-                          className="flex items-center justify-between p-2 bg-red-50 rounded text-sm"
+                          className="flex items-center justify-between p-2 bg-danger/10 rounded-md text-sm"
                         >
                           <div>
                             <Link
                               to={`/inventory/products/${product.id}`}
-                              className="font-medium text-gray-900 hover:text-red-600"
+                              className="font-medium text-text-primary hover:text-danger"
                             >
                               {product.name}
                             </Link>
                             {product.category && (
-                              <span className="text-gray-500 ml-2">({product.category})</span>
+                              <span className="text-text-muted ml-2">({product.category})</span>
                             )}
                           </div>
-                          <span className="text-gray-600">Qty: {product.quantity}</span>
+                          <span className="text-text-secondary">Qty: {product.quantity}</span>
                         </div>
                       ))}
                     </div>
@@ -374,7 +374,7 @@ export default function Dashboard() {
                 <div className="border-b pb-4 last:border-b-0 last:pb-0">
                   <button
                     onClick={() => toggleAlert('inactive')}
-                    className="flex items-center justify-between w-full text-left text-yellow-600 hover:text-yellow-700"
+                    className="flex items-center justify-between w-full text-left text-warning hover:text-warning/80"
                   >
                     <div className="flex items-center">
                       <AlertTriangle className="h-4 w-4 mr-2" />
@@ -393,20 +393,20 @@ export default function Dashboard() {
                       {data.alerts.inactive_products.map((product) => (
                         <div
                           key={product.id}
-                          className="flex items-center justify-between p-2 bg-yellow-50 rounded text-sm"
+                          className="flex items-center justify-between p-2 bg-warning/10 rounded-md text-sm"
                         >
                           <div>
                             <Link
                               to={`/inventory/products/${product.id}`}
-                              className="font-medium text-gray-900 hover:text-yellow-600"
+                              className="font-medium text-text-primary hover:text-warning"
                             >
                               {product.name}
                             </Link>
                             {product.category && (
-                              <span className="text-gray-500 ml-2">({product.category})</span>
+                              <span className="text-text-muted ml-2">({product.category})</span>
                             )}
                           </div>
-                          <span className="text-gray-600">Qty: {product.quantity}</span>
+                          <span className="text-text-secondary">Qty: {product.quantity}</span>
                         </div>
                       ))}
                     </div>
@@ -418,7 +418,7 @@ export default function Dashboard() {
                 <div className="border-b pb-4 last:border-b-0 last:pb-0">
                   <button
                     onClick={() => toggleAlert('sla_violated')}
-                    className="flex items-center justify-between w-full text-left text-red-600 hover:text-red-700"
+                    className="flex items-center justify-between w-full text-left text-danger hover:text-danger/80"
                   >
                     <div className="flex items-center">
                       <AlertTriangle className="h-4 w-4 mr-2" />
@@ -437,16 +437,16 @@ export default function Dashboard() {
                       {data.alerts.sla_violated_tickets.map((ticket) => (
                         <div
                           key={ticket.id}
-                          className="flex items-center justify-between p-2 bg-red-50 rounded text-sm"
+                          className="flex items-center justify-between p-2 bg-danger/10 rounded-md text-sm"
                         >
                           <div className="flex-1">
                             <Link
                               to={`/tickets/${ticket.id}`}
-                              className="font-medium text-gray-900 hover:text-red-600"
+                              className="font-medium text-text-primary hover:text-danger"
                             >
                               #{ticket.id} - {ticket.title}
                             </Link>
-                            <div className="text-xs text-gray-500 mt-1">
+                            <div className="text-xs text-text-muted mt-1">
                               {ticket.product && (
                                 <span>Product: {ticket.product}</span>
                               )}
@@ -469,7 +469,7 @@ export default function Dashboard() {
                 <div className="border-b pb-4 last:border-b-0 last:pb-0">
                   <button
                     onClick={() => toggleAlert('sla_at_risk')}
-                    className="flex items-center justify-between w-full text-left text-orange-600 hover:text-orange-700"
+                    className="flex items-center justify-between w-full text-left text-warning hover:text-warning/80"
                   >
                     <div className="flex items-center">
                       <Clock className="h-4 w-4 mr-2" />
@@ -488,16 +488,16 @@ export default function Dashboard() {
                       {data.alerts.sla_at_risk_tickets.map((ticket) => (
                         <div
                           key={ticket.id}
-                          className="flex items-center justify-between p-2 bg-orange-50 rounded text-sm"
+                          className="flex items-center justify-between p-2 bg-warning/10 rounded-md text-sm"
                         >
                           <div className="flex-1">
                             <Link
                               to={`/tickets/${ticket.id}`}
-                              className="font-medium text-gray-900 hover:text-orange-600"
+                              className="font-medium text-text-primary hover:text-warning"
                             >
                               #{ticket.id} - {ticket.title}
                             </Link>
-                            <div className="text-xs text-gray-500 mt-1">
+                            <div className="text-xs text-text-muted mt-1">
                               {ticket.product && (
                                 <span>Product: {ticket.product}</span>
                               )}
@@ -529,7 +529,7 @@ export default function Dashboard() {
                 <div className="border-b pb-4 last:border-b-0 last:pb-0">
                   <button
                     onClick={() => toggleAlert('critical_tickets')}
-                    className="flex items-center justify-between w-full text-left text-red-600 hover:text-red-700"
+                    className="flex items-center justify-between w-full text-left text-danger hover:text-danger/80"
                   >
                     <div className="flex items-center">
                       <AlertTriangle className="h-4 w-4 mr-2" />
@@ -548,16 +548,16 @@ export default function Dashboard() {
                       {data.alerts.critical_tickets_list.map((ticket) => (
                         <div
                           key={ticket.id}
-                          className="flex items-center justify-between p-2 bg-red-50 rounded text-sm"
+                          className="flex items-center justify-between p-2 bg-danger/10 rounded-md text-sm"
                         >
                           <div className="flex-1">
                             <Link
                               to={`/tickets/${ticket.id}`}
-                              className="font-medium text-gray-900 hover:text-red-600"
+                              className="font-medium text-text-primary hover:text-danger"
                             >
                               #{ticket.id} - {ticket.title}
                             </Link>
-                            <div className="text-xs text-gray-500 mt-1">
+                            <div className="text-xs text-text-muted mt-1">
                               {ticket.product && (
                                 <span>Product: {ticket.product}</span>
                               )}
@@ -580,7 +580,7 @@ export default function Dashboard() {
                 <div className="border-b pb-4 last:border-b-0 last:pb-0">
                   <button
                     onClick={() => toggleAlert('unassigned_tickets')}
-                    className="flex items-center justify-between w-full text-left text-yellow-600 hover:text-yellow-700"
+                    className="flex items-center justify-between w-full text-left text-warning hover:text-warning/80"
                   >
                     <div className="flex items-center">
                       <User className="h-4 w-4 mr-2" />
@@ -599,16 +599,16 @@ export default function Dashboard() {
                       {data.alerts.unassigned_tickets_list.map((ticket) => (
                         <div
                           key={ticket.id}
-                          className="flex items-center justify-between p-2 bg-yellow-50 rounded text-sm"
+                          className="flex items-center justify-between p-2 bg-warning/10 rounded-md text-sm"
                         >
                           <div className="flex-1">
                             <Link
                               to={`/tickets/${ticket.id}`}
-                              className="font-medium text-gray-900 hover:text-yellow-600"
+                              className="font-medium text-text-primary hover:text-warning"
                             >
                               #{ticket.id} - {ticket.title}
                             </Link>
-                            <div className="text-xs text-gray-500 mt-1">
+                            <div className="text-xs text-text-muted mt-1">
                               {ticket.product && (
                                 <span>Product: {ticket.product}</span>
                               )}
@@ -654,7 +654,7 @@ export default function Dashboard() {
           <CardContent>
             <div className="space-y-3">
               {data.recent_movements.length === 0 ? (
-                <p className="text-sm text-gray-500 text-center py-4">No recent activities</p>
+                <p className="text-sm text-text-secondary text-center py-4">No recent activities</p>
               ) : (
                 data.recent_movements.map((activity: any) => {
                   const isAssignment = activity.type === 'assignment_checkout' || activity.type === 'assignment_return';
@@ -669,19 +669,19 @@ export default function Dashboard() {
                             <div className="flex items-center gap-2">
                               <Link
                                 to={`/inventory/products/${activity.product?.id}`}
-                                className="font-medium text-blue-600 hover:underline"
+                                className="font-medium text-accent-primary hover:underline"
                               >
                                 {activity.product?.name}
                               </Link>
-                              <span className={`px-2 py-0.5 rounded text-xs ${
+                              <span className={`px-2 py-0.5 rounded-md text-xs ${
                                 isReturn 
-                                  ? 'bg-green-100 text-green-800' 
-                                  : 'bg-blue-100 text-blue-800'
+                                  ? 'bg-success/10 text-success' 
+                                  : 'bg-accent-primary/10 text-accent-primary'
                               }`}>
                                 {isReturn ? 'Returned' : 'Assigned'}
                               </span>
                             </div>
-                            <div className="text-gray-600 mt-1">
+                            <div className="text-text-secondary mt-1">
                               {isReturn ? (
                                 <>
                                   Returned by{' '}
@@ -709,20 +709,20 @@ export default function Dashboard() {
                           <div>
                             <Link
                               to={`/inventory/products/${activity.product?.id}`}
-                              className="font-medium text-blue-600 hover:underline"
+                              className="font-medium text-accent-primary hover:underline"
                             >
                               {activity.product?.name}
                             </Link>
-                            <span className="text-gray-500 ml-2 capitalize">
+                            <span className="text-text-muted ml-2 capitalize">
                               ({activity.movement_type || activity.type})
                             </span>
                             {activity.quantity && (
-                              <span className="text-gray-600 ml-2">Qty: {activity.quantity}</span>
+                              <span className="text-text-secondary ml-2">Qty: {activity.quantity}</span>
                             )}
                           </div>
                         )}
                       </div>
-                      <span className="text-gray-500 text-xs whitespace-nowrap ml-4">
+                      <span className="text-text-muted text-xs whitespace-nowrap ml-4">
                         {new Date(timestamp).toLocaleDateString()}
                       </span>
                     </div>
@@ -752,17 +752,17 @@ export default function Dashboard() {
                   <Link
                     key={ticket.id}
                     to={`/tickets/${ticket.id}`}
-                    className="block p-3 rounded-md hover:bg-gray-50 border border-gray-200 transition-colors"
+                    className="block p-3 rounded-md hover:bg-surface-alt border border-border transition-colors"
                   >
                     <div className="flex items-start justify-between">
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2 mb-1">
-                          <span className="font-medium text-gray-900 truncate">{ticket.title}</span>
+                          <span className="font-medium text-text-primary truncate">{ticket.title}</span>
                           <span className={`px-2 py-0.5 text-xs font-medium rounded-full ${getPriorityColor(ticket.priority)}`}>
                             {ticket.priority.toUpperCase()}
                           </span>
                         </div>
-                        <div className="flex items-center gap-2 text-sm text-gray-500">
+                        <div className="flex items-center gap-2 text-sm text-text-secondary">
                           {ticket.product && (
                             <>
                               <Package className="w-3 h-3" />
@@ -781,7 +781,7 @@ export default function Dashboard() {
                         <span className={`px-2 py-1 text-xs font-medium rounded-full ${getStatusColor(ticket.status)}`}>
                           {formatStatus(ticket.status)}
                         </span>
-                        <span className="text-xs text-gray-400">
+                        <span className="text-xs text-text-muted">
                           {new Date(ticket.created_at).toLocaleDateString()}
                         </span>
                       </div>

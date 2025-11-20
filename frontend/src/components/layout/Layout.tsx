@@ -1,6 +1,7 @@
 import { Outlet, Link, useLocation, Navigate } from 'react-router-dom';
 import { useAuthStore } from '@/stores/authStore';
 import { Button } from '@/components/ui/button';
+import { ThemeToggle } from '@/components/ui/theme-toggle';
 import { LayoutDashboard, Package, Ticket, Users, Building2, LogOut, Menu, X, Shield, User, Settings } from 'lucide-react';
 import { useState } from 'react';
 import NotificationBell from '@/components/notifications/NotificationBell';
@@ -33,14 +34,14 @@ export default function Layout() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <nav className="bg-white border-b border-gray-200">
+    <div className="min-h-screen bg-background">
+      <nav className="bg-surface border-b border-border">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between h-16">
             <div className="flex">
               <div className="flex-shrink-0 flex items-center">
                 <Link to="/dashboard">
-                  <h1 className="text-xl font-bold text-gray-900 hover:text-blue-600 cursor-pointer transition-colors">
+                  <h1 className="text-xl font-bold text-text-primary hover:text-accent-primary cursor-pointer transition-colors">
                     GearLog
                   </h1>
                 </Link>
@@ -58,8 +59,8 @@ export default function Layout() {
                       to={item.href}
                       className={`inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium ${
                         isActive
-                          ? 'border-blue-500 text-gray-900'
-                          : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700'
+                          ? 'border-accent-primary text-text-primary'
+                          : 'border-transparent text-text-secondary hover:border-border hover:text-text-primary'
                       }`}
                     >
                       <Icon className="w-4 h-4 mr-2" />
@@ -87,17 +88,18 @@ export default function Layout() {
             </div>
             {/* Desktop user info, notifications and logout */}
             <div className="hidden sm:flex items-center space-x-4">
+              <ThemeToggle />
               <NotificationBell />
               <Link
                 to="/profile"
-                className="text-sm text-gray-700 hover:text-gray-900 flex items-center gap-1"
+                className="text-sm text-text-secondary hover:text-text-primary flex items-center gap-1"
               >
                 <User className="w-4 h-4" />
                 {user?.name}
               </Link>
               <Link
                 to="/settings"
-                className="text-sm text-gray-700 hover:text-gray-900"
+                className="text-sm text-text-secondary hover:text-text-primary"
               >
                 <Settings className="w-4 h-4" />
               </Link>
@@ -112,7 +114,7 @@ export default function Layout() {
 
       {/* Mobile menu */}
       {mobileMenuOpen && (
-        <div className="sm:hidden border-b border-gray-200 bg-white">
+        <div className="sm:hidden border-b border-border bg-surface">
           <div className="px-2 pt-2 pb-3 space-y-1">
             {navigation.map((item) => {
               const Icon = item.icon;
@@ -126,8 +128,8 @@ export default function Layout() {
                   onClick={closeMobileMenu}
                   className={`flex items-center px-3 py-2 rounded-md text-base font-medium ${
                     isActive
-                      ? 'bg-blue-50 text-blue-700 border-l-4 border-blue-500'
-                      : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+                      ? 'bg-accent-primary/10 text-accent-primary border-l-4 border-accent-primary'
+                      : 'text-text-secondary hover:bg-surface-alt hover:text-text-primary'
                   }`}
                 >
                   <Icon className="w-5 h-5 mr-3" />
@@ -135,15 +137,18 @@ export default function Layout() {
                 </Link>
               );
             })}
-            <div className="border-t border-gray-200 pt-4 pb-3">
+            <div className="border-t border-border pt-4 pb-3">
               <div className="px-3 mb-3">
-                <div className="text-base font-medium text-gray-800">{user?.name}</div>
-                <div className="text-sm font-medium text-gray-500">{user?.email}</div>
+                <div className="text-base font-medium text-text-primary">{user?.name}</div>
+                <div className="text-sm font-medium text-text-secondary">{user?.email}</div>
+              </div>
+              <div className="px-3 mb-3">
+                <ThemeToggle variant="outline" size="sm" className="w-full justify-start" />
               </div>
               <Link
                 to="/profile"
                 onClick={closeMobileMenu}
-                className="flex items-center px-3 py-2 rounded-md text-base font-medium text-gray-600 hover:bg-gray-50 hover:text-gray-900"
+                className="flex items-center px-3 py-2 rounded-md text-base font-medium text-text-secondary hover:bg-surface-alt hover:text-text-primary"
               >
                 <User className="w-5 h-5 mr-3" />
                 Profile
@@ -151,14 +156,14 @@ export default function Layout() {
               <Link
                 to="/settings"
                 onClick={closeMobileMenu}
-                className="flex items-center px-3 py-2 rounded-md text-base font-medium text-gray-600 hover:bg-gray-50 hover:text-gray-900"
+                className="flex items-center px-3 py-2 rounded-md text-base font-medium text-text-secondary hover:bg-surface-alt hover:text-text-primary"
               >
                 <Settings className="w-5 h-5 mr-3" />
                 Settings
               </Link>
               <Button
                 variant="ghost"
-                className="w-full justify-start text-gray-600 hover:bg-gray-50 hover:text-gray-900"
+                className="w-full justify-start text-text-secondary hover:bg-surface-alt hover:text-text-primary"
                 onClick={async () => {
                   closeMobileMenu();
                   await handleLogout();

@@ -4,6 +4,7 @@ import { useAuthStore } from '@/stores/authStore';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { ThemeToggle } from '@/components/ui/theme-toggle';
 import { Label } from '@/components/ui/label';
 import { toast } from '@/utils/toast';
 import { Package, Building2 } from 'lucide-react';
@@ -98,11 +99,14 @@ export default function Onboarding() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen flex items-center justify-center bg-background py-12 px-4 sm:px-6 lg:px-8 relative">
+      <div className="absolute top-4 right-4">
+        <ThemeToggle />
+      </div>
       <Card className="w-full max-w-md">
         <CardHeader>
-          <div className="flex items-center justify-center gap-2 mb-4">
-            <Building2 className="h-8 w-8 text-blue-600" />
+            <div className="flex items-center justify-center gap-2 mb-4">
+            <Building2 className="h-8 w-8 text-accent-primary" />
             <CardTitle className="text-2xl">Setup Your Company</CardTitle>
           </div>
           <CardDescription className="text-center">
@@ -112,7 +116,7 @@ export default function Onboarding() {
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
             {error && (
-              <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded">
+              <div className="bg-danger/10 border border-danger/20 text-danger px-4 py-3 rounded-md">
                 {error}
               </div>
             )}
@@ -137,7 +141,7 @@ export default function Onboarding() {
                 id="country"
                 value={country}
                 onChange={(e) => setCountry(e.target.value)}
-                className="mt-1 block w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-blue-500"
+                className="mt-1 block w-full rounded-md border border-border bg-input-bg px-3 py-2 text-sm text-text-primary focus:border-accent-primary focus:outline-none focus:ring-2 focus:ring-accent-primary/20"
               >
                 <option value="">Select a country</option>
                 {COUNTRIES.map((c) => (
@@ -153,7 +157,7 @@ export default function Onboarding() {
                 id="timezone"
                 value={timezone}
                 onChange={(e) => setTimezone(e.target.value)}
-                className="mt-1 block w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-blue-500"
+                className="mt-1 block w-full rounded-md border border-border bg-input-bg px-3 py-2 text-sm text-text-primary focus:border-accent-primary focus:outline-none focus:ring-2 focus:ring-accent-primary/20"
               >
                 {TIMEZONES.map((tz) => (
                   <option key={tz} value={tz}>
@@ -166,9 +170,9 @@ export default function Onboarding() {
               {isSubmitting ? 'Setting up...' : 'Complete Setup'}
             </Button>
           </form>
-          <div className="mt-4 text-center text-sm text-gray-600">
+          <div className="mt-4 text-center text-sm text-text-secondary">
             <p>You'll be set up with a free plan that includes:</p>
-            <ul className="list-disc list-inside mt-2 text-left">
+            <ul className="list-disc list-inside mt-2 text-left text-text-secondary">
               <li>Up to 3 users</li>
               <li>Up to 500 products</li>
               <li>Up to 150 tickets per month</li>

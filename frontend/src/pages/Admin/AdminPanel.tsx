@@ -4,6 +4,7 @@ import { Navigate, useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
+import { ThemeToggle } from '@/components/ui/theme-toggle';
 import { 
   Building2, 
   Users, 
@@ -51,19 +52,20 @@ export default function AdminPanel() {
   ];
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-background">
       {/* Top Navigation Bar */}
-      <nav className="bg-white border-b border-gray-200">
+      <nav className="bg-surface border-b border-border">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between h-16">
             <div className="flex items-center">
-              <h1 className="text-xl font-bold text-gray-900">GearLog</h1>
-              <span className="ml-4 px-2 py-1 text-xs rounded bg-purple-100 text-purple-800">
+              <h1 className="text-xl font-bold text-text-primary">GearLog</h1>
+              <span className="ml-4 px-2 py-1 text-xs rounded bg-accent-secondary/20 text-accent-secondary">
                 Super Admin
               </span>
             </div>
             <div className="flex items-center gap-4">
-              <span className="text-sm text-gray-700">{user?.name}</span>
+              <ThemeToggle />
+              <span className="text-sm text-text-secondary">{user?.name}</span>
               <Button
                 variant="ghost"
                 size="sm"
@@ -88,14 +90,14 @@ export default function AdminPanel() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">Super Admin Panel</h1>
-          <p className="mt-1 text-sm text-gray-500">
+          <h1 className="text-3xl font-bold text-text-primary">Super Admin Panel</h1>
+          <p className="mt-1 text-sm text-text-secondary">
             Global system administration console for managing the entire GearLog SaaS ecosystem
           </p>
         </div>
 
         {/* Tabs Navigation */}
-        <div className="mb-6 border-b border-gray-200">
+        <div className="mb-6 border-b border-border">
           <nav className="-mb-px flex space-x-8 overflow-x-auto">
             {tabs.map((tab) => {
               const Icon = tab.icon;
@@ -107,8 +109,8 @@ export default function AdminPanel() {
                   className={`
                     flex items-center whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm
                     ${isActive
-                      ? 'border-blue-500 text-blue-600'
-                      : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700'
+                      ? 'border-accent-primary text-accent-primary'
+                      : 'border-transparent text-text-secondary hover:border-border hover:text-text-primary'
                     }
                   `}
                 >
