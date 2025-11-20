@@ -77,7 +77,17 @@ class TicketCommentController extends Controller
             'message' => 'required|string',
             'attachments' => 'nullable|array',
             'attachment_files' => 'nullable',
-            'attachment_files.*' => 'nullable|file|max:10240|mimes:jpg,jpeg,png,gif,pdf,doc,docx,txt',
+            'attachment_files.*' => [
+                'nullable',
+                'file',
+                'max:10240',
+                'mimes:jpg,jpeg,png,gif,pdf,doc,docx,txt',
+                'mimetypes:image/jpeg,image/png,image/gif,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,text/plain',
+            ],
+        ], [
+            'attachment_files.*.mimes' => 'The file must be one of the following types: JPG, JPEG, PNG, GIF, PDF, DOC, DOCX, or TXT.',
+            'attachment_files.*.mimetypes' => 'The file must be one of the following types: JPG, JPEG, PNG, GIF, PDF, DOC, DOCX, or TXT.',
+            'attachment_files.*.max' => 'The file size must not exceed 10MB.',
         ]);
 
         // Handle file uploads

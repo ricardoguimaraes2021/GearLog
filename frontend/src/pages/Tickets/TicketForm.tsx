@@ -57,24 +57,53 @@ export default function TicketForm() {
 
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || []);
+    const maxSize = 10 * 1024 * 1024; // 10MB
+    const allowedTypes = [
+      'image/jpeg', 
+      'image/jpg', 
+      'image/png', 
+      'image/gif', 
+      'application/pdf', 
+      'application/msword', 
+      'application/vnd.openxmlformats-officedocument.wordprocessingml.document', 
+      'text/plain'
+    ];
+    const allowedExtensions = ['.jpg', '.jpeg', '.png', '.gif', '.pdf', '.doc', '.docx', '.txt'];
+    
     const validFiles = files.filter(file => {
-      const maxSize = 10 * 1024 * 1024; // 10MB
-      const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'text/plain'];
-      
+      // Check file size
       if (file.size > maxSize) {
-        toast.error(`File ${file.name} is too large. Maximum size is 10MB.`);
+        toast.error(`File "${file.name}" is too large. Maximum size is 10MB.`);
         return false;
       }
       
+      // Check MIME type
       if (!allowedTypes.includes(file.type)) {
-        toast.error(`File ${file.name} has an invalid type. Allowed: images, PDF, DOC, DOCX, TXT.`);
-        return false;
+        // Also check by extension as fallback (some browsers may not detect MIME type correctly)
+        const fileExtension = '.' + file.name.split('.').pop()?.toLowerCase();
+        if (!allowedExtensions.includes(fileExtension)) {
+          toast.error(
+            `File "${file.name}" has an invalid format. ` +
+            `Allowed formats: JPG, JPEG, PNG, GIF, PDF, DOC, DOCX, TXT. ` +
+            `Maximum size: 10MB per file.`
+          );
+          return false;
+        }
       }
       
       return true;
     });
     
+    if (validFiles.length < files.length) {
+      toast.warning(`${files.length - validFiles.length} file(s) were rejected. Please check the allowed formats.`);
+    }
+    
     setSelectedFiles(prev => [...prev, ...validFiles]);
+    
+    // Reset input to allow selecting the same file again
+    if (e.target) {
+      e.target.value = '';
+    }
   };
 
   const removeFile = (index: number) => {
@@ -144,7 +173,34 @@ export default function TicketForm() {
           toast.success('Ticket updated successfully');
           navigate(`/tickets/${id}`);
         } catch (error: any) {
-          throw new Error(error.response?.data?.error || 'Failed to update ticket');
+          // Handle validation errors with more detail
+          if (error.response?.status === 422 && error.response?.data?.errors) {
+            const validationErrors = error.response.data.errors;
+            const errorMessages: string[] = [];
+            
+            // Extract file validation errors
+            if (validationErrors['attachment_files.0']) {
+              errorMessages.push(...validationErrors['attachment_files.0']);
+            }
+            if (validationErrors['attachment_files.*']) {
+              errorMessages.push(...validationErrors['attachment_files.*']);
+            }
+            
+            // Extract other validation errors
+            Object.keys(validationErrors).forEach(key => {
+              if (!key.startsWith('attachment_files')) {
+                errorMessages.push(...validationErrors[key]);
+              }
+            });
+            
+            if (errorMessages.length > 0) {
+              errorMessages.forEach(msg => toast.error(msg));
+            } else {
+              toast.error(error.response?.data?.message || 'Validation failed. Please check your input.');
+            }
+          } else {
+            throw new Error(error.response?.data?.error || 'Failed to update ticket');
+          }
         }
       } else {
         // For create, use FormData with api client (Content-Type will be set automatically)
@@ -153,11 +209,40 @@ export default function TicketForm() {
           toast.success('Ticket created successfully');
           navigate(`/tickets/${response.data.id}`);
         } catch (error: any) {
-          throw new Error(error.response?.data?.error || 'Failed to create ticket');
+          // Handle validation errors with more detail
+          if (error.response?.status === 422 && error.response?.data?.errors) {
+            const validationErrors = error.response.data.errors;
+            const errorMessages: string[] = [];
+            
+            // Extract file validation errors
+            if (validationErrors['attachment_files.0']) {
+              errorMessages.push(...validationErrors['attachment_files.0']);
+            }
+            if (validationErrors['attachment_files.*']) {
+              errorMessages.push(...validationErrors['attachment_files.*']);
+            }
+            
+            // Extract other validation errors
+            Object.keys(validationErrors).forEach(key => {
+              if (!key.startsWith('attachment_files')) {
+                errorMessages.push(...validationErrors[key]);
+              }
+            });
+            
+            if (errorMessages.length > 0) {
+              errorMessages.forEach(msg => toast.error(msg));
+            } else {
+              toast.error(error.response?.data?.message || 'Validation failed. Please check your input.');
+            }
+          } else {
+            throw new Error(error.response?.data?.error || 'Failed to create ticket');
+          }
         }
       }
     } catch (error: any) {
-      toast.error(error.message || 'Failed to save ticket');
+      if (!error.message || !error.message.includes('Validation failed')) {
+        toast.error(error.message || 'Failed to save ticket');
+      }
     }
   };
 
@@ -322,7 +407,9 @@ export default function TicketForm() {
                       Add Files
                     </Button>
                     <p className="text-xs text-gray-500 mt-1">
-                      Max 10MB per file. Allowed: Images, PDF, DOC, DOCX, TXT
+                      <strong>Allowed formats:</strong> JPG, JPEG, PNG, GIF, PDF, DOC, DOCX, TXT
+                      <br />
+                      <strong>Maximum size:</strong> 10MB per file
                     </p>
                   </div>
 

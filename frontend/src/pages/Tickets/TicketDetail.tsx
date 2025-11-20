@@ -23,17 +23,21 @@ export default function TicketDetail() {
   const [resolutionText, setResolutionText] = useState('');
   const [showAssignForm, setShowAssignForm] = useState(false);
   const [users, setUsers] = useState<UserType[]>([]);
+  const [employees, setEmployees] = useState<any[]>([]);
   const [selectedUserId, setSelectedUserId] = useState<number | null>(null);
+  const [selectedEmployeeId, setSelectedEmployeeId] = useState<number | null>(null);
+  const [assignToType, setAssignToType] = useState<'user' | 'employee'>('employee');
   const [commentFiles, setCommentFiles] = useState<File[]>([]);
 
   useEffect(() => {
     if (id) {
       fetchTicket(parseInt(id));
     }
-    // Load users if user can assign
+    // Load users and employees if user can assign
     const userRoles = user?.roles?.map(r => r.name) || [];
-    if (userRoles.some(r => ['admin', 'gestor'].includes(r))) {
+    if (userRoles.some(r => ['admin', 'gestor'].includes(r)) || user?.is_owner) {
       loadUsers();
+      loadEmployees();
     }
   }, [id, user]);
 
@@ -43,6 +47,15 @@ export default function TicketDetail() {
       setUsers(usersList);
     } catch (error) {
       console.error('Failed to load users:', error);
+    }
+  };
+
+  const loadEmployees = async () => {
+    try {
+      const employeesResponse = await api.getEmployees({ status: 'active', per_page: 100 });
+      setEmployees(employeesResponse.data || []);
+    } catch (error) {
+      console.error('Failed to load employees:', error);
     }
   };
 
@@ -158,11 +171,23 @@ export default function TicketDetail() {
 
   const handleAssign = async () => {
     if (!id) return;
-    await assignTicket(parseInt(id), selectedUserId);
-    // Force refresh the ticket to show updated assignment
-    await fetchTicket(parseInt(id));
-    setShowAssignForm(false);
-    setSelectedUserId(null);
+    try {
+      if (assignToType === 'user') {
+        await assignTicket(parseInt(id), selectedUserId);
+      } else {
+        // Assign to employee
+        await api.assignTicketToEmployee(parseInt(id), selectedEmployeeId);
+      }
+      // Force refresh the ticket to show updated assignment
+      await fetchTicket(parseInt(id));
+      setShowAssignForm(false);
+      setSelectedUserId(null);
+      setSelectedEmployeeId(null);
+      setAssignToType('employee');
+      toast.success('Ticket assigned successfully');
+    } catch (error: any) {
+      toast.error(error.response?.data?.error || 'Failed to assign ticket');
+    }
   };
 
   const handleUnassign = async () => {
@@ -175,8 +200,13 @@ export default function TicketDetail() {
   const canEdit = currentTicket && currentTicket.status !== 'closed';
   // Check permissions based on user roles
   const userRoles = user?.roles?.map(r => r.name) || [];
-  const canChangeStatus = userRoles.some(r => ['admin', 'gestor', 'tecnico'].includes(r));
-  const canAssign = userRoles.some(r => ['admin', 'gestor'].includes(r));
+  const isAdminOrManager = userRoles.some(r => ['admin', 'gestor'].includes(r));
+  const isAssigned = currentTicket?.assigned_to === user?.id;
+  const isOwner = currentTicket?.opened_by === user?.id;
+  
+  // Only assigned persons (or admin/manager) can change ticket status
+  const canChangeStatus = isAdminOrManager || (isAssigned && userRoles.some(r => ['tecnico', 'admin', 'gestor'].includes(r)));
+  const canAssign = isAdminOrManager || user?.is_owner;
   const canClose = userRoles.some(r => ['admin', 'gestor'].includes(r));
 
   if (isLoading || !currentTicket) {
@@ -642,31 +672,66 @@ export default function TicketDetail() {
               </CardHeader>
               <CardContent className="space-y-4">
                 <div>
-                  <Label>Select User *</Label>
+                  <Label>Assign To</Label>
                   <select
-                    value={selectedUserId || ''}
-                    onChange={(e) => setSelectedUserId(e.target.value ? parseInt(e.target.value) : null)}
+                    value={assignToType}
+                    onChange={(e) => {
+                      setAssignToType(e.target.value as 'user' | 'employee');
+                      setSelectedUserId(null);
+                      setSelectedEmployeeId(null);
+                    }}
                     className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm mt-1"
                   >
-                    <option value="">Select a user...</option>
-                    {users.map((u) => (
-                      <option key={u.id} value={u.id}>
-                        {u.name} ({u.email})
-                      </option>
-                    ))}
+                    <option value="employee">Employee</option>
+                    <option value="user">User</option>
                   </select>
                 </div>
+                {assignToType === 'employee' ? (
+                  <div>
+                    <Label>Select Employee *</Label>
+                    <select
+                      value={selectedEmployeeId || ''}
+                      onChange={(e) => setSelectedEmployeeId(e.target.value ? parseInt(e.target.value) : null)}
+                      className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm mt-1"
+                    >
+                      <option value="">Select an employee...</option>
+                      {employees.map((emp) => (
+                        <option key={emp.id} value={emp.id}>
+                          {emp.name} {emp.employee_code && `(${emp.employee_code})`}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                ) : (
+                  <div>
+                    <Label>Select User *</Label>
+                    <select
+                      value={selectedUserId || ''}
+                      onChange={(e) => setSelectedUserId(e.target.value ? parseInt(e.target.value) : null)}
+                      className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm mt-1"
+                    >
+                      <option value="">Select a user...</option>
+                      {users.map((u) => (
+                        <option key={u.id} value={u.id}>
+                          {u.name} ({u.email})
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                )}
                 <div className="flex gap-2">
                   <Button 
                     onClick={handleAssign} 
                     className="flex-1"
-                    disabled={!selectedUserId}
+                    disabled={assignToType === 'employee' ? !selectedEmployeeId : !selectedUserId}
                   >
                     Assign
                   </Button>
                   <Button variant="outline" onClick={() => {
                     setShowAssignForm(false);
                     setSelectedUserId(null);
+                    setSelectedEmployeeId(null);
+                    setAssignToType('employee');
                   }}>
                     Cancel
                   </Button>

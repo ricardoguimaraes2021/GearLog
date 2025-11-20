@@ -148,17 +148,41 @@ class TicketController extends Controller
             ], 403);
         }
         
+        $user = $request->user();
+        
         $validated = $request->validate([
             'title' => 'required|string|max:255',
             'product_id' => 'nullable|exists:products,id',
             'employee_id' => 'nullable|exists:employees,id',
-            'assigned_to' => 'nullable|exists:users,id',
+            'assigned_to' => [
+                'nullable',
+                'exists:users,id',
+                function ($attribute, $value, $fail) use ($user) {
+                    if ($value) {
+                        // Validate that assigned user belongs to the same company
+                        $assignedUser = \App\Models\User::find($value);
+                        if ($assignedUser && $user->company_id && $assignedUser->company_id !== $user->company_id) {
+                            $fail('The selected user must belong to your company.');
+                        }
+                    }
+                },
+            ],
             'priority' => 'nullable|in:low,medium,high,critical',
             'type' => 'nullable|in:damage,maintenance,update,audit,other',
             'description' => 'required|string',
             'attachments' => 'nullable|array',
             'attachment_files' => 'nullable',
-            'attachment_files.*' => 'nullable|file|max:10240|mimes:jpg,jpeg,png,gif,pdf,doc,docx,txt',
+            'attachment_files.*' => [
+                'nullable',
+                'file',
+                'max:10240',
+                'mimes:jpg,jpeg,png,gif,pdf,doc,docx,txt',
+                'mimetypes:image/jpeg,image/png,image/gif,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,text/plain',
+            ],
+        ], [
+            'attachment_files.*.mimes' => 'The file must be one of the following types: JPG, JPEG, PNG, GIF, PDF, DOC, DOCX, or TXT.',
+            'attachment_files.*.mimetypes' => 'The file must be one of the following types: JPG, JPEG, PNG, GIF, PDF, DOC, DOCX, or TXT.',
+            'attachment_files.*.max' => 'The file size must not exceed 10MB.',
         ]);
 
         // Handle file uploads
@@ -286,7 +310,17 @@ class TicketController extends Controller
             'description' => 'sometimes|required|string',
             'attachments' => 'nullable|array',
             'attachment_files' => 'nullable',
-            'attachment_files.*' => 'nullable|file|max:10240|mimes:jpg,jpeg,png,gif,pdf,doc,docx,txt',
+            'attachment_files.*' => [
+                'nullable',
+                'file',
+                'max:10240',
+                'mimes:jpg,jpeg,png,gif,pdf,doc,docx,txt',
+                'mimetypes:image/jpeg,image/png,image/gif,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,text/plain',
+            ],
+        ], [
+            'attachment_files.*.mimes' => 'The file must be one of the following types: JPG, JPEG, PNG, GIF, PDF, DOC, DOCX, or TXT.',
+            'attachment_files.*.mimetypes' => 'The file must be one of the following types: JPG, JPEG, PNG, GIF, PDF, DOC, DOCX, or TXT.',
+            'attachment_files.*.max' => 'The file size must not exceed 10MB.',
         ]);
 
         // Handle file uploads
@@ -379,7 +413,8 @@ class TicketController extends Controller
             required: true,
             content: new OA\JsonContent(
                 properties: [
-                    new OA\Property(property: 'assigned_to', type: 'integer', nullable: true),
+                    new OA\Property(property: 'assigned_to', type: 'integer', nullable: true, description: 'User ID to assign ticket to'),
+                    new OA\Property(property: 'employee_id', type: 'integer', nullable: true, description: 'Employee ID to assign ticket to'),
                 ]
             )
         ),
@@ -393,12 +428,60 @@ class TicketController extends Controller
     {
         $this->authorize('assign', $ticket);
 
+        $user = Auth::user();
+        
         $validated = $request->validate([
-            'assigned_to' => 'nullable|exists:users,id',
+            'assigned_to' => [
+                'nullable',
+                'exists:users,id',
+                function ($attribute, $value, $fail) use ($user, $ticket) {
+                    if ($value) {
+                        // Validate that assigned user belongs to the same company
+                        $assignedUser = \App\Models\User::find($value);
+                        if ($assignedUser) {
+                            // Ensure assigned user belongs to the same company as the ticket
+                            if ($ticket->company_id && $assignedUser->company_id !== $ticket->company_id) {
+                                $fail('The selected user must belong to the same company as the ticket.');
+                            }
+                            
+                            // Also ensure assigned user belongs to the same company as the current user
+                            if ($user->company_id && $assignedUser->company_id !== $user->company_id) {
+                                $fail('The selected user must belong to your company.');
+                            }
+                        }
+                    }
+                },
+            ],
+            'employee_id' => [
+                'nullable',
+                'exists:employees,id',
+                function ($attribute, $value, $fail) use ($user, $ticket) {
+                    if ($value) {
+                        // Validate that assigned employee belongs to the same company
+                        $assignedEmployee = \App\Models\Employee::find($value);
+                        if ($assignedEmployee) {
+                            // Ensure assigned employee belongs to the same company as the ticket
+                            if ($ticket->company_id && $assignedEmployee->company_id !== $ticket->company_id) {
+                                $fail('The selected employee must belong to the same company as the ticket.');
+                            }
+                            
+                            // Also ensure assigned employee belongs to the same company as the current user
+                            if ($user->company_id && $assignedEmployee->company_id !== $user->company_id) {
+                                $fail('The selected employee must belong to your company.');
+                            }
+                        }
+                    }
+                },
+            ],
         ]);
 
         try {
-            $ticket = $this->ticketService->assignTicket($ticket, $validated['assigned_to'] ?? null, Auth::id());
+            // If employee_id is provided, assign to employee; otherwise use assigned_to (user)
+            if (isset($validated['employee_id'])) {
+                $ticket = $this->ticketService->assignTicketToEmployee($ticket, $validated['employee_id'], Auth::id());
+            } else {
+                $ticket = $this->ticketService->assignTicket($ticket, $validated['assigned_to'] ?? null, Auth::id());
+            }
             return response()->json($ticket);
         } catch (BusinessRuleException $e) {
             return response()->json([

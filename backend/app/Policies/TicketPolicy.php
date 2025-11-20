@@ -67,12 +67,17 @@ class TicketPolicy
             return true;
         }
 
-        // Technician can update assigned tickets or tickets they opened
-        if ($user->hasRole('tecnico')) {
-            return $ticket->assigned_to === $user->id || $ticket->opened_by === $user->id;
+        // The person who created the ticket can always update it (edit, add comments)
+        if ($ticket->opened_by === $user->id) {
+            return true;
         }
 
-        // Consulta can only update tickets they opened (but not change status)
+        // Technician can update assigned tickets
+        if ($user->hasRole('tecnico')) {
+            return $ticket->assigned_to === $user->id;
+        }
+
+        // Consulta can only update tickets they opened
         if ($user->hasRole('consulta')) {
             return $ticket->opened_by === $user->id;
         }
@@ -114,8 +119,30 @@ class TicketPolicy
             return false;
         }
 
-        // Admin, Manager, and Technician can change status
-        return $user->hasAnyRole(['admin', 'gestor', 'tecnico']);
+        // Admin and Manager can always change status (they have full permissions)
+        if ($user->hasAnyRole(['admin', 'gestor'])) {
+            return true;
+        }
+
+        // For other roles, only the assigned person can change status
+        // Check if user is assigned to the ticket (assigned_to)
+        if ($ticket->assigned_to === $user->id) {
+            // Only users with technician role or higher can change status when assigned
+            // This ensures only people with proper permissions can change status
+            return $user->hasAnyRole(['tecnico', 'admin', 'gestor']);
+        }
+
+        // If ticket is assigned to an employee (not a user), we check if the user's email matches the employee's email
+        // This allows users who are linked to employees (via email) to change status
+        if ($ticket->employee_id) {
+            $employee = \App\Models\Employee::find($ticket->employee_id);
+            if ($employee && $employee->email === $user->email) {
+                // User's email matches employee's email, allow status change if they have proper role
+                return $user->hasAnyRole(['tecnico', 'admin', 'gestor']);
+            }
+        }
+        
+        return false;
     }
 
     public function close(User $user, Ticket $ticket): bool

@@ -18,10 +18,38 @@ class TicketService
     public function createTicket(array $data, int $userId): Ticket
     {
         return DB::transaction(function () use ($data, $userId) {
+            // Validate that assigned user belongs to the same company as the creator
+            if (!empty($data['assigned_to'])) {
+                $opener = \App\Models\User::find($userId);
+                $assignedUser = \App\Models\User::find($data['assigned_to']);
+                
+                if (!$assignedUser) {
+                    throw new BusinessRuleException(
+                        'The specified user does not exist.',
+                        "User {$data['assigned_to']} not found",
+                        ['assigned_to' => $data['assigned_to']]
+                    );
+                }
+                
+                if ($opener && $opener->company_id && $assignedUser->company_id !== $opener->company_id) {
+                    throw new BusinessRuleException(
+                        'Cannot assign ticket to a user from a different company.',
+                        "User {$data['assigned_to']} belongs to company {$assignedUser->company_id}, but creator belongs to company {$opener->company_id}",
+                        [
+                            'assigned_user_id' => $data['assigned_to'],
+                            'assigned_user_company_id' => $assignedUser->company_id,
+                            'creator_company_id' => $opener->company_id,
+                        ]
+                    );
+                }
+            }
+            
+            $opener = \App\Models\User::find($userId);
             $ticket = Ticket::create([
                 'title' => $data['title'],
                 'product_id' => $data['product_id'] ?? null,
                 'opened_by' => $userId,
+                'company_id' => $opener->company_id ?? null, // Set company_id from opener
                 'assigned_to' => $data['assigned_to'] ?? null,
                 'priority' => $data['priority'] ?? 'medium',
                 'type' => $data['type'] ?? 'other',
@@ -167,6 +195,31 @@ class TicketService
     public function assignTicket(Ticket $ticket, ?int $assignedTo, int $userId): Ticket
     {
         return DB::transaction(function () use ($ticket, $assignedTo, $userId) {
+            // Validate that assigned user belongs to the same company as the ticket
+            if ($assignedTo) {
+                $assignedUser = \App\Models\User::find($assignedTo);
+                if (!$assignedUser) {
+                    throw new BusinessRuleException(
+                        'The specified user does not exist.',
+                        "User {$assignedTo} not found",
+                        ['assigned_to' => $assignedTo]
+                    );
+                }
+
+                // Ensure assigned user belongs to the same company as the ticket
+                if ($ticket->company_id && $assignedUser->company_id !== $ticket->company_id) {
+                    throw new BusinessRuleException(
+                        'Cannot assign ticket to a user from a different company.',
+                        "User {$assignedTo} belongs to company {$assignedUser->company_id}, but ticket belongs to company {$ticket->company_id}",
+                        [
+                            'assigned_user_id' => $assignedTo,
+                            'assigned_user_company_id' => $assignedUser->company_id,
+                            'ticket_company_id' => $ticket->company_id,
+                        ]
+                    );
+                }
+            }
+
             $oldAssignedTo = $ticket->assigned_to;
             $ticket->assigned_to = $assignedTo;
             $ticket->save();
@@ -187,6 +240,53 @@ class TicketService
             // Fire assignment event
             $assignedUser = $assignedTo ? \App\Models\User::find($assignedTo) : null;
             event(new \App\Events\TicketAssigned($ticket, $assignedUser));
+
+            return $ticket;
+        });
+    }
+
+    public function assignTicketToEmployee(Ticket $ticket, int $employeeId, int $userId): Ticket
+    {
+        return DB::transaction(function () use ($ticket, $employeeId, $userId) {
+            // Validate that assigned employee belongs to the same company as the ticket
+            $assignedEmployee = \App\Models\Employee::find($employeeId);
+            if (!$assignedEmployee) {
+                throw new BusinessRuleException(
+                    'The specified employee does not exist.',
+                    "Employee {$employeeId} not found",
+                    ['employee_id' => $employeeId]
+                );
+            }
+
+            // Ensure assigned employee belongs to the same company as the ticket
+            if ($ticket->company_id && $assignedEmployee->company_id !== $ticket->company_id) {
+                throw new BusinessRuleException(
+                    'Cannot assign ticket to an employee from a different company.',
+                    "Employee {$employeeId} belongs to company {$assignedEmployee->company_id}, but ticket belongs to company {$ticket->company_id}",
+                    [
+                        'assigned_employee_id' => $employeeId,
+                        'assigned_employee_company_id' => $assignedEmployee->company_id,
+                        'ticket_company_id' => $ticket->company_id,
+                    ]
+                );
+            }
+
+            $oldEmployeeId = $ticket->employee_id;
+            $ticket->employee_id = $employeeId;
+            $ticket->save();
+
+            $action = 'assigned_to_employee';
+            TicketLog::create([
+                'ticket_id' => $ticket->id,
+                'user_id' => $userId,
+                'action' => $action,
+                'old_value' => ['employee_id' => $oldEmployeeId],
+                'new_value' => ['employee_id' => $employeeId],
+            ]);
+
+            // Refresh the ticket to get updated relationships
+            $ticket->refresh();
+            $ticket->load(['product', 'openedBy', 'assignedTo', 'employee']);
 
             return $ticket;
         });
