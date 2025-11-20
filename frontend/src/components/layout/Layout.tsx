@@ -1,7 +1,7 @@
 import { Outlet, Link, useLocation } from 'react-router-dom';
 import { useAuthStore } from '@/stores/authStore';
 import { Button } from '@/components/ui/button';
-import { LayoutDashboard, Package, Ticket, Users, Building2, LogOut, Menu, X } from 'lucide-react';
+import { LayoutDashboard, Package, Ticket, Users, Building2, LogOut, Menu, X, Shield } from 'lucide-react';
 import { useState } from 'react';
 import NotificationBell from '@/components/notifications/NotificationBell';
 
@@ -10,12 +10,16 @@ export default function Layout() {
   const location = useLocation();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
+  // Check if user is super admin (email-based check)
+  const isSuperAdmin = user?.email === 'admin@admin.com';
+
   const navigation = [
     { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
     { name: 'Inventory', href: '/inventory/products', icon: Package },
     { name: 'Employees', href: '/employees', icon: Users },
     { name: 'Departments', href: '/departments', icon: Building2 },
     { name: 'Tickets', href: '/tickets', icon: Ticket },
+    ...(isSuperAdmin ? [{ name: 'Admin Panel', href: '/admin', icon: Shield }] : []),
   ];
 
   const handleLogout = async () => {
