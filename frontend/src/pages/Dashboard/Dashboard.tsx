@@ -3,13 +3,16 @@ import { Navigate } from 'react-router-dom';
 import { useDashboardStore } from '@/stores/dashboardStore';
 import { useAuthStore } from '@/stores/authStore';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Package, AlertTriangle, DollarSign, TrendingDown, ChevronDown, ChevronUp, Ticket, Clock, User, Users, Briefcase } from 'lucide-react';
+import { Package, AlertTriangle, TrendingDown, ChevronDown, ChevronUp, Ticket, Clock, User, Users, Briefcase, Coins } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 
 export default function Dashboard() {
   const { user } = useAuthStore();
+  
+  // Check if user is viewer - viewers cannot access tickets
+  const isViewer = user?.roles?.some((r) => r.name === 'viewer') ?? false;
   
   // Redirect super admin to admin panel
   const isSuperAdmin = user?.email === 'admin@admin.com';
@@ -117,7 +120,7 @@ export default function Dashboard() {
     {
       title: 'Total Value',
       value: `€${data.kpis.total_value.toLocaleString()}`,
-      icon: DollarSign,
+      icon: Coins,
       color: 'text-success',
     },
     {
@@ -195,11 +198,16 @@ export default function Dashboard() {
         <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
           {kpiCards.map((kpi) => {
             const Icon = kpi.icon;
+            const isTotalValue = kpi.title === 'Total Value';
             return (
               <Card key={kpi.title}>
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                   <CardTitle className="text-sm font-medium">{kpi.title}</CardTitle>
-                  <Icon className={`h-4 w-4 ${kpi.color}`} />
+                  {isTotalValue ? (
+                    <span className={`text-xl font-normal ${kpi.color}`}>€</span>
+                  ) : (
+                    <Icon className={`h-4 w-4 ${kpi.color}`} />
+                  )}
                 </CardHeader>
                 <CardContent>
                   <div className="text-2xl font-bold">{kpi.value}</div>
@@ -274,10 +282,12 @@ export default function Dashboard() {
       {(data.alerts.low_stock > 0 || 
         data.alerts.damaged > 0 || 
         data.alerts.inactive > 0 ||
-        (data.alerts.sla_violated !== undefined && data.alerts.sla_violated > 0) ||
-        (data.alerts.sla_at_risk !== undefined && data.alerts.sla_at_risk > 0) ||
-        (data.alerts.critical_tickets !== undefined && data.alerts.critical_tickets > 0) ||
-        (data.alerts.unassigned_tickets !== undefined && data.alerts.unassigned_tickets > 0)) && (
+        (!isViewer && (
+          (data.alerts.sla_violated !== undefined && data.alerts.sla_violated > 0) ||
+          (data.alerts.sla_at_risk !== undefined && data.alerts.sla_at_risk > 0) ||
+          (data.alerts.critical_tickets !== undefined && data.alerts.critical_tickets > 0) ||
+          (data.alerts.unassigned_tickets !== undefined && data.alerts.unassigned_tickets > 0)
+        ))) && (
         <Card>
           <CardHeader>
             <CardTitle>Alerts</CardTitle>
@@ -413,8 +423,8 @@ export default function Dashboard() {
                   )}
                 </div>
               )}
-              {/* SLA Violated Tickets */}
-              {data.alerts.sla_violated !== undefined && data.alerts.sla_violated > 0 && (
+              {/* SLA Violated Tickets - hidden for viewers */}
+              {!isViewer && data.alerts.sla_violated !== undefined && data.alerts.sla_violated > 0 && (
                 <div className="border-b pb-4 last:border-b-0 last:pb-0">
                   <button
                     onClick={() => toggleAlert('sla_violated')}
@@ -464,8 +474,8 @@ export default function Dashboard() {
                   )}
                 </div>
               )}
-              {/* SLA At Risk Tickets */}
-              {data.alerts.sla_at_risk !== undefined && data.alerts.sla_at_risk > 0 && (
+              {/* SLA At Risk Tickets - hidden for viewers */}
+              {!isViewer && data.alerts.sla_at_risk !== undefined && data.alerts.sla_at_risk > 0 && (
                 <div className="border-b pb-4 last:border-b-0 last:pb-0">
                   <button
                     onClick={() => toggleAlert('sla_at_risk')}
@@ -524,8 +534,8 @@ export default function Dashboard() {
                   )}
                 </div>
               )}
-              {/* Critical Tickets */}
-              {data.alerts.critical_tickets !== undefined && data.alerts.critical_tickets > 0 && (
+              {/* Critical Tickets - hidden for viewers */}
+              {!isViewer && data.alerts.critical_tickets !== undefined && data.alerts.critical_tickets > 0 && (
                 <div className="border-b pb-4 last:border-b-0 last:pb-0">
                   <button
                     onClick={() => toggleAlert('critical_tickets')}
@@ -575,8 +585,8 @@ export default function Dashboard() {
                   )}
                 </div>
               )}
-              {/* Unassigned Tickets */}
-              {data.alerts.unassigned_tickets !== undefined && data.alerts.unassigned_tickets > 0 && (
+              {/* Unassigned Tickets - hidden for viewers */}
+              {!isViewer && data.alerts.unassigned_tickets !== undefined && data.alerts.unassigned_tickets > 0 && (
                 <div className="border-b pb-4 last:border-b-0 last:pb-0">
                   <button
                     onClick={() => toggleAlert('unassigned_tickets')}
@@ -733,8 +743,8 @@ export default function Dashboard() {
           </CardContent>
         </Card>
 
-        {/* Recent Tickets */}
-        {data.recent_tickets && data.recent_tickets.length > 0 && (
+        {/* Recent Tickets - hidden for viewers */}
+        {!isViewer && data.recent_tickets && data.recent_tickets.length > 0 && (
           <Card>
             <CardHeader>
               <div className="flex items-center justify-between">

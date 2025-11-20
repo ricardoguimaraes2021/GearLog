@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { useProductStore } from '@/stores/productStore';
 import { useCategoryStore } from '@/stores/categoryStore';
+import { useAuthStore } from '@/stores/authStore';
 import { api } from '@/services/api';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -13,6 +14,8 @@ import { toast } from 'sonner';
 import { Skeleton } from '@/components/ui/skeleton';
 
 export default function ProductDetail() {
+  const { user } = useAuthStore();
+  const isViewer = user?.roles?.some((r) => r.name === 'viewer') ?? false;
   const { id } = useParams<{ id: string }>();
   const { currentProduct, fetchProduct, updateProduct, isLoading } = useProductStore();
   const { fetchCategories } = useCategoryStore();
@@ -62,6 +65,12 @@ export default function ProductDetail() {
 
   const handleCreateMovement = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    if (isViewer) {
+      toast.error('You do not have permission to create movements. Please contact your administrator to update your role.');
+      return;
+    }
+    
     if (!id || !currentProduct) return;
 
     // Validate quantity before submitting
@@ -163,12 +172,14 @@ export default function ProductDetail() {
             <p className="text-sm text-gray-500">Product Details</p>
           </div>
         </div>
-        <Link to={`/inventory/products/${currentProduct.id}/edit`}>
-          <Button>
-            <Edit className="w-4 h-4 mr-2" />
-            Edit
-          </Button>
-        </Link>
+        {!isViewer && (
+          <Link to={`/inventory/products/${currentProduct.id}/edit`}>
+            <Button>
+              <Edit className="w-4 h-4 mr-2" />
+              Edit
+            </Button>
+          </Link>
+        )}
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -204,34 +215,36 @@ export default function ProductDetail() {
                   <label className="text-sm font-medium text-gray-500">Status</label>
                   <div className="mt-1 flex items-center gap-2">
                     <span className="capitalize">{currentProduct.status}</span>
-                    <select
-                      value={currentProduct.status}
-                      onChange={async (e) => {
-                        if (!id || !currentProduct) return;
-                        const newStatus = e.target.value;
-                        if (newStatus === currentProduct.status) return;
-                        
-                        setIsUpdatingStatus(true);
-                        try {
-                          const formData = new FormData();
-                          formData.append('status', newStatus);
-                          await updateProduct(parseInt(id), formData);
-                          toast.success('Product status updated successfully');
-                        } catch (error: any) {
-                          toast.error(error.response?.data?.error || 'Failed to update status');
-                        } finally {
-                          setIsUpdatingStatus(false);
-                        }
-                      }}
-                      disabled={isUpdatingStatus}
-                      className="ml-2 text-sm rounded-md border border-input bg-background px-2 py-1 disabled:opacity-50"
-                    >
-                      <option value="new">New</option>
-                      <option value="used">Used</option>
-                      <option value="damaged">Damaged</option>
-                      <option value="repair">Repair</option>
-                      <option value="reserved">Reserved</option>
-                    </select>
+                    {!isViewer && (
+                      <select
+                        value={currentProduct.status}
+                        onChange={async (e) => {
+                          if (!id || !currentProduct) return;
+                          const newStatus = e.target.value;
+                          if (newStatus === currentProduct.status) return;
+                          
+                          setIsUpdatingStatus(true);
+                          try {
+                            const formData = new FormData();
+                            formData.append('status', newStatus);
+                            await updateProduct(parseInt(id), formData);
+                            toast.success('Product status updated successfully');
+                          } catch (error: any) {
+                            toast.error(error.response?.data?.error || 'Failed to update status');
+                          } finally {
+                            setIsUpdatingStatus(false);
+                          }
+                        }}
+                        disabled={isUpdatingStatus}
+                        className="ml-2 text-sm rounded-md border border-input bg-background px-2 py-1 disabled:opacity-50"
+                      >
+                        <option value="new">New</option>
+                        <option value="used">Used</option>
+                        <option value="damaged">Damaged</option>
+                        <option value="repair">Repair</option>
+                        <option value="reserved">Reserved</option>
+                      </select>
+                    )}
                     {isUpdatingStatus && (
                       <span className="text-xs text-gray-500">Updating...</span>
                     )}
@@ -423,17 +436,19 @@ export default function ProductDetail() {
             <CardHeader>
               <div className="flex justify-between items-center">
                 <CardTitle>Movements</CardTitle>
-                <Button
-                  size="sm"
-                  onClick={() => setShowMovementForm(!showMovementForm)}
-                >
-                  <Plus className="w-4 h-4 mr-2" />
-                  New Movement
-                </Button>
+                {!isViewer && (
+                  <Button
+                    size="sm"
+                    onClick={() => setShowMovementForm(!showMovementForm)}
+                  >
+                    <Plus className="w-4 h-4 mr-2" />
+                    New Movement
+                  </Button>
+                )}
               </div>
             </CardHeader>
             <CardContent>
-              {showMovementForm && (
+              {showMovementForm && !isViewer && (
                 <form onSubmit={handleCreateMovement} className="mb-6 p-4 border rounded-lg space-y-4">
                   <div className="grid grid-cols-2 gap-4">
                     <div>
