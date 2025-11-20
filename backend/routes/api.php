@@ -15,6 +15,8 @@ use App\Http\Controllers\Api\DepartmentController;
 use App\Http\Controllers\Api\AssignmentController;
 use App\Http\Controllers\Api\Admin\CompanyController as AdminCompanyController;
 use App\Http\Controllers\Api\Admin\ImpersonationController as AdminImpersonationController;
+use App\Http\Controllers\Api\ProfileController;
+use App\Http\Controllers\Api\CompanySettingsController;
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('v1')->middleware('throttle:60,1')->group(function () {
@@ -34,6 +36,17 @@ Route::prefix('v1')->middleware('throttle:60,1')->group(function () {
 
     // Protected routes (require auth AND tenant)
     Route::middleware(['auth:sanctum', 'tenant'])->group(function () {
+
+        // Profile
+        Route::get('/profile', [ProfileController::class, 'show']);
+        Route::put('/profile', [ProfileController::class, 'update']);
+        Route::put('/profile/password', [ProfileController::class, 'updatePassword']);
+
+        // Company Settings
+        Route::get('/company', [CompanySettingsController::class, 'show']);
+        Route::put('/company', [CompanySettingsController::class, 'update']);
+        Route::get('/company/usage', [CompanySettingsController::class, 'usage']);
+        Route::get('/company/plan', [CompanySettingsController::class, 'plan']);
 
         // Products
         Route::apiResource('products', ProductController::class);
