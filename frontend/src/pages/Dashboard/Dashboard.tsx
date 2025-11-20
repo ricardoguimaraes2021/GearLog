@@ -1,5 +1,7 @@
 import { useEffect, useState } from 'react';
+import { Navigate } from 'react-router-dom';
 import { useDashboardStore } from '@/stores/dashboardStore';
+import { useAuthStore } from '@/stores/authStore';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Package, AlertTriangle, DollarSign, TrendingDown, ChevronDown, ChevronUp, Ticket, Clock, User, Users, Briefcase } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -7,6 +9,13 @@ import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 
 export default function Dashboard() {
+  const { user } = useAuthStore();
+  
+  // Redirect super admin to admin panel
+  const isSuperAdmin = user?.email === 'admin@admin.com';
+  if (isSuperAdmin) {
+    return <Navigate to="/admin" replace />;
+  }
   const { data, isLoading, fetchDashboard } = useDashboardStore();
   const [expandedAlerts, setExpandedAlerts] = useState<{
     low_stock: boolean;
@@ -265,10 +274,10 @@ export default function Dashboard() {
       {(data.alerts.low_stock > 0 || 
         data.alerts.damaged > 0 || 
         data.alerts.inactive > 0 ||
-        (data.alerts.sla_violated && data.alerts.sla_violated > 0) ||
-        (data.alerts.sla_at_risk && data.alerts.sla_at_risk > 0) ||
-        (data.alerts.critical_tickets && data.alerts.critical_tickets > 0) ||
-        (data.alerts.unassigned_tickets && data.alerts.unassigned_tickets > 0)) && (
+        (data.alerts.sla_violated !== undefined && data.alerts.sla_violated > 0) ||
+        (data.alerts.sla_at_risk !== undefined && data.alerts.sla_at_risk > 0) ||
+        (data.alerts.critical_tickets !== undefined && data.alerts.critical_tickets > 0) ||
+        (data.alerts.unassigned_tickets !== undefined && data.alerts.unassigned_tickets > 0)) && (
         <Card>
           <CardHeader>
             <CardTitle>Alerts</CardTitle>

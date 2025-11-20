@@ -56,31 +56,10 @@ class DashboardController extends Controller
             ->groupBy('categories.id', 'categories.name')
             ->get();
 
-        // Recent movements
-        $recentMovements = Movement::with(['product.category'])
-            ->orderBy('created_at', 'desc')
-            ->limit(10)
-            ->get()
-            ->map(function ($movement) {
-                return [
-                    'id' => $movement->id,
-                    'type' => 'movement',
-                    'product' => $movement->product ? [
-                        'id' => $movement->product->id,
-                        'name' => $movement->product->name,
-                        'category' => $movement->product->category ? $movement->product->category->name : null,
-                    ] : null,
-                    'movement_type' => $movement->type,
-                    'quantity' => $movement->quantity,
-                    'assigned_to' => $movement->assigned_to,
-                    'created_at' => $movement->created_at,
-                ];
-            });
-
-        // Recent assignments (checkout and checkin)
+        // Recent assignments (checkout and checkin) - get these first
         $recentAssignments = AssetAssignment::with(['product.category', 'employee', 'assignedBy', 'returnedBy'])
             ->orderBy('created_at', 'desc')
-            ->limit(10)
+            ->limit(20)
             ->get()
             ->map(function ($assignment) {
                 return [
@@ -101,6 +80,54 @@ class DashboardController extends Controller
                     'assigned_at' => $assignment->assigned_at,
                     'returned_at' => $assignment->returned_at,
                     'created_at' => $assignment->created_at,
+                ];
+            });
+
+        // Get product IDs and timestamps from assignments to filter out duplicate allocation movements
+        $assignmentProductIds = $recentAssignments
+            ->where('type', 'assignment_checkout')
+            ->pluck('product.id')
+            ->filter()
+            ->unique()
+            ->toArray();
+
+        // Recent movements - exclude 'allocation' type movements that have corresponding assignments
+        // to avoid duplicate entries in recent activities
+        $recentMovements = Movement::with(['product.category'])
+            ->orderBy('created_at', 'desc')
+            ->limit(20)
+            ->get()
+            ->filter(function ($movement) use ($assignmentProductIds) {
+                // Exclude allocation movements that have a corresponding assignment
+                // (when a product is allocated, both a Movement and AssetAssignment are created)
+                if ($movement->type === 'allocation' && in_array($movement->product_id, $assignmentProductIds)) {
+                    // Check if there's an assignment for this product created around the same time
+                    // (within 5 seconds, as they're created in the same transaction)
+                    $hasRecentAssignment = AssetAssignment::where('product_id', $movement->product_id)
+                        ->whereBetween('created_at', [
+                            $movement->created_at->copy()->subSeconds(5),
+                            $movement->created_at->copy()->addSeconds(5)
+                        ])
+                        ->exists();
+                    
+                    // If there's a recent assignment, exclude this movement to avoid duplication
+                    return !$hasRecentAssignment;
+                }
+                return true;
+            })
+            ->map(function ($movement) {
+                return [
+                    'id' => $movement->id,
+                    'type' => 'movement',
+                    'product' => $movement->product ? [
+                        'id' => $movement->product->id,
+                        'name' => $movement->product->name,
+                        'category' => $movement->product->category ? $movement->product->category->name : null,
+                    ] : null,
+                    'movement_type' => $movement->type,
+                    'quantity' => $movement->quantity,
+                    'assigned_to' => $movement->assigned_to,
+                    'created_at' => $movement->created_at,
                 ];
             });
 
