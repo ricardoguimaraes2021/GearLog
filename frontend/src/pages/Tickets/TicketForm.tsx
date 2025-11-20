@@ -1,12 +1,13 @@
 import { useEffect, useState } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useParams, Link } from 'react-router-dom';
 import { useTicketStore } from '@/stores/ticketStore';
 import { useProductStore } from '@/stores/productStore';
 import { useEmployeeStore } from '@/stores/employeeStore';
+import { useAuthStore } from '@/stores/authStore';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { ArrowLeft, Save, X, Paperclip } from 'lucide-react';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { ArrowLeft, Save, X, Paperclip, Shield, AlertCircle } from 'lucide-react';
 import { toast } from 'sonner';
 import { Label } from '@/components/ui/label';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -14,6 +15,54 @@ import { Textarea } from '@/components/ui/textarea';
 import { api } from '@/services/api';
 
 export default function TicketForm() {
+  const { user } = useAuthStore();
+  
+  // Check if user is viewer - viewers cannot access tickets
+  const isViewer = user?.roles?.some((r) => r.name === 'viewer') ?? false;
+  
+  // Show access denied message for viewers
+  if (isViewer) {
+    return (
+      <div className="space-y-6">
+        <Card className="border-warning/20 bg-warning/5">
+          <CardHeader>
+            <div className="flex items-center gap-3">
+              <Shield className="w-8 h-8 text-warning" />
+              <div>
+                <CardTitle className="text-text-primary">Access Restricted</CardTitle>
+                <CardDescription className="text-text-secondary">
+                  Your current role does not allow access to tickets
+                </CardDescription>
+              </div>
+            </div>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              <div className="flex items-start gap-3 p-4 bg-background rounded-lg border border-border">
+                <AlertCircle className="w-5 h-5 text-text-secondary mt-0.5 flex-shrink-0" />
+                <div className="flex-1">
+                  <p className="text-text-primary font-medium mb-2">
+                    Viewer Role Limitations
+                  </p>
+                  <p className="text-text-secondary text-sm mb-3">
+                    As a Viewer, you have read-only access. To create or manage tickets, please contact your company owner or administrator to update your role.
+                  </p>
+                </div>
+              </div>
+              <div className="flex gap-3">
+                <Button asChild>
+                  <Link to="/dashboard">Go to Dashboard</Link>
+                </Button>
+                <Button variant="outline" asChild>
+                  <Link to="/tickets">Back to Tickets</Link>
+                </Button>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const isEditing = !!id;
@@ -290,12 +339,12 @@ export default function TicketForm() {
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <Label htmlFor="type">Type *</Label>
+                <Label htmlFor="type" className="block text-sm font-medium text-text-primary">Type *</Label>
                 <select
                   id="type"
                   value={formData.type}
                   onChange={(e) => setFormData({ ...formData, type: e.target.value as any })}
-                  className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+                  className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm text-text-primary focus:border-accent-primary focus:outline-none focus:ring-2 focus:ring-accent-primary/20 dark:bg-surface dark:text-text-primary"
                   required
                 >
                   <option value="damage">Damage</option>
@@ -307,12 +356,12 @@ export default function TicketForm() {
               </div>
 
               <div>
-                <Label htmlFor="priority">Priority *</Label>
+                <Label htmlFor="priority" className="block text-sm font-medium text-text-primary">Priority *</Label>
                 <select
                   id="priority"
                   value={formData.priority}
                   onChange={(e) => setFormData({ ...formData, priority: e.target.value as any })}
-                  className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+                  className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm text-text-primary focus:border-accent-primary focus:outline-none focus:ring-2 focus:ring-accent-primary/20 dark:bg-surface dark:text-text-primary"
                   required
                 >
                   <option value="low">Low</option>
@@ -324,12 +373,12 @@ export default function TicketForm() {
             </div>
 
             <div>
-              <Label htmlFor="product_id">Product (Optional)</Label>
+              <Label htmlFor="product_id" className="block text-sm font-medium text-text-primary">Product (Optional)</Label>
               <select
                 id="product_id"
                 value={formData.product_id}
                 onChange={(e) => setFormData({ ...formData, product_id: e.target.value })}
-                className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+                className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm text-text-primary focus:border-accent-primary focus:outline-none focus:ring-2 focus:ring-accent-primary/20 dark:bg-surface dark:text-text-primary"
               >
                 <option value="">No product selected</option>
                 {products.map((product) => (
@@ -341,12 +390,12 @@ export default function TicketForm() {
             </div>
 
             <div>
-              <Label htmlFor="employee_id">Employee (Optional)</Label>
+              <Label htmlFor="employee_id" className="block text-sm font-medium text-text-primary">Employee (Optional)</Label>
               <select
                 id="employee_id"
                 value={formData.employee_id}
                 onChange={(e) => setFormData({ ...formData, employee_id: e.target.value })}
-                className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+                className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm text-text-primary focus:border-accent-primary focus:outline-none focus:ring-2 focus:ring-accent-primary/20 dark:bg-surface dark:text-text-primary"
               >
                 <option value="">No employee selected</option>
                 {employees.filter(emp => emp.status === 'active').map((employee) => (

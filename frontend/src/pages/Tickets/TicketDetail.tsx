@@ -3,8 +3,8 @@ import { useParams, Link, useNavigate } from 'react-router-dom';
 import { useTicketStore, type TicketComment } from '@/stores/ticketStore';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { ArrowLeft, Edit, MessageSquare, Send, User, Clock, Paperclip, X, Download, AlertCircle, CheckCircle2 } from 'lucide-react';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { ArrowLeft, Edit, MessageSquare, Send, User, Clock, Paperclip, X, Download, AlertCircle, CheckCircle2, Shield } from 'lucide-react';
 import { toast } from 'sonner';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Textarea } from '@/components/ui/textarea';
@@ -18,6 +18,64 @@ export default function TicketDetail() {
   const navigate = useNavigate();
   const { currentTicket, fetchTicket, updateStatus, assignTicket, resolveTicket, closeTicket, addComment, isLoading } = useTicketStore();
   const { user } = useAuthStore();
+  
+  // Check if user is viewer - viewers cannot access tickets
+  const isViewer = user?.roles?.some((r) => r.name === 'viewer') ?? false;
+  
+  // Show access denied message for viewers
+  if (isViewer) {
+    return (
+      <div className="space-y-6">
+        <Card className="border-warning/20 bg-warning/5">
+          <CardHeader>
+            <div className="flex items-center gap-3">
+              <Shield className="w-8 h-8 text-warning" />
+              <div>
+                <CardTitle className="text-text-primary">Access Restricted</CardTitle>
+                <CardDescription className="text-text-secondary">
+                  Your current role does not allow access to tickets
+                </CardDescription>
+              </div>
+            </div>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              <div className="flex items-start gap-3 p-4 bg-background rounded-lg border border-border">
+                <AlertCircle className="w-5 h-5 text-text-secondary mt-0.5 flex-shrink-0" />
+                <div className="flex-1">
+                  <p className="text-text-primary font-medium mb-2">
+                    Viewer Role Limitations
+                  </p>
+                  <p className="text-text-secondary text-sm mb-3">
+                    As a Viewer, you have read-only access to the following:
+                  </p>
+                  <ul className="list-disc list-inside space-y-1 text-text-secondary text-sm mb-3">
+                    <li>Dashboard metrics and statistics</li>
+                    <li>Products and inventory</li>
+                    <li>Employees and departments</li>
+                  </ul>
+                  <p className="text-text-secondary text-sm mb-2">
+                    To access tickets and other protected features, please contact your company owner or administrator to update your role.
+                  </p>
+                  <p className="text-text-muted text-xs">
+                    You can request role updates through the User Roles Management section in Company Settings (accessible by admin/owner).
+                  </p>
+                </div>
+              </div>
+              <div className="flex gap-3">
+                <Button asChild>
+                  <Link to="/dashboard">Go to Dashboard</Link>
+                </Button>
+                <Button variant="outline" asChild>
+                  <Link to="/tickets">Back to Tickets</Link>
+                </Button>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
   const [commentText, setCommentText] = useState('');
   const [showResolveForm, setShowResolveForm] = useState(false);
   const [resolutionText, setResolutionText] = useState('');
@@ -672,7 +730,7 @@ export default function TicketDetail() {
               </CardHeader>
               <CardContent className="space-y-4">
                 <div>
-                  <Label>Assign To</Label>
+                  <Label className="block text-sm font-medium text-text-primary">Assign To</Label>
                   <select
                     value={assignToType}
                     onChange={(e) => {
@@ -680,7 +738,7 @@ export default function TicketDetail() {
                       setSelectedUserId(null);
                       setSelectedEmployeeId(null);
                     }}
-                    className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm mt-1"
+                    className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm text-text-primary focus:border-accent-primary focus:outline-none focus:ring-2 focus:ring-accent-primary/20 dark:bg-surface dark:text-text-primary mt-1"
                   >
                     <option value="employee">Employee</option>
                     <option value="user">User</option>
@@ -688,11 +746,11 @@ export default function TicketDetail() {
                 </div>
                 {assignToType === 'employee' ? (
                   <div>
-                    <Label>Select Employee *</Label>
+                    <Label className="block text-sm font-medium text-text-primary">Select Employee *</Label>
                     <select
                       value={selectedEmployeeId || ''}
                       onChange={(e) => setSelectedEmployeeId(e.target.value ? parseInt(e.target.value) : null)}
-                      className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm mt-1"
+                      className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm text-text-primary focus:border-accent-primary focus:outline-none focus:ring-2 focus:ring-accent-primary/20 dark:bg-surface dark:text-text-primary mt-1"
                     >
                       <option value="">Select an employee...</option>
                       {employees.map((emp) => (
@@ -704,11 +762,11 @@ export default function TicketDetail() {
                   </div>
                 ) : (
                   <div>
-                    <Label>Select User *</Label>
+                    <Label className="block text-sm font-medium text-text-primary">Select User *</Label>
                     <select
                       value={selectedUserId || ''}
                       onChange={(e) => setSelectedUserId(e.target.value ? parseInt(e.target.value) : null)}
-                      className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm mt-1"
+                      className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm text-text-primary focus:border-accent-primary focus:outline-none focus:ring-2 focus:ring-accent-primary/20 dark:bg-surface dark:text-text-primary mt-1"
                     >
                       <option value="">Select a user...</option>
                       {users.map((u) => (

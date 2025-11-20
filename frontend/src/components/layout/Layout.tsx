@@ -17,12 +17,15 @@ export default function Layout() {
     return <Navigate to="/admin" replace />;
   }
 
+  // Check if user is viewer - viewers cannot access tickets
+  const isViewer = user?.roles?.some((r) => r.name === 'viewer') ?? false;
+  
   const navigation = [
     { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
     { name: 'Inventory', href: '/inventory/products', icon: Package },
     { name: 'Employees', href: '/employees', icon: Users },
     { name: 'Departments', href: '/departments', icon: Building2 },
-    { name: 'Tickets', href: '/tickets', icon: Ticket },
+    ...(isViewer ? [] : [{ name: 'Tickets', href: '/tickets', icon: Ticket }]),
   ];
 
   const handleLogout = async () => {
