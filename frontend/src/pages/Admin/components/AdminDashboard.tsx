@@ -129,7 +129,7 @@ export default function AdminDashboard() {
     return (
       <Card>
         <CardContent className="pt-6">
-          <p className="text-center text-gray-500">No data available</p>
+          <p className="text-center text-text-secondary">No data available</p>
         </CardContent>
       </Card>
     );
@@ -138,13 +138,13 @@ export default function AdminDashboard() {
   const getHealthColor = (status: string) => {
     switch (status) {
       case 'healthy':
-        return 'text-green-600 bg-green-100';
+        return 'text-success bg-success/10 border border-success/20';
       case 'warning':
-        return 'text-orange-600 bg-orange-100';
+        return 'text-warning bg-warning/10 border border-warning/20';
       case 'critical':
-        return 'text-red-600 bg-red-100';
+        return 'text-danger bg-danger/10 border border-danger/20';
       default:
-        return 'text-gray-600 bg-gray-100';
+        return 'text-text-secondary bg-surface-alt border border-border';
     }
   };
 
@@ -183,7 +183,7 @@ export default function AdminDashboard() {
                 <select
                   value={filters.company_id || ''}
                   onChange={(e) => handleFilterChange('company_id', e.target.value ? parseInt(e.target.value) : null)}
-                  className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+                  className="flex h-10 w-full rounded-md border border-border bg-background px-3 py-2 text-sm text-text-primary focus:border-accent-primary focus:outline-none focus:ring-2 focus:ring-accent-primary/20 dark:bg-surface dark:text-text-primary"
                 >
                   <option value="">All Companies</option>
                   {companies.map((company) => (
@@ -199,13 +199,13 @@ export default function AdminDashboard() {
                 <select
                   value={filters.role || ''}
                   onChange={(e) => handleFilterChange('role', e.target.value || null)}
-                  className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+                  className="flex h-10 w-full rounded-md border border-border bg-background px-3 py-2 text-sm text-text-primary focus:border-accent-primary focus:outline-none focus:ring-2 focus:ring-accent-primary/20 dark:bg-surface dark:text-text-primary"
                 >
                   <option value="">All Roles</option>
                   <option value="admin">Admin</option>
                   <option value="gestor">Manager</option>
                   <option value="tecnico">Technician</option>
-                  <option value="consulta">Consulta</option>
+                  <option value="viewer">Viewer</option>
                 </select>
               </div>
 
@@ -214,7 +214,7 @@ export default function AdminDashboard() {
                 <select
                   value={filters.plan_type || ''}
                   onChange={(e) => handleFilterChange('plan_type', e.target.value || null)}
-                  className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+                  className="flex h-10 w-full rounded-md border border-border bg-background px-3 py-2 text-sm text-text-primary focus:border-accent-primary focus:outline-none focus:ring-2 focus:ring-accent-primary/20 dark:bg-surface dark:text-text-primary"
                 >
                   <option value="">All Plans</option>
                   <option value="FREE">FREE</option>
@@ -301,12 +301,12 @@ export default function AdminDashboard() {
           <CardContent>
             <div className="space-y-4">
               <div className="flex items-center justify-between">
-                <span className="text-sm text-gray-600">Daily Active Users (DAU)</span>
-                <span className="text-lg font-semibold">{stats.daily_active_users}</span>
+                <span className="text-sm text-text-secondary">Daily Active Users (DAU)</span>
+                <span className="text-lg font-semibold text-text-primary">{stats.daily_active_users}</span>
               </div>
               <div className="flex items-center justify-between">
-                <span className="text-sm text-gray-600">Monthly Active Users (MAU)</span>
-                <span className="text-lg font-semibold">{stats.monthly_active_users}</span>
+                <span className="text-sm text-text-secondary">Monthly Active Users (MAU)</span>
+                <span className="text-lg font-semibold text-text-primary">{stats.monthly_active_users}</span>
               </div>
             </div>
           </CardContent>
@@ -319,18 +319,18 @@ export default function AdminDashboard() {
           <CardContent>
             <div className="space-y-4">
               <div className="flex items-center justify-between">
-                <span className="text-sm text-gray-600">Status</span>
+                <span className="text-sm text-text-secondary">Status</span>
                 <span className={`px-2 py-1 text-xs rounded ${getHealthColor(stats.system_health.status)}`}>
                   {stats.system_health.status.toUpperCase()}
                 </span>
               </div>
               <div className="flex items-center justify-between">
-                <span className="text-sm text-gray-600">Response Time</span>
-                <span className="text-lg font-semibold">{stats.system_health.response_time}ms</span>
+                <span className="text-sm text-text-secondary">Response Time</span>
+                <span className="text-lg font-semibold text-text-primary">{stats.system_health.response_time}ms</span>
               </div>
               <div className="flex items-center justify-between">
-                <span className="text-sm text-gray-600">Error Rate</span>
-                <span className="text-lg font-semibold">{stats.system_health.error_rate}%</span>
+                <span className="text-sm text-text-secondary">Error Rate</span>
+                <span className="text-lg font-semibold text-text-primary">{stats.system_health.error_rate}%</span>
               </div>
             </div>
           </CardContent>
