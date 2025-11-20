@@ -1,5 +1,5 @@
 import axios, { AxiosError, AxiosInstance } from 'axios';
-import type { User, Product, Category, Movement, DashboardData, PaginatedResponse, Employee, Department, AssetAssignment } from '@/types';
+import type { User, Product, Category, Movement, DashboardData, PaginatedResponse, Employee, Department, AssetAssignment, Company, CompanyUsageStats, CompanyStatistics, CompanyWithStats, CompanyLogs } from '@/types';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000/api/v1';
 
@@ -177,7 +177,7 @@ class ApiClient {
     }
 
     // Then make the login request with the same base URL to ensure cookies are sent
-    const response = await axios.post<{ user: User; token: string }>(
+    const response = await axios.post<{ user: User; token: string; requires_onboarding?: boolean }>(
       `${this.baseURL}/api/v1/login`,
       {
         email,
@@ -192,6 +192,70 @@ class ApiClient {
     if (response.data.token) {
       localStorage.setItem('auth_token', response.data.token);
     }
+    return response.data;
+  }
+
+  async register(name: string, email: string, password: string) {
+    await this.ensureCsrfToken();
+    
+    const csrfToken = this.getCsrfToken();
+    const headers: Record<string, string> = {
+      'Content-Type': 'application/json',
+      'Accept': 'application/json',
+    };
+    
+    if (csrfToken) {
+      headers['X-XSRF-TOKEN'] = csrfToken;
+    }
+
+    const response = await axios.post<{ user: User; token: string; requires_onboarding: boolean }>(
+      `${this.baseURL}/api/v1/register`,
+      {
+        name,
+        email,
+        password,
+        password_confirmation: password,
+      },
+      {
+        withCredentials: true,
+        headers,
+      }
+    );
+    
+    if (response.data.token) {
+      localStorage.setItem('auth_token', response.data.token);
+    }
+    return response.data;
+  }
+
+  async onboarding(data: { company_name: string; country?: string | null; timezone?: string }) {
+    const token = localStorage.getItem('auth_token');
+    if (!token) {
+      throw new Error('Not authenticated');
+    }
+
+    await this.ensureCsrfToken();
+    
+    const csrfToken = this.getCsrfToken();
+    const headers: Record<string, string> = {
+      'Content-Type': 'application/json',
+      'Accept': 'application/json',
+      'Authorization': `Bearer ${token}`,
+    };
+    
+    if (csrfToken) {
+      headers['X-XSRF-TOKEN'] = csrfToken;
+    }
+
+    const response = await axios.post<{ user: User; company: any }>(
+      `${this.baseURL}/api/v1/onboarding`,
+      data,
+      {
+        withCredentials: true,
+        headers,
+      }
+    );
+    
     return response.data;
   }
 
@@ -521,6 +585,59 @@ class ApiClient {
       
       // Otherwise, assume it's a relative path and prepend /storage
       return `${this.baseURL}/storage/${path}`;
+    }
+
+    // Admin endpoints (Super Admin only)
+    async getCompanies(params?: {
+      page?: number;
+      per_page?: number;
+      search?: string;
+      plan_type?: 'FREE' | 'PRO' | 'ENTERPRISE';
+      is_active?: boolean;
+      suspended?: boolean;
+    }): Promise<PaginatedResponse<CompanyWithStats>> {
+      const response = await this.client.get<PaginatedResponse<CompanyWithStats>>('/admin/companies', { params });
+      return response.data;
+    }
+
+    async getCompany(id: number): Promise<{ company: CompanyWithStats; owner: User | null; statistics: CompanyStatistics }> {
+      const response = await this.client.get<{ company: CompanyWithStats; owner: User | null; statistics: CompanyStatistics }>(`/admin/companies/${id}`);
+      return response.data;
+    }
+
+    async suspendCompany(id: number): Promise<{ message: string; company: Company }> {
+      const response = await this.client.post<{ message: string; company: Company }>(`/admin/companies/${id}/suspend`);
+      return response.data;
+    }
+
+    async activateCompany(id: number): Promise<{ message: string; company: Company }> {
+      const response = await this.client.post<{ message: string; company: Company }>(`/admin/companies/${id}/activate`);
+      return response.data;
+    }
+
+    async updateCompanyPlan(id: number, plan: {
+      plan_type: 'FREE' | 'PRO' | 'ENTERPRISE';
+      max_users?: number;
+      max_products?: number;
+      max_tickets?: number;
+    }): Promise<{ message: string; company: Company }> {
+      const response = await this.client.put<{ message: string; company: Company }>(`/admin/companies/${id}/plan`, plan);
+      return response.data;
+    }
+
+    async getCompanyLogs(id: number): Promise<CompanyLogs> {
+      const response = await this.client.get<CompanyLogs>(`/admin/companies/${id}/logs`);
+      return response.data;
+    }
+
+    async impersonateUser(userId: number): Promise<{ user: User; token: string; original_user_id: number; message: string }> {
+      const response = await this.client.post<{ user: User; token: string; original_user_id: number; message: string }>(`/admin/impersonate/${userId}`);
+      return response.data;
+    }
+
+    async stopImpersonation(): Promise<{ message: string }> {
+      const response = await this.client.post<{ message: string }>('/admin/stop-impersonation');
+      return response.data;
     }
   }
 

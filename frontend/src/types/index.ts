@@ -2,8 +2,26 @@ export interface User {
   id: number;
   name: string;
   email: string;
+  company_id?: number | null;
+  is_owner?: boolean;
+  company?: Company;
   roles?: Role[];
   permissions?: Permission[];
+}
+
+export interface Company {
+  id: number;
+  name: string;
+  country?: string | null;
+  timezone: string;
+  plan_type: 'FREE' | 'PRO' | 'ENTERPRISE';
+  max_users: number;
+  max_products: number;
+  max_tickets: number;
+  is_active: boolean;
+  suspended_at?: string | null;
+  created_at: string;
+  updated_at: string;
 }
 
 export interface Role {
@@ -255,5 +273,67 @@ export interface EmployeeLog {
   new_value?: Record<string, any>;
   created_at: string;
   updated_at: string;
+}
+
+export interface CompanyUsageStats {
+  users: {
+    current: number;
+    max: number;
+    percentage: number;
+  };
+  products: {
+    current: number;
+    max: number;
+    percentage: number;
+  };
+  tickets_this_month: {
+    current: number;
+    max: number;
+    percentage: number;
+  };
+}
+
+export interface CompanyStatistics {
+  usage: CompanyUsageStats;
+  recent_tickets_30_days: number;
+  total_product_value: number;
+  active_users: number;
+  total_employees: number;
+  total_departments: number;
+}
+
+export interface CompanyWithStats extends Company {
+  users_count?: number;
+  products_count?: number;
+  tickets_count?: number;
+  employees_count?: number;
+  departments_count?: number;
+  usage_stats?: CompanyUsageStats;
+  owner?: User | null;
+}
+
+export interface CompanyLogs {
+  company_id: number;
+  company_name: string;
+  recent_activity: {
+    tickets: Array<{
+      id: number;
+      title: string;
+      status: string;
+      created_at: string;
+    }>;
+    products: Array<{
+      id: number;
+      name: string;
+      status: string;
+      created_at: string;
+    }>;
+    users: Array<{
+      id: number;
+      name: string;
+      email: string;
+      created_at: string;
+    }>;
+  };
 }
 

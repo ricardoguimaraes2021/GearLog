@@ -10,6 +10,7 @@ interface AuthState {
   isAuthenticated: boolean;
   isInitializing: boolean;
   login: (email: string, password: string) => Promise<void>;
+  register: (name: string, email: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
   fetchUser: () => Promise<void>;
   initialize: () => Promise<void>;
@@ -38,7 +39,7 @@ export const useAuthStore = create<AuthState>((set, get) => {
 
     set({ isLoading: true });
     try {
-      const { user, token } = await api.login(email, password);
+      const { user, token, requires_onboarding } = await api.login(email, password);
       
       // Store token in localStorage first
       if (token) {
@@ -53,7 +54,7 @@ export const useAuthStore = create<AuthState>((set, get) => {
       set({ user, token, isAuthenticated: true, isLoading: false, isInitializing: false });
       
       // Initialize Echo for real-time notifications (non-blocking)
-      if (token) {
+      if (token && !requires_onboarding) {
         try {
           useNotificationStore.getState().initializeEcho(token);
           // Fetch unread count in background, don't wait for it
@@ -65,6 +66,30 @@ export const useAuthStore = create<AuthState>((set, get) => {
           console.warn('Failed to initialize Echo:', echoError);
         }
       }
+    } catch (error) {
+      set({ isLoading: false });
+      throw error;
+    }
+  },
+
+  register: async (name: string, email: string, password: string) => {
+    if (get().isLoading) {
+      return;
+    }
+
+    set({ isLoading: true });
+    try {
+      const { user, token, requires_onboarding } = await api.register(name, email, password);
+      
+      if (token) {
+        localStorage.setItem('auth_token', token);
+      }
+      
+      if (user) {
+        localStorage.setItem('auth_user', JSON.stringify(user));
+      }
+      
+      set({ user, token, isAuthenticated: true, isLoading: false, isInitializing: false });
     } catch (error) {
       set({ isLoading: false });
       throw error;

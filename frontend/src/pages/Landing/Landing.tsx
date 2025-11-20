@@ -189,9 +189,9 @@ export default function Landing() {
             Track equipment, manage support tickets with SLA tracking, and optimize your operations with powerful analytics.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link to="/login">
+            <Link to="/register">
               <Button size="lg" className="text-lg px-8">
-                Get Started Free
+                Start for Free
                 <ArrowRight className="ml-2 h-5 w-5" />
               </Button>
             </Link>
@@ -328,9 +328,9 @@ export default function Landing() {
               Get started today with our easy setup process.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Link to="/login">
+              <Link to="/register">
                 <Button size="lg" variant="secondary" className="text-lg px-8 bg-white text-blue-600 hover:bg-gray-100">
-                  Get Started
+                  Start for Free
                   <ArrowRight className="ml-2 h-5 w-5" />
                 </Button>
               </Link>

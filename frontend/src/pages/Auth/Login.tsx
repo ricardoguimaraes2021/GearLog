@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { useAuthStore } from '@/stores/authStore';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -58,7 +58,14 @@ export default function Login() {
     try {
       await login(email, password);
       toast.success('Login successful');
-      navigate('/dashboard');
+      
+      // Check if user needs onboarding
+      const user = useAuthStore.getState().user;
+      if (user && !user.company_id) {
+        navigate('/onboarding');
+      } else {
+        navigate('/dashboard');
+      }
     } catch (err: any) {
       const errorMessage = err.response?.data?.message || err.response?.data?.error || 'Invalid credentials';
       setError(errorMessage);
@@ -120,9 +127,12 @@ export default function Login() {
               {isLoading || isSubmitting ? 'Signing in...' : 'Sign in'}
             </Button>
           </form>
-          <div className="mt-4 text-sm text-gray-600">
-            <p>Default credentials:</p>
-            <p>admin@gearlog.local / password</p>
+          <div className="mt-4 text-center text-sm text-gray-600">
+            <p>Don't have an account?{' '}
+              <Link to="/register" className="text-blue-600 hover:text-blue-700 font-medium">
+                Sign up
+              </Link>
+            </p>
           </div>
         </CardContent>
       </Card>

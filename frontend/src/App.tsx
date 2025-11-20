@@ -24,6 +24,9 @@ import Layout from './components/layout/Layout';
 import { Toaster } from './components/ui/toast';
 import ErrorBoundary from './components/ErrorBoundary';
 import Landing from './pages/Landing/Landing';
+import Register from './pages/Auth/Register';
+import Onboarding from './pages/Auth/Onboarding';
+import AdminPanel from './pages/Admin/AdminPanel';
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { isAuthenticated, isLoading, isInitializing } = useAuthStore();
@@ -62,6 +65,15 @@ function App() {
           <Routes>
             <Route path="/landing" element={<Landing />} />
             <Route path="/login" element={<Login />} />
+            <Route path="/register" element={<Register />} />
+            <Route 
+              path="/onboarding" 
+              element={
+                <ProtectedRoute>
+                  <Onboarding />
+                </ProtectedRoute>
+              } 
+            />
             <Route path="/products/:id/view" element={<ProductPublicView />} />
             <Route
               path="/"
@@ -95,6 +107,7 @@ function App() {
               <Route path="departments/new" element={<DepartmentForm />} />
               <Route path="departments/:id" element={<DepartmentDetail />} />
               <Route path="departments/:id/edit" element={<DepartmentForm />} />
+              <Route path="admin" element={<AdminPanel />} />
             </Route>
           </Routes>
       </BrowserRouter>
