@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useDepartmentStore } from '@/stores/departmentStore';
 import { useEmployeeStore } from '@/stores/employeeStore';
+import { useAuthStore } from '@/stores/authStore';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -10,8 +11,11 @@ import { ArrowLeft } from 'lucide-react';
 import { toast } from 'sonner';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
+import ViewerRestriction from '@/components/ViewerRestriction';
 
 export default function DepartmentForm() {
+  const { user } = useAuthStore();
+  const isViewer = user?.roles?.some((r) => r.name === 'viewer') ?? false;
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const isEditing = !!id;
@@ -82,6 +86,21 @@ export default function DepartmentForm() {
     }
   };
 
+  // Show restriction message for viewers
+  if (isViewer) {
+    return (
+      <div className="space-y-6">
+        <ViewerRestriction
+          title="Cannot Create or Edit Departments"
+          description="Your current role does not allow creating or editing departments"
+          action="You can only view departments. To create or edit departments, please contact your company owner or administrator to update your role."
+          backUrl="/departments"
+          backLabel="Back to Departments"
+        />
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -92,7 +111,7 @@ export default function DepartmentForm() {
               Back
             </Button>
           </Link>
-          <h1 className="text-3xl font-bold text-gray-900">
+          <h1 className="text-3xl font-bold text-text-primary">
             {isEditing ? 'Edit Department' : 'New Department'}
           </h1>
         </div>

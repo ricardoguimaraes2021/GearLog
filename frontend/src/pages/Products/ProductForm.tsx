@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useProductStore } from '@/stores/productStore';
 import { useCategoryStore } from '@/stores/categoryStore';
+import { useAuthStore } from '@/stores/authStore';
 import { api } from '@/services/api';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -11,8 +12,11 @@ import { toast } from '@/utils/toast';
 import { productSchema, type ProductFormData } from '@/utils/validation';
 import { Label } from '@/components/ui/label';
 import { Skeleton } from '@/components/ui/skeleton';
+import ViewerRestriction from '@/components/ViewerRestriction';
 
 export default function ProductForm() {
+  const { user } = useAuthStore();
+  const isViewer = user?.roles?.some((r) => r.name === 'viewer') ?? false;
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const isEditing = !!id;
@@ -212,6 +216,21 @@ export default function ProductForm() {
     }
   };
 
+  // Show restriction message for viewers
+  if (isViewer) {
+    return (
+      <div className="space-y-6">
+        <ViewerRestriction
+          title="Cannot Create or Edit Products"
+          description="Your current role does not allow creating or editing products"
+          action="You can only view products. To create or edit products, please contact your company owner or administrator to update your role."
+          backUrl="/inventory/products"
+          backLabel="Back to Products"
+        />
+      </div>
+    );
+  }
+
   if (isLoading && isEditing) {
     return (
       <div className="space-y-6">
@@ -277,7 +296,7 @@ export default function ProductForm() {
               </div>
 
               <div>
-                <Label htmlFor="category_id" className="block text-sm font-medium text-gray-700 mb-1">
+                <Label htmlFor="category_id" className="block text-sm font-medium text-text-primary mb-1">
                   Category *
                 </Label>
                 <select
@@ -287,7 +306,7 @@ export default function ProductForm() {
                     setFormData({ ...formData, category_id: e.target.value });
                     if (errors.category_id) setErrors({ ...errors, category_id: '' });
                   }}
-                  className={`w-full rounded-md border bg-background px-3 py-2 text-sm ${errors.category_id ? 'border-red-500' : 'border-input'}`}
+                  className={`w-full rounded-md border bg-background px-3 py-2 text-sm text-text-primary focus:border-accent-primary focus:outline-none focus:ring-2 focus:ring-accent-primary/20 dark:bg-surface dark:text-text-primary ${errors.category_id ? 'border-danger' : 'border-border'}`}
                   required
                 >
                   <option value="">Select a category</option>
@@ -327,13 +346,13 @@ export default function ProductForm() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Status *</label>
+                <label className="block text-sm font-medium text-text-primary mb-1">Status *</label>
                 <select
                   value={formData.status}
                   onChange={(e) =>
                     setFormData({ ...formData, status: e.target.value as any })
                   }
-                  className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+                  className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm text-text-primary focus:border-accent-primary focus:outline-none focus:ring-2 focus:ring-accent-primary/20 dark:bg-surface dark:text-text-primary"
                   required
                 >
                   <option value="new">New</option>

@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useEmployeeStore } from '@/stores/employeeStore';
 import { useDepartmentStore } from '@/stores/departmentStore';
+import { useAuthStore } from '@/stores/authStore';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -10,8 +11,11 @@ import { Label } from '@/components/ui/label';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import ViewerRestriction from '@/components/ViewerRestriction';
 
 export default function EmployeeForm() {
+  const { user } = useAuthStore();
+  const isViewer = user?.roles?.some((r) => r.name === 'viewer') ?? false;
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const isEditing = !!id;
@@ -91,6 +95,21 @@ export default function EmployeeForm() {
       }
     }
   };
+
+  // Show restriction message for viewers
+  if (isViewer) {
+    return (
+      <div className="space-y-6">
+        <ViewerRestriction
+          title="Cannot Create or Edit Employees"
+          description="Your current role does not allow creating or editing employees"
+          action="You can only view employees. To create or edit employees, please contact your company owner or administrator to update your role."
+          backUrl="/employees"
+          backLabel="Back to Employees"
+        />
+      </div>
+    );
+  }
 
   if (isLoading && isEditing) {
     return (

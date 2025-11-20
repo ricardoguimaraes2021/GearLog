@@ -1,14 +1,18 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useDepartmentStore } from '@/stores/departmentStore';
+import { useAuthStore } from '@/stores/authStore';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Plus, Search, Building2, Users, Package, Ticket, DollarSign } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { toast } from 'sonner';
+import ViewerRestriction from '@/components/ViewerRestriction';
 
 export default function Departments() {
+  const { user } = useAuthStore();
+  const isViewer = user?.roles?.some((r) => r.name === 'viewer') ?? false;
   const {
     departments,
     isLoading,
@@ -31,6 +35,11 @@ export default function Departments() {
   };
 
   const handleDelete = async (id: number, name: string) => {
+    if (isViewer) {
+      toast.error('You do not have permission to delete departments. Please contact your administrator to update your role.');
+      return;
+    }
+    
     if (window.confirm(`Are you sure you want to delete department "${name}"? This action cannot be undone.`)) {
       try {
         await deleteDepartment(id);
@@ -55,16 +64,27 @@ export default function Departments() {
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Departments</h1>
-          <p className="mt-1 text-sm text-gray-500">Manage organizational departments and their assets</p>
+          <h1 className="text-3xl font-bold text-text-primary">Departments</h1>
+          <p className="mt-1 text-sm text-text-secondary">Manage organizational departments and their assets</p>
         </div>
-        <Link to="/departments/new">
-          <Button>
-            <Plus className="w-4 h-4 mr-2" />
-            Add Department
-          </Button>
-        </Link>
+        {!isViewer && (
+          <Link to="/departments/new">
+            <Button>
+              <Plus className="w-4 h-4 mr-2" />
+              Add Department
+            </Button>
+          </Link>
+        )}
       </div>
+
+      {isViewer && (
+        <ViewerRestriction
+          title="Read-Only Access to Departments"
+          description="You can view departments but cannot create, edit, or delete them"
+          action="To manage departments, please contact your company owner or administrator to update your role."
+          compact={true}
+        />
+      )}
 
       {/* Search */}
       <Card>
@@ -184,18 +204,22 @@ export default function Departments() {
                         View
                       </Button>
                     </Link>
-                    <Link to={`/departments/${department.id}/edit`} className="flex-1">
-                      <Button variant="outline" size="sm" className="w-full">
-                        Edit
-                      </Button>
-                    </Link>
-                    <Button
-                      variant="destructive"
-                      size="sm"
-                      onClick={() => handleDelete(department.id, department.name)}
-                    >
-                      Delete
-                    </Button>
+                    {!isViewer && (
+                      <>
+                        <Link to={`/departments/${department.id}/edit`} className="flex-1">
+                          <Button variant="outline" size="sm" className="w-full">
+                            Edit
+                          </Button>
+                        </Link>
+                        <Button
+                          variant="destructive"
+                          size="sm"
+                          onClick={() => handleDelete(department.id, department.name)}
+                        >
+                          Delete
+                        </Button>
+                      </>
+                    )}
                   </div>
                 </div>
               </CardContent>

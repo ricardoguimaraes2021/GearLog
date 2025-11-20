@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useEmployeeStore } from '@/stores/employeeStore';
 import { useDepartmentStore } from '@/stores/departmentStore';
+import { useAuthStore } from '@/stores/authStore';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -10,8 +11,11 @@ import type { Employee } from '@/types';
 import { toast } from 'sonner';
 import { Skeleton } from '@/components/ui/skeleton';
 import { api } from '@/services/api';
+import ViewerRestriction from '@/components/ViewerRestriction';
 
 export default function Employees() {
+  const { user } = useAuthStore();
+  const isViewer = user?.roles?.some((r) => r.name === 'viewer') ?? false;
   const {
     employees,
     pagination,
@@ -46,6 +50,11 @@ export default function Employees() {
   };
 
   const handleDelete = async (id: number) => {
+    if (isViewer) {
+      toast.error('You do not have permission to delete employees. Please contact your administrator to update your role.');
+      return;
+    }
+    
     if (window.confirm('Are you sure you want to delete this employee?')) {
       try {
         await deleteEmployee(id);
@@ -85,13 +94,24 @@ export default function Employees() {
           <h1 className="text-3xl font-bold text-gray-900">Employees</h1>
           <p className="mt-1 text-sm text-gray-500">Manage your employee directory</p>
         </div>
-        <Link to="/employees/new">
-          <Button>
-            <Plus className="w-4 h-4 mr-2" />
-            Add Employee
-          </Button>
-        </Link>
+        {!isViewer && (
+          <Link to="/employees/new">
+            <Button>
+              <Plus className="w-4 h-4 mr-2" />
+              Add Employee
+            </Button>
+          </Link>
+        )}
       </div>
+
+      {isViewer && (
+        <ViewerRestriction
+          title="Read-Only Access to Employees"
+          description="You can view employees but cannot create, edit, or delete them"
+          action="To manage employees, please contact your company owner or administrator to update your role."
+          compact={true}
+        />
+      )}
 
       {/* Search and Filters */}
       <Card>
@@ -279,13 +299,15 @@ export default function Employees() {
                         View
                       </Button>
                     </Link>
-                    <Button
-                      variant="destructive"
-                      size="sm"
-                      onClick={() => handleDelete(employee.id)}
-                    >
-                      Delete
-                    </Button>
+                    {!isViewer && (
+                      <Button
+                        variant="destructive"
+                        size="sm"
+                        onClick={() => handleDelete(employee.id)}
+                      >
+                        Delete
+                      </Button>
+                    )}
                   </div>
                 </CardContent>
               </Card>

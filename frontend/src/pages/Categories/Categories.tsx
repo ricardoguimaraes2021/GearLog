@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useCategoryStore } from '@/stores/categoryStore';
+import { useAuthStore } from '@/stores/authStore';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -7,8 +8,11 @@ import { Plus, Trash2, Edit } from 'lucide-react';
 import { toast } from '@/utils/toast';
 import { categorySchema } from '@/utils/validation';
 import { Label } from '@/components/ui/label';
+import ViewerRestriction from '@/components/ViewerRestriction';
 
 export default function Categories() {
+  const { user } = useAuthStore();
+  const isViewer = user?.roles?.some((r) => r.name === 'viewer') ?? false;
   const { categories, isLoading, fetchCategories, createCategory, updateCategory, deleteCategory } =
     useCategoryStore();
   const [showForm, setShowForm] = useState(false);
@@ -74,13 +78,24 @@ export default function Categories() {
           <h1 className="text-3xl font-bold text-gray-900">Categories</h1>
           <p className="mt-1 text-sm text-gray-500">Manage product categories</p>
         </div>
-        <Button onClick={() => setShowForm(true)}>
-          <Plus className="w-4 h-4 mr-2" />
-          Add Category
-        </Button>
+        {!isViewer && (
+          <Button onClick={() => setShowForm(true)}>
+            <Plus className="w-4 h-4 mr-2" />
+            Add Category
+          </Button>
+        )}
       </div>
 
-      {showForm && (
+      {isViewer && (
+        <ViewerRestriction
+          title="Read-Only Access to Categories"
+          description="You can view categories but cannot create, edit, or delete them"
+          action="To manage categories, please contact your company owner or administrator to update your role."
+          compact={true}
+        />
+      )}
+
+      {showForm && !isViewer && (
         <Card>
           <CardHeader>
             <CardTitle>{editingId ? 'Edit Category' : 'New Category'}</CardTitle>
@@ -138,20 +153,24 @@ export default function Categories() {
                     {category.products_count || 0} products
                   </span>
                   <div className="flex gap-2">
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => handleEdit(category)}
-                    >
-                      <Edit className="w-4 h-4" />
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => handleDelete(category.id)}
-                    >
-                      <Trash2 className="w-4 h-4 text-red-600" />
-                    </Button>
+                    {!isViewer && (
+                      <>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleEdit(category)}
+                        >
+                          <Edit className="w-4 h-4" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleDelete(category.id)}
+                        >
+                          <Trash2 className="w-4 h-4 text-red-600" />
+                        </Button>
+                      </>
+                    )}
                   </div>
                 </div>
               </CardContent>

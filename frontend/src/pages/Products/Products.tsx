@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useProductStore } from '@/stores/productStore';
 import { useCategoryStore } from '@/stores/categoryStore';
+import { useAuthStore } from '@/stores/authStore';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -9,8 +10,11 @@ import { Plus, Search, Filter, Download } from 'lucide-react';
 import type { Product } from '@/types';
 import { toast } from '@/utils/toast';
 import { Skeleton } from '@/components/ui/skeleton';
+import ViewerRestriction from '@/components/ViewerRestriction';
 
 export default function Products() {
+  const { user } = useAuthStore();
+  const isViewer = user?.roles?.some((r) => r.name === 'viewer') ?? false;
   const {
     products,
     pagination,
@@ -43,6 +47,11 @@ export default function Products() {
   };
 
   const handleDelete = async (id: number) => {
+    if (isViewer) {
+      toast.error('You do not have permission to delete products. Please contact your administrator to update your role.');
+      return;
+    }
+    
     if (window.confirm('Are you sure you want to delete this product?')) {
       try {
         await deleteProduct(id);
@@ -89,13 +98,24 @@ export default function Products() {
           <h1 className="text-3xl font-bold text-gray-900">Products</h1>
           <p className="mt-1 text-sm text-gray-500">Manage your inventory</p>
         </div>
-        <Link to="/inventory/products/new">
-          <Button>
-            <Plus className="w-4 h-4 mr-2" />
-            Add Product
-          </Button>
-        </Link>
+        {!isViewer && (
+          <Link to="/inventory/products/new">
+            <Button>
+              <Plus className="w-4 h-4 mr-2" />
+              Add Product
+            </Button>
+          </Link>
+        )}
       </div>
+
+      {isViewer && (
+        <ViewerRestriction
+          title="Read-Only Access to Products"
+          description="You can view products but cannot create, edit, or delete them"
+          action="To manage products, please contact your company owner or administrator to update your role."
+          compact={true}
+        />
+      )}
 
       {/* Search and Filters */}
       <Card>
@@ -120,7 +140,7 @@ export default function Products() {
         <CardContent>
           <div className="space-y-4">
             <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-text-muted w-4 h-4" />
               <Input
                 placeholder="Search products..."
                 value={filters.search || ''}
@@ -132,7 +152,7 @@ export default function Products() {
             {showFilters && (
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-4 border-t">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label className="block text-sm font-medium text-text-primary mb-1">
                     Category
                   </label>
                   <select
@@ -140,7 +160,7 @@ export default function Products() {
                     onChange={(e) =>
                       handleFilterChange('category_id', e.target.value || undefined)
                     }
-                    className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+                    className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm text-text-primary focus:border-accent-primary focus:outline-none focus:ring-2 focus:ring-accent-primary/20 dark:bg-surface dark:text-text-primary"
                   >
                     <option value="">All Categories</option>
                     {categories.map((cat) => (
@@ -152,7 +172,7 @@ export default function Products() {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label className="block text-sm font-medium text-text-primary mb-1">
                     Status
                   </label>
                   <select
@@ -160,7 +180,7 @@ export default function Products() {
                     onChange={(e) =>
                       handleFilterChange('status', e.target.value || undefined)
                     }
-                    className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+                    className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm text-text-primary focus:border-accent-primary focus:outline-none focus:ring-2 focus:ring-accent-primary/20 dark:bg-surface dark:text-text-primary"
                   >
                     <option value="">All Statuses</option>
                     <option value="new">New</option>
@@ -286,13 +306,15 @@ export default function Products() {
                         View
                       </Button>
                     </Link>
-                    <Button
-                      variant="destructive"
-                      size="sm"
-                      onClick={() => handleDelete(product.id)}
-                    >
-                      Delete
-                    </Button>
+                    {!isViewer && (
+                      <Button
+                        variant="destructive"
+                        size="sm"
+                        onClick={() => handleDelete(product.id)}
+                      >
+                        Delete
+                      </Button>
+                    )}
                   </div>
                 </CardContent>
               </Card>
