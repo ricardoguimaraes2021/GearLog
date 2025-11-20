@@ -87,8 +87,8 @@ class TicketController extends Controller
                 $q->where('assigned_to', $user->id)
                   ->orWhere('opened_by', $user->id);
             });
-        } elseif ($user && $user->hasRole('consulta')) {
-            // Consulta only sees tickets they opened
+        } elseif ($user && $user->hasRole('viewer')) {
+            // Viewer only sees tickets they opened
             $query->where('opened_by', $user->id);
         }
 

@@ -15,8 +15,8 @@ class TicketPolicy
         }
         
         // Admin, Manager, Technician can view all
-        // Consulta can only view their own
-        return $user->hasAnyRole(['admin', 'gestor', 'tecnico', 'consulta']);
+        // Viewer can only view their own
+        return $user->hasAnyRole(['admin', 'gestor', 'tecnico', 'viewer']);
     }
 
     public function view(User $user, Ticket $ticket): bool
@@ -36,8 +36,8 @@ class TicketPolicy
             return $ticket->assigned_to === $user->id || $ticket->opened_by === $user->id;
         }
 
-        // Consulta can only view tickets they opened
-        if ($user->hasRole('consulta')) {
+        // Viewer can only view tickets they opened
+        if ($user->hasRole('viewer')) {
             return $ticket->opened_by === $user->id;
         }
 
@@ -77,8 +77,8 @@ class TicketPolicy
             return $ticket->assigned_to === $user->id;
         }
 
-        // Consulta can only update tickets they opened
-        if ($user->hasRole('consulta')) {
+        // Viewer can only update tickets they opened
+        if ($user->hasRole('viewer')) {
             return $ticket->opened_by === $user->id;
         }
 

@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Hash;
 use OpenApi\Attributes as OA;
 
 #[OA\Tag(name: 'Users', description: 'User management endpoints')]
@@ -102,7 +103,7 @@ class UserController extends Controller
 
         $validated = $request->validate([
             'roles' => 'required|array',
-            'roles.*' => 'required|string|in:admin,gestor,tecnico,consulta',
+            'roles.*' => 'required|string|in:admin,gestor,tecnico,viewer',
         ]);
 
         $user = User::find($id);
@@ -133,5 +134,78 @@ class UserController extends Controller
             'message' => 'User roles updated successfully',
             'user' => $user->load('roles'),
         ]);
+    }
+
+    #[OA\Post(
+        path: '/api/v1/users',
+        summary: 'Create a new user in the company (Owner/Admin only)',
+        tags: ['Users'],
+        security: [['bearerAuth' => []]],
+        requestBody: new OA\RequestBody(
+            required: true,
+            content: new OA\JsonContent(
+                required: ['name', 'email', 'password', 'roles'],
+                properties: [
+                    new OA\Property(property: 'name', type: 'string', example: 'John Doe'),
+                    new OA\Property(property: 'email', type: 'string', format: 'email', example: 'john@example.com'),
+                    new OA\Property(property: 'password', type: 'string', format: 'password', example: 'password123'),
+                    new OA\Property(property: 'roles', type: 'array', items: new OA\Items(type: 'string'), description: 'Array of role names', example: ['tecnico']),
+                ]
+            )
+        ),
+        responses: [
+            new OA\Response(response: 201, description: 'User created successfully'),
+            new OA\Response(response: 403, description: 'Unauthorized'),
+            new OA\Response(response: 422, description: 'Validation error'),
+        ]
+    )]
+    public function store(Request $request)
+    {
+        $currentUser = $request->user();
+        
+        // Only owner or admin can create users
+        if (!$currentUser->is_owner && !$currentUser->hasRole('admin')) {
+            return response()->json(['error' => 'Unauthorized'], 403);
+        }
+
+        // Ensure current user has a company
+        if (!$currentUser->company_id) {
+            return response()->json(['error' => 'You must belong to a company to create users'], 400);
+        }
+
+        // Check plan limits
+        $company = $currentUser->company;
+        if (!$company) {
+            return response()->json(['error' => 'Company not found'], 404);
+        }
+
+        $usage = User::where('company_id', $currentUser->company_id)->count();
+        if ($usage >= $company->max_users) {
+            return response()->json(['error' => 'User limit reached for your plan'], 400);
+        }
+
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'email' => 'required|string|email|max:255|unique:users',
+            'password' => 'required|string|min:8',
+            'roles' => 'required|array|min:1',
+            'roles.*' => 'required|string|in:admin,gestor,tecnico,viewer',
+        ]);
+
+        $user = User::create([
+            'name' => $validated['name'],
+            'email' => $validated['email'],
+            'password' => Hash::make($validated['password']),
+            'company_id' => $currentUser->company_id,
+            'is_owner' => false,
+        ]);
+
+        // Assign roles
+        $user->syncRoles($validated['roles']);
+
+        return response()->json([
+            'message' => 'User created successfully',
+            'user' => $user->load('roles'),
+        ], 201);
     }
 }

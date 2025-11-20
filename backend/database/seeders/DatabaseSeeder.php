@@ -59,7 +59,7 @@ class DatabaseSeeder extends Seeder
         $adminRole = Role::firstOrCreate(['name' => 'admin']);
         $gestorRole = Role::firstOrCreate(['name' => 'gestor']);
         $tecnicoRole = Role::firstOrCreate(['name' => 'tecnico']);
-        $consultaRole = Role::firstOrCreate(['name' => 'consulta']);
+        $viewerRole = Role::firstOrCreate(['name' => 'viewer']);
 
         // Assign permissions to roles
         $adminRole->givePermissionTo(Permission::all());
@@ -94,7 +94,7 @@ class DatabaseSeeder extends Seeder
             'assignments.return',
         ]);
 
-        $consultaRole->givePermissionTo([
+        $viewerRole->givePermissionTo([
             'products.view',
             'movements.view',
             'dashboard.view',

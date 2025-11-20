@@ -27,8 +27,8 @@ class SuperAdminSeeder extends Seeder
         if ($superAdmin->hasRole('admin')) {
             $superAdmin->syncRoles(['admin']);
         } else {
-            // If admin role doesn't exist, just assign consulta role for now
-            $superAdmin->assignRole('consulta');
+            // If admin role doesn't exist, just assign viewer role for now
+            $superAdmin->assignRole('viewer');
         }
 
         $this->command->info('Super Admin created:');
