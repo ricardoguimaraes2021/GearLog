@@ -60,8 +60,9 @@ Route::prefix('v1')->middleware('throttle:60,1')->group(function () {
         // Dashboard
         Route::get('/dashboard', [DashboardController::class, 'index']);
 
-        // Users (for assignment)
+        // Users (for assignment and role management)
         Route::get('/users', [UserController::class, 'index']);
+        Route::put('/users/{id}/roles', [UserController::class, 'updateRoles']);
 
         // Tickets
         Route::get('/tickets/dashboard', [TicketDashboardController::class, 'index']);
@@ -108,6 +109,15 @@ Route::prefix('v1')->middleware('throttle:60,1')->group(function () {
         Route::post('/companies/{id}/activate', [AdminCompanyController::class, 'activate']);
         Route::put('/companies/{id}/plan', [AdminCompanyController::class, 'updatePlan']);
         Route::get('/companies/{id}/logs', [AdminCompanyController::class, 'logs']);
+
+        // User management
+        Route::get('/users', [\App\Http\Controllers\Api\Admin\UserController::class, 'index']);
+
+        // Analytics
+        Route::get('/analytics/global', [\App\Http\Controllers\Api\Admin\AnalyticsController::class, 'global']);
+
+        // Security logs
+        Route::get('/logs/security', [\App\Http\Controllers\Api\Admin\SecurityLogController::class, 'index']);
 
         // User impersonation
         Route::post('/impersonate/{userId}', [AdminImpersonationController::class, 'impersonate']);

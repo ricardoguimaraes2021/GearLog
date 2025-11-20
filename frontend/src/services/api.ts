@@ -415,6 +415,11 @@ class ApiClient {
       return response.data;
     }
 
+    async updateUserRoles(userId: number, roles: string[]) {
+      const response = await this.client.put<{ message: string; user: User }>(`/users/${userId}/roles`, { roles });
+      return response.data;
+    }
+
     // Tickets
     async getTickets(params?: Record<string, any>) {
       const response = await this.client.get('/tickets', { params });
@@ -442,6 +447,11 @@ class ApiClient {
 
     async assignTicket(id: number, assignedTo: number | null) {
       const response = await this.client.post(`/tickets/${id}/assign`, { assigned_to: assignedTo });
+      return response.data;
+    }
+
+    async assignTicketToEmployee(id: number, employeeId: number | null) {
+      const response = await this.client.post(`/tickets/${id}/assign`, { employee_id: employeeId });
       return response.data;
     }
 
@@ -678,6 +688,28 @@ class ApiClient {
 
     async getCompanyPlan(): Promise<{ plan: any }> {
       const response = await this.client.get<{ plan: any }>('/company/plan');
+      return response.data;
+    }
+
+    // Admin Analytics endpoints
+    async getAdminAnalytics(params?: {
+      company_id?: number;
+      role?: string;
+      date_from?: string;
+      date_to?: string;
+      plan_type?: string;
+    }): Promise<any> {
+      const response = await this.client.get('/admin/analytics/global', { params });
+      return response.data;
+    }
+
+    async getAdminUsers(): Promise<User[]> {
+      const response = await this.client.get('/admin/users');
+      return response.data;
+    }
+
+    async getAdminSecurityLogs(): Promise<any[]> {
+      const response = await this.client.get('/admin/logs/security');
       return response.data;
     }
   }
