@@ -21,5 +21,9 @@ return [
         'driver' => env('APP_MAINTENANCE_DRIVER', 'file'),
         'store' => env('APP_MAINTENANCE_STORE', 'database'),
     ],
+    
+    'super_admin_emails' => array_filter(
+        explode(',', env('SUPER_ADMIN_EMAILS', 'admin@gearlog.local'))
+    ),
 ];
 
