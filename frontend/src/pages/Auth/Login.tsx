@@ -8,6 +8,7 @@ import { ThemeToggle } from '@/components/ui/theme-toggle';
 import { toast } from '@/utils/toast';
 import { loginSchema } from '@/utils/validation';
 import { Label } from '@/components/ui/label';
+import { ArrowLeft } from 'lucide-react';
 
 export default function Login() {
   const [email, setEmail] = useState('');
@@ -92,6 +93,13 @@ export default function Login() {
     <div className="min-h-screen flex items-center justify-center bg-background py-12 px-4 sm:px-6 lg:px-8 relative">
       <div className="absolute top-4 right-4">
         <ThemeToggle />
+      </div>
+      <div className="absolute top-4 left-4">
+        <Link to="/landing">
+          <Button variant="ghost" size="icon">
+            <ArrowLeft className="h-5 w-5" />
+          </Button>
+        </Link>
       </div>
       <Card className="w-full max-w-md">
         <CardHeader>
