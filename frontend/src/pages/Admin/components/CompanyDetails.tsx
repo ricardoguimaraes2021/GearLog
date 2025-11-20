@@ -38,7 +38,7 @@ export default function CompanyDetails({ companyId, onClose }: CompanyDetailsPro
     max_products: 500,
     max_tickets: 150,
   });
-  const [activeTab, setActiveTab] = useState<'overview' | 'statistics' | 'logs'>('overview');
+  const [activeTab, setActiveTab] = useState<'overview' | 'statistics' | 'logs' | 'roles'>('overview');
 
   useEffect(() => {
     if (companyId) {
@@ -93,7 +93,7 @@ export default function CompanyDetails({ companyId, onClose }: CompanyDetailsPro
         localStorage.setItem('impersonating', 'true');
         localStorage.setItem('original_user_id', response.original_user_id.toString());
         toast.success('Impersonation started');
-        navigate('/dashboard');
+        navigate('/admin');
       } catch (error: any) {
         toast.error(error.response?.data?.error || 'Failed to impersonate user');
       }
@@ -213,6 +213,16 @@ export default function CompanyDetails({ companyId, onClose }: CompanyDetailsPro
               }`}
             >
               Activity Logs
+            </button>
+            <button
+              onClick={() => setActiveTab('roles')}
+              className={`px-6 py-3 font-medium ${
+                activeTab === 'roles'
+                  ? 'border-b-2 border-blue-500 text-blue-600'
+                  : 'text-gray-600 hover:text-gray-900'
+              }`}
+            >
+              User Roles
             </button>
           </div>
         </div>
@@ -404,6 +414,72 @@ export default function CompanyDetails({ companyId, onClose }: CompanyDetailsPro
                 </div>
               </CardContent>
             </Card>
+          </div>
+        )}
+
+        {activeTab === 'roles' && currentCompany && (
+          <div className="space-y-6">
+            <div>
+              <h3 className="text-lg font-semibold text-gray-900 mb-4">Company User Roles</h3>
+              <p className="text-sm text-gray-600 mb-4">
+                Overview of roles assigned to users in this company
+              </p>
+            </div>
+            {((currentCompany as any).users_with_roles && (currentCompany as any).users_with_roles.length > 0) ? (
+              <div className="space-y-4">
+                {(currentCompany as any).users_with_roles.map((companyUser: any) => (
+                  <Card key={companyUser.id}>
+                    <CardContent className="pt-6">
+                      <div className="flex items-start justify-between">
+                        <div className="flex-1">
+                          <div className="flex items-center gap-2 mb-2">
+                            <UserCog className="w-5 h-5 text-gray-500" />
+                            <span className="font-semibold text-gray-900">{companyUser.name}</span>
+                            {companyUser.is_owner && (
+                              <span className="px-2 py-1 text-xs rounded bg-purple-100 text-purple-800">
+                                Owner
+                              </span>
+                            )}
+                          </div>
+                          <p className="text-sm text-gray-600 mb-3">{companyUser.email}</p>
+                          {companyUser.roles && companyUser.roles.length > 0 ? (
+                            <div className="flex flex-wrap gap-2">
+                              {companyUser.roles.map((role: string) => (
+                                <span
+                                  key={role}
+                                  className={`px-3 py-1 text-xs font-medium rounded ${
+                                    role === 'admin'
+                                      ? 'bg-red-100 text-red-800'
+                                      : role === 'gestor'
+                                      ? 'bg-blue-100 text-blue-800'
+                                      : role === 'tecnico'
+                                      ? 'bg-green-100 text-green-800'
+                                      : 'bg-gray-100 text-gray-800'
+                                  }`}
+                                >
+                                  {role.charAt(0).toUpperCase() + role.slice(1)}
+                                </span>
+                              ))}
+                            </div>
+                          ) : (
+                            <span className="text-sm text-gray-500 italic">No roles assigned</span>
+                          )}
+                        </div>
+                        <div className="text-xs text-gray-500">
+                          Created: {new Date(companyUser.created_at).toLocaleDateString()}
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            ) : (
+              <Card>
+                <CardContent className="pt-6">
+                  <p className="text-center text-gray-500 py-4">No users found for this company</p>
+                </CardContent>
+              </Card>
+            )}
           </div>
         )}
       </CardContent>

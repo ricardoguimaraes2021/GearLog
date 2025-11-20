@@ -121,9 +121,27 @@ class CompanyController extends Controller
         // Get active users count
         $activeUsers = $company->users()->count();
 
+        // Get users with their roles for role management display
+        $usersWithRoles = $company->users()
+            ->with('roles')
+            ->select('id', 'name', 'email', 'is_owner', 'created_at')
+            ->orderBy('name')
+            ->get()
+            ->map(function ($user) {
+                return [
+                    'id' => $user->id,
+                    'name' => $user->name,
+                    'email' => $user->email,
+                    'is_owner' => $user->is_owner,
+                    'roles' => $user->roles->pluck('name')->toArray(),
+                    'created_at' => $user->created_at,
+                ];
+            });
+
         return response()->json([
             'company' => $company,
             'owner' => $company->owner(),
+            'users_with_roles' => $usersWithRoles,
             'statistics' => [
                 'usage' => $usageStats,
                 'recent_tickets_30_days' => $recentTickets,

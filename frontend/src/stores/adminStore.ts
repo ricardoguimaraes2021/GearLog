@@ -91,6 +91,7 @@ export const useAdminStore = create<AdminStore>((set, get) => ({
       const companyWithOwner = {
         ...response.company,
         owner: response.company.owner || response.owner || null,
+        users_with_roles: (response as any).users_with_roles || [],
       };
       set({
         currentCompany: companyWithOwner,

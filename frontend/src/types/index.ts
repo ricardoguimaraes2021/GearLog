@@ -310,6 +310,14 @@ export interface CompanyWithStats extends Company {
   departments_count?: number;
   usage_stats?: CompanyUsageStats;
   owner?: User | null;
+  users_with_roles?: Array<{
+    id: number;
+    name: string;
+    email: string;
+    is_owner: boolean;
+    roles: string[];
+    created_at: string;
+  }>;
 }
 
 export interface CompanyLogs {
