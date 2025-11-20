@@ -112,6 +112,24 @@ GearLog is a modern, feature-rich inventory management solution that combines po
 - **CSRF Protection** - Built-in CSRF token protection
 - **API Rate Limiting** - Protect against abuse with configurable rate limits
 
+### 🏢 Multi-Tenancy (SaaS)
+- **Company Isolation** - Complete data separation between tenants
+- **Public Registration** - Self-service user registration
+- **Onboarding Flow** - Company setup after registration
+- **Plan Management** - FREE, PRO, and ENTERPRISE plans with limits
+- **Plan Limits** - Configurable limits for users, products, and tickets
+- **Company Suspension** - Suspend/activate tenant accounts
+- **Usage Statistics** - Track resource usage per company
+
+### 👨‍💼 Super Admin Panel
+- **Company Management** - List, view, and manage all companies
+- **Usage Analytics** - View detailed usage statistics per company
+- **Plan Management** - Upgrade/downgrade company plans
+- **Company Suspension** - Suspend or activate tenant accounts
+- **Activity Logs** - View recent activity (tickets, products, users)
+- **User Impersonation** - Impersonate users for support purposes
+- **Search & Filters** - Search companies by name, filter by plan and status
+
 ### 🎨 User Experience
 - **Modern UI** - Built with shadcn/ui components and TailwindCSS
 - **Responsive Design** - Fully responsive, works on desktop, tablet, and mobile
@@ -212,20 +230,42 @@ npm run dev
 
 Frontend will run on: **http://localhost:5173**
 
-### 4. Access the Application
+### 4. Create Super Admin Account (Optional)
+```bash
+cd backend
+php artisan db:seed --class=SuperAdminSeeder
+```
+
+This creates a super admin account:
+- **Email**: `admin@admin.com`
+- **Password**: `admin123`
+
+**Important**: Change the password in production!
+
+### 5. Configure Super Admin (Optional)
+Add your super admin email(s) to `.env`:
+```env
+SUPER_ADMIN_EMAILS=admin@admin.com,your-email@example.com
+```
+
+### 6. Access the Application
 - **Frontend**: http://localhost:5173
 - **API Documentation**: http://localhost:8000/api/documentation
 - **Landing Page**: http://localhost:5173/landing
+- **Admin Panel**: http://localhost:5173/admin (super admin only)
 - **Live Gallery**: [https://gearlogallery.vercel.app/](https://gearlogallery.vercel.app/)
 
 ## 🔑 Default Credentials
 
 After running migrations with seeders, you can login with:
 
+- **Super Admin**: `admin@admin.com` / `admin123` (for admin panel access)
 - **Admin**: `admin@gearlog.local` / `password`
 - **Manager**: `gestor@gearlog.local` / `password`
 - **Technician**: `tecnico@gearlog.local` / `password`
 - **Read-only**: `consulta@gearlog.local` / `password`
+
+**Note**: The super admin account is created via `SuperAdminSeeder`. Run `php artisan db:seed --class=SuperAdminSeeder` to create it.
 
 ## 📁 Project Structure
 
@@ -277,6 +317,7 @@ GearLog/
 ```bash
 php artisan migrate              # Run migrations
 php artisan migrate:fresh --seed # Reset database with seeders
+php artisan db:seed --class=SuperAdminSeeder  # Create super admin account
 php artisan storage:link         # Create storage symlink
 php artisan rate-limit:clear     # Clear rate limiting cache
 php artisan l5-swagger:generate  # Regenerate API docs
