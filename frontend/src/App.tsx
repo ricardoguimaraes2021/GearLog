@@ -31,6 +31,7 @@ import AdminProfile from './pages/Admin/AdminProfile';
 import Profile from './pages/Profile/Profile';
 import CompanySettings from './pages/Settings/CompanySettings';
 import HomeRedirect from './components/HomeRedirect';
+import PageTransition from './components/PageTransition';
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { isAuthenticated, isLoading, isInitializing } = useAuthStore();
@@ -67,14 +68,28 @@ function App() {
       <Toaster />
       <BrowserRouter>
           <Routes>
-            <Route path="/landing" element={<Landing />} />
-            <Route path="/login" element={<Login />} />
-            <Route path="/register" element={<Register />} />
+            <Route path="/landing" element={
+              <PageTransition animationType="fade">
+                <Landing />
+              </PageTransition>
+            } />
+            <Route path="/login" element={
+              <PageTransition animationType="slideUp">
+                <Login />
+              </PageTransition>
+            } />
+            <Route path="/register" element={
+              <PageTransition animationType="slideUp">
+                <Register />
+              </PageTransition>
+            } />
             <Route 
               path="/onboarding" 
               element={
                 <ProtectedRoute>
-                  <Onboarding />
+                  <PageTransition animationType="slideUp">
+                    <Onboarding />
+                  </PageTransition>
                 </ProtectedRoute>
               } 
             />
@@ -120,7 +135,9 @@ function App() {
               path="/admin"
               element={
                 <ProtectedRoute>
-                  <AdminPanel />
+                  <PageTransition animationType="fade">
+                    <AdminPanel />
+                  </PageTransition>
                 </ProtectedRoute>
               }
             />
@@ -128,7 +145,9 @@ function App() {
               path="/admin/profile"
               element={
                 <ProtectedRoute>
-                  <AdminProfile />
+                  <PageTransition animationType="fade">
+                    <AdminProfile />
+                  </PageTransition>
                 </ProtectedRoute>
               }
             />

@@ -5,6 +5,7 @@ import { ThemeToggle } from '@/components/ui/theme-toggle';
 import { LayoutDashboard, Package, Ticket, Users, Building2, LogOut, Menu, X, Shield, User, Settings } from 'lucide-react';
 import { useState } from 'react';
 import NotificationBell from '@/components/notifications/NotificationBell';
+import PageTransition from '@/components/PageTransition';
 
 export default function Layout() {
   const { user, logout } = useAuthStore();
@@ -181,7 +182,9 @@ export default function Layout() {
       )}
 
       <main className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
-        <Outlet />
+        <PageTransition animationType="fade">
+          <Outlet />
+        </PageTransition>
       </main>
     </div>
   );
