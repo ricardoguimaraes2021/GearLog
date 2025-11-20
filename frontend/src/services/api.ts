@@ -600,8 +600,12 @@ class ApiClient {
       return response.data;
     }
 
-    async getCompany(id: number): Promise<{ company: CompanyWithStats; owner: User | null; statistics: CompanyStatistics }> {
-      const response = await this.client.get<{ company: CompanyWithStats; owner: User | null; statistics: CompanyStatistics }>(`/admin/companies/${id}`);
+    async getAdminCompany(id: number): Promise<{ company: CompanyWithStats; owner?: User | null; statistics: CompanyStatistics }> {
+      const response = await this.client.get<{ company: CompanyWithStats; owner?: User | null; statistics: CompanyStatistics }>(`/admin/companies/${id}`);
+      // Merge owner into company object if provided separately
+      if (response.data.owner && !response.data.company.owner) {
+        response.data.company.owner = response.data.owner;
+      }
       return response.data;
     }
 

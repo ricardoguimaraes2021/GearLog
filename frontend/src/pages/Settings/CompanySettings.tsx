@@ -2,7 +2,12 @@ import { useEffect, useState } from 'react';
 import { useAuthStore } from '@/stores/authStore';
 import { api } from '@/services/api';
 import { toast } from 'sonner';
-import { Building2, Users, Package, Ticket, TrendingUp, AlertTriangle } from 'lucide-react';
+import { Building2, Users, Package, Ticket, TrendingUp, AlertTriangle, Edit2, Save, X } from 'lucide-react';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Skeleton } from '@/components/ui/skeleton';
 import type { Company, CompanyUsageStats } from '@/types';
 
 export default function CompanySettings() {
@@ -89,63 +94,88 @@ export default function CompanySettings() {
   };
 
   if (isLoading && !company) {
-    return <div className="text-center py-8">Loading...</div>;
+    return (
+      <div className="space-y-6">
+        <Skeleton className="h-9 w-48" />
+        <Card>
+          <CardHeader>
+            <Skeleton className="h-6 w-32" />
+          </CardHeader>
+          <CardContent>
+            <Skeleton className="h-32 w-full" />
+          </CardContent>
+        </Card>
+      </div>
+    );
   }
 
   if (!company) {
-    return <div className="text-center py-8">Company not found</div>;
+    return (
+      <div className="space-y-6">
+        <div>
+          <h1 className="text-3xl font-bold text-gray-900">Company Settings</h1>
+        </div>
+        <Card>
+          <CardContent className="pt-6">
+            <p className="text-center text-gray-500">Company not found</p>
+          </CardContent>
+        </Card>
+      </div>
+    );
   }
 
   return (
-    <div className="max-w-6xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
-      <div className="space-y-6">
-        {/* Company Information */}
-        <div className="bg-white rounded-lg shadow">
-          <div className="p-6 border-b">
-            <div className="flex items-center justify-between">
-              <div>
-                <h1 className="text-2xl font-bold text-gray-900">Company Settings</h1>
-                <p className="text-sm text-gray-600 mt-1">Manage your company information and settings</p>
-              </div>
-              {canEdit && !isEditing && (
-                <button
-                  onClick={() => setIsEditing(true)}
-                  className="px-4 py-2 text-sm bg-blue-600 text-white rounded hover:bg-blue-700"
-                >
-                  Edit
-                </button>
-              )}
-            </div>
-          </div>
+    <div className="space-y-6">
+      <div>
+        <h1 className="text-3xl font-bold text-gray-900">Company Settings</h1>
+        <p className="mt-1 text-sm text-gray-500">Manage your company information and settings</p>
+      </div>
 
-          <div className="p-6">
-            {isEditing ? (
+      {/* Company Information */}
+      <Card>
+        <CardHeader>
+          <div className="flex items-center justify-between">
+            <div>
+              <CardTitle>Company Information</CardTitle>
+              <CardDescription>View and update your company details</CardDescription>
+            </div>
+            {canEdit && !isEditing && (
+              <Button variant="outline" onClick={() => setIsEditing(true)}>
+                <Edit2 className="w-4 h-4 mr-2" />
+                Edit
+              </Button>
+            )}
+          </div>
+        </CardHeader>
+        <CardContent>
+          {isEditing ? (
               <form onSubmit={handleUpdate} className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Company Name</label>
-                  <input
+                <div className="space-y-2">
+                  <Label htmlFor="company-name">Company Name</Label>
+                  <Input
+                    id="company-name"
                     type="text"
                     value={formData.name}
                     onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                     required
                   />
                 </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Country</label>
-                  <input
+                <div className="space-y-2">
+                  <Label htmlFor="country">Country</Label>
+                  <Input
+                    id="country"
                     type="text"
                     value={formData.country}
                     onChange={(e) => setFormData({ ...formData, country: e.target.value })}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
                 </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Timezone</label>
+                <div className="space-y-2">
+                  <Label htmlFor="timezone">Timezone</Label>
                   <select
+                    id="timezone"
                     value={formData.timezone}
                     onChange={(e) => setFormData({ ...formData, timezone: e.target.value })}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                   >
                     <option value="UTC">UTC</option>
                     <option value="Europe/Lisbon">Europe/Lisbon</option>
@@ -155,32 +185,31 @@ export default function CompanySettings() {
                     <option value="Asia/Tokyo">Asia/Tokyo</option>
                   </select>
                 </div>
-                <div className="flex gap-2">
-                  <button
-                    type="submit"
-                    disabled={isLoading}
-                    className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:opacity-50"
-                  >
-                    {isLoading ? 'Saving...' : 'Save Changes'}
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setIsEditing(false);
-                      setFormData({
-                        name: company.name,
-                        country: company.country || '',
-                        timezone: company.timezone || 'UTC',
-                      });
-                    }}
-                    className="px-4 py-2 bg-gray-200 text-gray-800 rounded hover:bg-gray-300"
-                  >
-                    Cancel
-                  </button>
-                </div>
-              </form>
-            ) : (
-              <dl className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="flex gap-2 pt-4">
+                <Button type="submit" disabled={isLoading}>
+                  <Save className="w-4 h-4 mr-2" />
+                  {isLoading ? 'Saving...' : 'Save Changes'}
+                </Button>
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => {
+                    setIsEditing(false);
+                    setFormData({
+                      name: company.name,
+                      country: company.country || '',
+                      timezone: company.timezone || 'UTC',
+                    });
+                  }}
+                >
+                  <X className="w-4 h-4 mr-2" />
+                  Cancel
+                </Button>
+              </div>
+            </form>
+          ) : (
+            <div className="space-y-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <dt className="text-sm font-medium text-gray-600">Company Name</dt>
                   <dd className="mt-1 text-sm font-semibold text-gray-900">{company.name}</dd>
@@ -213,171 +242,169 @@ export default function CompanySettings() {
                     <dd className="mt-1 text-sm text-gray-900">{owner.name} ({owner.email})</dd>
                   </div>
                 )}
-              </dl>
+              </div>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* Statistics Overview */}
+      {statistics && (
+        <Card>
+          <CardHeader>
+            <CardTitle>Company Statistics</CardTitle>
+            <CardDescription>Overview of your company resources</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              <div className="text-center p-4 border rounded-lg">
+                <Users className="w-8 h-8 mx-auto text-blue-600 mb-2" />
+                <div className="text-2xl font-bold text-gray-900">{statistics.total_users}</div>
+                <div className="text-sm text-gray-600">Users</div>
+              </div>
+              <div className="text-center p-4 border rounded-lg">
+                <Package className="w-8 h-8 mx-auto text-green-600 mb-2" />
+                <div className="text-2xl font-bold text-gray-900">{statistics.total_products}</div>
+                <div className="text-sm text-gray-600">Products</div>
+              </div>
+              <div className="text-center p-4 border rounded-lg">
+                <Users className="w-8 h-8 mx-auto text-purple-600 mb-2" />
+                <div className="text-2xl font-bold text-gray-900">{statistics.total_employees}</div>
+                <div className="text-sm text-gray-600">Employees</div>
+              </div>
+              <div className="text-center p-4 border rounded-lg">
+                <Ticket className="w-8 h-8 mx-auto text-orange-600 mb-2" />
+                <div className="text-2xl font-bold text-gray-900">{statistics.total_tickets}</div>
+                <div className="text-sm text-gray-600">Tickets</div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Plan & Usage */}
+      {usage && plan && (
+        <Card>
+          <CardHeader>
+            <CardTitle>Plan & Usage</CardTitle>
+            <CardDescription>Monitor your plan limits and resource consumption</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            {/* Plan Information */}
+            <div>
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-md font-semibold text-gray-900">Current Plan</h3>
+                <span className={`px-3 py-1 text-sm rounded ${getPlanBadgeColor(plan.plan_type)}`}>
+                  {plan.plan_type}
+                </span>
+              </div>
+              <div className="bg-gray-50 rounded-lg p-4">
+                <p className="text-sm text-gray-600 mb-2">Plan Limits:</p>
+                <ul className="text-sm text-gray-900 space-y-1">
+                  <li>• {plan.limits.max_users} users</li>
+                  <li>• {plan.limits.max_products} products</li>
+                  <li>• {plan.limits.max_tickets} tickets per month</li>
+                </ul>
+              </div>
+            </div>
+
+            {/* Usage Statistics */}
+            <div>
+              <h3 className="text-md font-semibold text-gray-900 mb-4">Usage Statistics</h3>
+              <div className="space-y-4">
+                {/* Users Usage */}
+                <div>
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-sm font-medium text-gray-700">Users</span>
+                    <span className="text-sm text-gray-600">
+                      {usage.users.current} / {usage.users.max}
+                    </span>
+                  </div>
+                  <div className="w-full bg-gray-200 rounded-full h-2">
+                    <div
+                      className={`h-2 rounded-full ${getUsageColor(usage.users.percentage)}`}
+                      style={{ width: `${Math.min(usage.users.percentage, 100)}%` }}
+                    ></div>
+                  </div>
+                  {usage.users.percentage >= 80 && (
+                    <p className="text-xs text-orange-600 mt-1 flex items-center gap-1">
+                      <AlertTriangle className="w-3 h-3" />
+                      {usage.users.percentage >= 100
+                        ? 'Limit exceeded'
+                        : 'Approaching limit'}
+                    </p>
+                  )}
+                </div>
+
+                {/* Products Usage */}
+                <div>
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-sm font-medium text-gray-700">Products</span>
+                    <span className="text-sm text-gray-600">
+                      {usage.products.current} / {usage.products.max}
+                    </span>
+                  </div>
+                  <div className="w-full bg-gray-200 rounded-full h-2">
+                    <div
+                      className={`h-2 rounded-full ${getUsageColor(usage.products.percentage)}`}
+                      style={{ width: `${Math.min(usage.products.percentage, 100)}%` }}
+                    ></div>
+                  </div>
+                  {usage.products.percentage >= 80 && (
+                    <p className="text-xs text-orange-600 mt-1 flex items-center gap-1">
+                      <AlertTriangle className="w-3 h-3" />
+                      {usage.products.percentage >= 100
+                        ? 'Limit exceeded'
+                        : 'Approaching limit'}
+                    </p>
+                  )}
+                </div>
+
+                {/* Tickets Usage */}
+                <div>
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-sm font-medium text-gray-700">Tickets (This Month)</span>
+                    <span className="text-sm text-gray-600">
+                      {usage.tickets_this_month.current} / {usage.tickets_this_month.max}
+                    </span>
+                  </div>
+                  <div className="w-full bg-gray-200 rounded-full h-2">
+                    <div
+                      className={`h-2 rounded-full ${getUsageColor(usage.tickets_this_month.percentage)}`}
+                      style={{ width: `${Math.min(usage.tickets_this_month.percentage, 100)}%` }}
+                    ></div>
+                  </div>
+                  {usage.tickets_this_month.percentage >= 80 && (
+                    <p className="text-xs text-orange-600 mt-1 flex items-center gap-1">
+                      <AlertTriangle className="w-3 h-3" />
+                      {usage.tickets_this_month.percentage >= 100
+                        ? 'Limit exceeded'
+                        : 'Approaching limit'}
+                    </p>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            {/* Upgrade CTA */}
+            {plan.plan_type === 'FREE' && (
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h4 className="font-semibold text-blue-900 mb-1">Upgrade to Pro</h4>
+                    <p className="text-sm text-blue-700">
+                      Get more resources and features with a Pro plan
+                    </p>
+                  </div>
+                  <Button disabled variant="default" className="opacity-50 cursor-not-allowed">
+                    Coming Soon
+                  </Button>
+                </div>
+              </div>
             )}
-          </div>
-        </div>
-
-        {/* Statistics Overview */}
-        {statistics && (
-          <div className="bg-white rounded-lg shadow">
-            <div className="p-6 border-b">
-              <h2 className="text-lg font-semibold text-gray-900">Company Statistics</h2>
-            </div>
-            <div className="p-6">
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                <div className="text-center p-4 border rounded-lg">
-                  <Users className="w-8 h-8 mx-auto text-blue-600 mb-2" />
-                  <div className="text-2xl font-bold text-gray-900">{statistics.total_users}</div>
-                  <div className="text-sm text-gray-600">Users</div>
-                </div>
-                <div className="text-center p-4 border rounded-lg">
-                  <Package className="w-8 h-8 mx-auto text-green-600 mb-2" />
-                  <div className="text-2xl font-bold text-gray-900">{statistics.total_products}</div>
-                  <div className="text-sm text-gray-600">Products</div>
-                </div>
-                <div className="text-center p-4 border rounded-lg">
-                  <Users className="w-8 h-8 mx-auto text-purple-600 mb-2" />
-                  <div className="text-2xl font-bold text-gray-900">{statistics.total_employees}</div>
-                  <div className="text-sm text-gray-600">Employees</div>
-                </div>
-                <div className="text-center p-4 border rounded-lg">
-                  <Ticket className="w-8 h-8 mx-auto text-orange-600 mb-2" />
-                  <div className="text-2xl font-bold text-gray-900">{statistics.total_tickets}</div>
-                  <div className="text-sm text-gray-600">Tickets</div>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* Plan & Usage */}
-        {usage && plan && (
-          <div className="bg-white rounded-lg shadow">
-            <div className="p-6 border-b">
-              <h2 className="text-lg font-semibold text-gray-900">Plan & Usage</h2>
-            </div>
-            <div className="p-6 space-y-6">
-              {/* Plan Information */}
-              <div>
-                <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-md font-semibold text-gray-900">Current Plan</h3>
-                  <span className={`px-3 py-1 text-sm rounded ${getPlanBadgeColor(plan.plan_type)}`}>
-                    {plan.plan_type}
-                  </span>
-                </div>
-                <div className="bg-gray-50 rounded-lg p-4">
-                  <p className="text-sm text-gray-600 mb-2">Plan Limits:</p>
-                  <ul className="text-sm text-gray-900 space-y-1">
-                    <li>• {plan.limits.max_users} users</li>
-                    <li>• {plan.limits.max_products} products</li>
-                    <li>• {plan.limits.max_tickets} tickets per month</li>
-                  </ul>
-                </div>
-              </div>
-
-              {/* Usage Statistics */}
-              <div>
-                <h3 className="text-md font-semibold text-gray-900 mb-4">Usage Statistics</h3>
-                <div className="space-y-4">
-                  {/* Users Usage */}
-                  <div>
-                    <div className="flex items-center justify-between mb-2">
-                      <span className="text-sm font-medium text-gray-700">Users</span>
-                      <span className="text-sm text-gray-600">
-                        {usage.users.current} / {usage.users.max}
-                      </span>
-                    </div>
-                    <div className="w-full bg-gray-200 rounded-full h-2">
-                      <div
-                        className={`h-2 rounded-full ${getUsageColor(usage.users.percentage)}`}
-                        style={{ width: `${Math.min(usage.users.percentage, 100)}%` }}
-                      ></div>
-                    </div>
-                    {usage.users.percentage >= 80 && (
-                      <p className="text-xs text-orange-600 mt-1 flex items-center gap-1">
-                        <AlertTriangle className="w-3 h-3" />
-                        {usage.users.percentage >= 100
-                          ? 'Limit exceeded'
-                          : 'Approaching limit'}
-                      </p>
-                    )}
-                  </div>
-
-                  {/* Products Usage */}
-                  <div>
-                    <div className="flex items-center justify-between mb-2">
-                      <span className="text-sm font-medium text-gray-700">Products</span>
-                      <span className="text-sm text-gray-600">
-                        {usage.products.current} / {usage.products.max}
-                      </span>
-                    </div>
-                    <div className="w-full bg-gray-200 rounded-full h-2">
-                      <div
-                        className={`h-2 rounded-full ${getUsageColor(usage.products.percentage)}`}
-                        style={{ width: `${Math.min(usage.products.percentage, 100)}%` }}
-                      ></div>
-                    </div>
-                    {usage.products.percentage >= 80 && (
-                      <p className="text-xs text-orange-600 mt-1 flex items-center gap-1">
-                        <AlertTriangle className="w-3 h-3" />
-                        {usage.products.percentage >= 100
-                          ? 'Limit exceeded'
-                          : 'Approaching limit'}
-                      </p>
-                    )}
-                  </div>
-
-                  {/* Tickets Usage */}
-                  <div>
-                    <div className="flex items-center justify-between mb-2">
-                      <span className="text-sm font-medium text-gray-700">Tickets (This Month)</span>
-                      <span className="text-sm text-gray-600">
-                        {usage.tickets_this_month.current} / {usage.tickets_this_month.max}
-                      </span>
-                    </div>
-                    <div className="w-full bg-gray-200 rounded-full h-2">
-                      <div
-                        className={`h-2 rounded-full ${getUsageColor(usage.tickets_this_month.percentage)}`}
-                        style={{ width: `${Math.min(usage.tickets_this_month.percentage, 100)}%` }}
-                      ></div>
-                    </div>
-                    {usage.tickets_this_month.percentage >= 80 && (
-                      <p className="text-xs text-orange-600 mt-1 flex items-center gap-1">
-                        <AlertTriangle className="w-3 h-3" />
-                        {usage.tickets_this_month.percentage >= 100
-                          ? 'Limit exceeded'
-                          : 'Approaching limit'}
-                      </p>
-                    )}
-                  </div>
-                </div>
-              </div>
-
-              {/* Upgrade CTA */}
-              {plan.plan_type === 'FREE' && (
-                <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <h4 className="font-semibold text-blue-900 mb-1">Upgrade to Pro</h4>
-                      <p className="text-sm text-blue-700">
-                        Get more resources and features with a Pro plan
-                      </p>
-                    </div>
-                    <button
-                      disabled
-                      className="px-4 py-2 bg-blue-600 text-white rounded opacity-50 cursor-not-allowed"
-                    >
-                      Coming Soon
-                    </button>
-                  </div>
-                </div>
-              )}
-            </div>
-          </div>
-        )}
-      </div>
+          </CardContent>
+        </Card>
+      )}
     </div>
   );
 }
-
