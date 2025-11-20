@@ -9,6 +9,11 @@ class TicketPolicy
 {
     public function viewAny(User $user): bool
     {
+        // Ensure user has a company
+        if ($user->company_id === null) {
+            return false;
+        }
+        
         // Admin, Manager, Technician can view all
         // Consulta can only view their own
         return $user->hasAnyRole(['admin', 'gestor', 'tecnico', 'consulta']);
@@ -16,6 +21,11 @@ class TicketPolicy
 
     public function view(User $user, Ticket $ticket): bool
     {
+        // Ensure ticket belongs to user's company
+        if ($user->company_id === null || $ticket->company_id !== $user->company_id) {
+            return false;
+        }
+        
         // Admin and Manager can view all
         if ($user->hasAnyRole(['admin', 'gestor'])) {
             return true;
@@ -36,12 +46,17 @@ class TicketPolicy
 
     public function create(User $user): bool
     {
-        // All authenticated users can create tickets
-        return true;
+        // Ensure user has a company
+        return $user->company_id !== null;
     }
 
     public function update(User $user, Ticket $ticket): bool
     {
+        // Ensure ticket belongs to user's company
+        if ($user->company_id === null || $ticket->company_id !== $user->company_id) {
+            return false;
+        }
+        
         // Cannot update closed tickets
         if ($ticket->status === 'closed') {
             return false;
@@ -67,18 +82,33 @@ class TicketPolicy
 
     public function delete(User $user, Ticket $ticket): bool
     {
+        // Ensure ticket belongs to user's company
+        if ($user->company_id === null || $ticket->company_id !== $user->company_id) {
+            return false;
+        }
+        
         // Only admin can delete
         return $user->hasRole('admin');
     }
 
     public function assign(User $user, Ticket $ticket): bool
     {
+        // Ensure ticket belongs to user's company
+        if ($user->company_id === null || $ticket->company_id !== $user->company_id) {
+            return false;
+        }
+        
         // Admin and Manager can assign
         return $user->hasAnyRole(['admin', 'gestor']);
     }
 
     public function changeStatus(User $user, Ticket $ticket): bool
     {
+        // Ensure ticket belongs to user's company
+        if ($user->company_id === null || $ticket->company_id !== $user->company_id) {
+            return false;
+        }
+        
         // Cannot change status of closed tickets
         if ($ticket->status === 'closed') {
             return false;
@@ -90,6 +120,11 @@ class TicketPolicy
 
     public function close(User $user, Ticket $ticket): bool
     {
+        // Ensure ticket belongs to user's company
+        if ($user->company_id === null || $ticket->company_id !== $user->company_id) {
+            return false;
+        }
+        
         // Admin and Manager can close
         return $user->hasAnyRole(['admin', 'gestor']);
     }

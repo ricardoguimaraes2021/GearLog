@@ -3,6 +3,7 @@
 namespace Database\Seeders;
 
 use App\Models\Category;
+use App\Models\Company;
 use App\Models\Product;
 use App\Models\User;
 use Illuminate\Database\Seeder;
@@ -14,6 +15,20 @@ class DatabaseSeeder extends Seeder
 {
     public function run(): void
     {
+        // Create demo company
+        $company = Company::firstOrCreate(
+            ['name' => 'GearLog Demo Company'],
+            [
+                'country' => 'Portugal',
+                'timezone' => 'Europe/Lisbon',
+                'plan_type' => 'FREE',
+                'max_users' => 3,
+                'max_products' => 500,
+                'max_tickets' => 150,
+                'is_active' => true,
+            ]
+        );
+
         // Create permissions
         $permissions = [
             'products.view',
@@ -85,14 +100,20 @@ class DatabaseSeeder extends Seeder
             'dashboard.view',
         ]);
 
-        // Create users
+        // Create users (update company_id if user already exists)
         $admin = User::firstOrCreate(
             ['email' => 'admin@gearlog.local'],
             [
                 'name' => 'Administrator',
                 'password' => Hash::make('password'),
+                'company_id' => $company->id,
+                'is_owner' => true,
             ]
         );
+        // Update company_id if user already existed
+        if (!$admin->company_id) {
+            $admin->update(['company_id' => $company->id, 'is_owner' => true]);
+        }
         $admin->assignRole($adminRole);
 
         $gestor = User::firstOrCreate(
@@ -100,8 +121,14 @@ class DatabaseSeeder extends Seeder
             [
                 'name' => 'Manager',
                 'password' => Hash::make('password'),
+                'company_id' => $company->id,
+                'is_owner' => false,
             ]
         );
+        // Update company_id if user already existed
+        if (!$gestor->company_id) {
+            $gestor->update(['company_id' => $company->id, 'is_owner' => false]);
+        }
         $gestor->assignRole($gestorRole);
 
         $tecnico = User::firstOrCreate(
@@ -109,8 +136,14 @@ class DatabaseSeeder extends Seeder
             [
                 'name' => 'Technician',
                 'password' => Hash::make('password'),
+                'company_id' => $company->id,
+                'is_owner' => false,
             ]
         );
+        // Update company_id if user already existed
+        if (!$tecnico->company_id) {
+            $tecnico->update(['company_id' => $company->id, 'is_owner' => false]);
+        }
         $tecnico->assignRole($tecnicoRole);
 
         // Create sample categories
@@ -125,14 +158,21 @@ class DatabaseSeeder extends Seeder
         ];
 
         foreach ($categories as $categoryData) {
-            Category::firstOrCreate(['name' => $categoryData['name']]);
+            Category::firstOrCreate(
+                ['name' => $categoryData['name'], 'company_id' => $company->id],
+                ['company_id' => $company->id]
+            );
         }
 
-        // Seed departments and employees
+        // Seed departments and employees (pass company_id)
         $this->call([
             DepartmentSeeder::class,
             EmployeeSeeder::class,
         ]);
+        
+        // Update seeders to use company_id
+        // Note: We pass company_id through the seeder classes
+        $this->command->info("Demo company created: {$company->name} (ID: {$company->id})");
     }
 }
 

@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Models\Company;
 use App\Models\Department;
 use App\Models\Employee;
 use Illuminate\Database\Seeder;
@@ -10,12 +11,31 @@ class EmployeeSeeder extends Seeder
 {
     public function run(): void
     {
-        $itDept = Department::where('name', 'IT Department')->first();
-        $salesDept = Department::where('name', 'Sales')->first();
-        $marketingDept = Department::where('name', 'Marketing')->first();
-        $hrDept = Department::where('name', 'Human Resources')->first();
-        $financeDept = Department::where('name', 'Finance')->first();
-        $opsDept = Department::where('name', 'Operations')->first();
+        // Get demo company
+        $company = Company::where('name', 'GearLog Demo Company')->first();
+        if (!$company) {
+            $this->command->warn('Demo company not found. Please run DatabaseSeeder first.');
+            return;
+        }
+
+        $itDept = Department::where('name', 'IT Department')
+            ->where('company_id', $company->id)
+            ->first();
+        $salesDept = Department::where('name', 'Sales')
+            ->where('company_id', $company->id)
+            ->first();
+        $marketingDept = Department::where('name', 'Marketing')
+            ->where('company_id', $company->id)
+            ->first();
+        $hrDept = Department::where('name', 'Human Resources')
+            ->where('company_id', $company->id)
+            ->first();
+        $financeDept = Department::where('name', 'Finance')
+            ->where('company_id', $company->id)
+            ->first();
+        $opsDept = Department::where('name', 'Operations')
+            ->where('company_id', $company->id)
+            ->first();
 
         $employees = [
             // IT Department
@@ -138,28 +158,34 @@ class EmployeeSeeder extends Seeder
 
         foreach ($employees as $employeeData) {
             Employee::firstOrCreate(
-                ['email' => $employeeData['email']],
-                $employeeData
+                ['email' => $employeeData['email'], 'company_id' => $company->id],
+                array_merge($employeeData, ['company_id' => $company->id])
             );
         }
 
         // Update department managers
         if ($itDept) {
-            $itManager = Employee::where('email', 'john.smith@company.com')->first();
+            $itManager = Employee::where('email', 'john.smith@company.com')
+                ->where('company_id', $company->id)
+                ->first();
             if ($itManager) {
                 $itDept->update(['manager_employee_id' => $itManager->id]);
             }
         }
 
         if ($salesDept) {
-            $salesManager = Employee::where('email', 'robert.brown@company.com')->first();
+            $salesManager = Employee::where('email', 'robert.brown@company.com')
+                ->where('company_id', $company->id)
+                ->first();
             if ($salesManager) {
                 $salesDept->update(['manager_employee_id' => $salesManager->id]);
             }
         }
 
         if ($marketingDept) {
-            $marketingDirector = Employee::where('email', 'david.martinez@company.com')->first();
+            $marketingDirector = Employee::where('email', 'david.martinez@company.com')
+                ->where('company_id', $company->id)
+                ->first();
             if ($marketingDirector) {
                 $marketingDept->update(['manager_employee_id' => $marketingDirector->id]);
             }

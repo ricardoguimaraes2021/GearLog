@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Models\Company;
 use App\Models\Department;
 use Illuminate\Database\Seeder;
 
@@ -9,6 +10,13 @@ class DepartmentSeeder extends Seeder
 {
     public function run(): void
     {
+        // Get or create demo company
+        $company = Company::where('name', 'GearLog Demo Company')->first();
+        if (!$company) {
+            $this->command->warn('Demo company not found. Please run DatabaseSeeder first.');
+            return;
+        }
+
         $departments = [
             [
                 'name' => 'IT Department',
@@ -44,8 +52,8 @@ class DepartmentSeeder extends Seeder
 
         foreach ($departments as $departmentData) {
             Department::firstOrCreate(
-                ['name' => $departmentData['name']],
-                $departmentData
+                ['name' => $departmentData['name'], 'company_id' => $company->id],
+                array_merge($departmentData, ['company_id' => $company->id])
             );
         }
     }

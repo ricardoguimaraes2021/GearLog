@@ -176,6 +176,14 @@ class ProductController extends Controller
     )]
     public function store(Request $request)
     {
+        // Check if company can create more products
+        $user = $request->user();
+        if ($user->company && !$user->company->canCreateProduct()) {
+            return response()->json([
+                'error' => 'Product limit reached. Please upgrade your plan to add more products.',
+            ], 403);
+        }
+
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'category_id' => 'required|exists:categories,id',

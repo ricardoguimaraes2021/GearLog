@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
@@ -16,6 +17,8 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        'company_id',
+        'is_owner',
     ];
 
     protected $hidden = [
@@ -28,7 +31,32 @@ class User extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'is_owner' => 'boolean',
         ];
+    }
+
+    /**
+     * Get the company this user belongs to
+     */
+    public function company(): BelongsTo
+    {
+        return $this->belongsTo(Company::class);
+    }
+
+    /**
+     * Check if user is company owner
+     */
+    public function isCompanyOwner(): bool
+    {
+        return $this->is_owner === true;
+    }
+
+    /**
+     * Get company ID (for tenant isolation)
+     */
+    public function getCompanyId(): ?int
+    {
+        return $this->company_id;
     }
 
     public function notifications()

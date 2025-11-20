@@ -27,16 +27,34 @@ class DemoDataSeeder extends Seeder
 
     public function run(): void
     {
+        // Get demo company
+        $company = \App\Models\Company::where('name', 'GearLog Demo Company')->first();
+        if (!$company) {
+            $this->command->warn('Demo company not found. Please run DatabaseSeeder first.');
+            return;
+        }
+
         // Clear existing demo data (optional - comment out if you want to keep existing data)
         // Product::truncate();
         // Movement::truncate();
         // Ticket::truncate();
         // AssetAssignment::truncate();
 
-        $categories = Category::all();
-        $users = User::all();
-        $employees = Employee::where('status', 'active')->get();
-        $adminUser = User::where('email', 'admin@gearlog.local')->first();
+        // Use withoutGlobalScopes to avoid TenantScope interference during seeding
+        $categories = Category::withoutGlobalScopes()
+            ->where('company_id', $company->id)
+            ->get();
+        $users = User::withoutGlobalScopes()
+            ->where('company_id', $company->id)
+            ->get();
+        $employees = Employee::withoutGlobalScopes()
+            ->where('status', 'active')
+            ->where('company_id', $company->id)
+            ->get();
+        $adminUser = User::withoutGlobalScopes()
+            ->where('email', 'admin@gearlog.local')
+            ->where('company_id', $company->id)
+            ->first();
 
         if ($categories->isEmpty() || $users->isEmpty() || $employees->isEmpty()) {
             $this->command->warn('Please run DatabaseSeeder first to create categories, users, and employees.');
@@ -44,21 +62,21 @@ class DemoDataSeeder extends Seeder
         }
 
         // Create Products with realistic data
-        $products = $this->createProducts($categories);
+        $products = $this->createProducts($categories, $company);
         
         // Create Movements
-        $this->createMovements($products, $users);
+        $this->createMovements($products, $users, $company);
         
         // Create Asset Assignments
-        $this->createAssetAssignments($products, $employees, $users);
+        $this->createAssetAssignments($products, $employees, $users, $company);
         
         // Create Tickets with various statuses
-        $this->createTickets($products, $employees, $users);
+        $this->createTickets($products, $employees, $users, $company);
         
         $this->command->info('Demo data seeded successfully!');
     }
 
-    protected function createProducts($categories): array
+    protected function createProducts($categories, $company): array
     {
         $products = [];
         
@@ -349,6 +367,7 @@ class DemoDataSeeder extends Seeder
             $product = Product::create([
                 'name' => $data['name'],
                 'category_id' => $category->id,
+                'company_id' => $company->id,
                 'brand' => $data['brand'],
                 'model' => $data['model'],
                 'serial_number' => $this->generateSerialNumber($data['brand']),
@@ -391,6 +410,7 @@ class DemoDataSeeder extends Seeder
                 $products[] = Product::create([
                     'name' => $data['name'],
                     'category_id' => $category->id,
+                    'company_id' => $company->id,
                     'brand' => $data['brand'],
                     'model' => $data['model'],
                     'serial_number' => $this->generateSerialNumber($data['brand']),
@@ -406,7 +426,7 @@ class DemoDataSeeder extends Seeder
         return $products;
     }
 
-    protected function createMovements($products, $users): void
+    protected function createMovements($products, $users, $company): void
     {
         $movementTypes = ['entry', 'exit', 'allocation', 'return'];
         $user = $users->first();
@@ -415,6 +435,7 @@ class DemoDataSeeder extends Seeder
             // Create initial entry movement
             Movement::create([
                 'product_id' => $product->id,
+                'company_id' => $company->id,
                 'type' => 'entry',
                 'quantity' => $product->quantity,
                 'assigned_to' => null,
@@ -432,6 +453,7 @@ class DemoDataSeeder extends Seeder
 
                     Movement::create([
                         'product_id' => $product->id,
+                        'company_id' => $company->id,
                         'type' => $type,
                         'quantity' => $quantity,
                         'assigned_to' => $type === 'allocation' ? 'Department A' : null,
@@ -443,7 +465,7 @@ class DemoDataSeeder extends Seeder
         }
     }
 
-    protected function createAssetAssignments($products, $employees, $users): void
+    protected function createAssetAssignments($products, $employees, $users, $company): void
     {
         $productsCollection = collect($products);
         $assignableProducts = $productsCollection->filter(function ($product) {
@@ -475,6 +497,7 @@ class DemoDataSeeder extends Seeder
             AssetAssignment::create([
                 'product_id' => $product->id,
                 'employee_id' => $employee->id,
+                'company_id' => $company->id,
                 'assigned_by' => $adminUser->id,
                 'returned_by' => $isReturned ? $adminUser->id : null,
                 'assigned_at' => $assignedAt,
@@ -485,7 +508,7 @@ class DemoDataSeeder extends Seeder
         }
     }
 
-    protected function createTickets($products, $employees, $users): void
+    protected function createTickets($products, $employees, $users, $company): void
     {
         $priorities = ['low', 'medium', 'high', 'critical'];
         $statuses = ['open', 'in_progress', 'waiting_parts', 'resolved', 'closed'];
@@ -493,7 +516,10 @@ class DemoDataSeeder extends Seeder
         $adminUser = $users->first();
         
         // Get all technician users (including any created by migrations)
-        $techUsers = \App\Models\User::role('tecnico')->get();
+        $techUsers = \App\Models\User::withoutGlobalScopes()
+            ->role('tecnico')
+            ->where('company_id', $company->id)
+            ->get();
         if ($techUsers->isEmpty()) {
             $techUsers = collect([$users->where('email', 'tecnico@gearlog.local')->first() ?? $users->first()]);
         }
@@ -651,6 +677,7 @@ class DemoDataSeeder extends Seeder
                 'title' => $data['title'],
                 'product_id' => $product?->id,
                 'employee_id' => $product ? $employees->random()->id : null,
+                'company_id' => $company->id,
                 'opened_by' => $adminUser->id,
                 'assigned_to' => $data['assigned_to'] ?? null,
                 'priority' => $data['priority'],
@@ -672,6 +699,7 @@ class DemoDataSeeder extends Seeder
                     TicketComment::create([
                         'ticket_id' => $ticket->id,
                         'user_id' => $users->random()->id,
+                        'company_id' => $company->id,
                         'message' => "Update: " . ['Working on this issue', 'Waiting for parts', 'Need more information', 'Almost resolved'][rand(0, 3)],
                         'created_at' => $createdAt->copy()->addHours(rand(1, 24)),
                     ]);

@@ -140,6 +140,14 @@ class TicketController extends Controller
     {
         $this->authorize('create', Ticket::class);
         
+        // Check if company can create more tickets this month
+        $user = $request->user();
+        if ($user->company && !$user->company->canCreateTicket()) {
+            return response()->json([
+                'error' => 'Monthly ticket limit reached. Please upgrade your plan to create more tickets.',
+            ], 403);
+        }
+        
         $validated = $request->validate([
             'title' => 'required|string|max:255',
             'product_id' => 'nullable|exists:products,id',
