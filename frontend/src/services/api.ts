@@ -228,7 +228,7 @@ class ApiClient {
     return response.data;
   }
 
-  async onboarding(data: { company_name: string; country?: string | null; timezone?: string }) {
+  async onboarding(data: { company_name?: string; invite_code?: string; country?: string | null; timezone?: string }) {
     const token = localStorage.getItem('auth_token');
     if (!token) {
       throw new Error('Not authenticated');
@@ -415,8 +415,49 @@ class ApiClient {
       return response.data;
     }
 
+    async createUser(data: { name: string; email: string; password: string; roles: string[] }) {
+      const response = await this.client.post<{ message: string; user: User }>('/users', data);
+      return response.data;
+    }
+
     async updateUserRoles(userId: number, roles: string[]) {
       const response = await this.client.put<{ message: string; user: User }>(`/users/${userId}/roles`, { roles });
+      return response.data;
+    }
+
+    // Company Invites
+    async createCompanyInvite() {
+      const response = await this.client.post<{ message: string; invite: any; code: string }>('/company/invites', {});
+      return response.data;
+    }
+
+    async getCompanyInvites() {
+      const response = await this.client.get<any[]>('/company/invites');
+      return response.data;
+    }
+
+    async validateInviteCode(code: string) {
+      try {
+        const response = await axios.get<{ valid: boolean; company?: any; code?: string; error?: string }>(
+          `${this.baseURL}/api/v1/invites/${code}/validate`,
+          {
+            headers: {
+              'Accept': 'application/json',
+            },
+          }
+        );
+        return response.data;
+      } catch (error: any) {
+        // Handle 404 as invalid invite
+        if (error.response?.status === 404 && error.response?.data) {
+          return error.response.data;
+        }
+        throw error;
+      }
+    }
+
+    async deleteCompanyInvite(id: number) {
+      const response = await this.client.delete<{ message: string }>(`/company/invites/${id}`);
       return response.data;
     }
 

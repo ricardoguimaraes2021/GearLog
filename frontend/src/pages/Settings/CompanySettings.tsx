@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { useAuthStore } from '@/stores/authStore';
 import { api } from '@/services/api';
 import { toast } from 'sonner';
-import { Building2, Users, Package, Ticket, TrendingUp, AlertTriangle, Edit2, Save, X, Shield, UserCog } from 'lucide-react';
+import { Building2, Users, Package, Ticket, TrendingUp, AlertTriangle, Edit2, Save, X, Shield, UserCog, Plus, UserPlus, Copy, Trash2, CheckCircle2, XCircle } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -21,6 +21,17 @@ export default function CompanySettings() {
   const [isLoading, setIsLoading] = useState(true);
   const [isEditing, setIsEditing] = useState(false);
   const [editingUserId, setEditingUserId] = useState<number | null>(null);
+  const [showAddUserForm, setShowAddUserForm] = useState(false);
+  const [invites, setInvites] = useState<any[]>([]);
+  const [isLoadingInvites, setIsLoadingInvites] = useState(false);
+  const [isCreatingInvite, setIsCreatingInvite] = useState(false);
+  const [newUserData, setNewUserData] = useState({
+    name: '',
+    email: '',
+    password: '',
+    password_confirmation: '',
+    roles: [] as string[],
+  });
   const [formData, setFormData] = useState({
     name: '',
     country: '',
@@ -37,11 +48,12 @@ export default function CompanySettings() {
   const loadData = async () => {
     setIsLoading(true);
     try {
-      const [companyData, usageData, planData, usersData] = await Promise.all([
+      const [companyData, usageData, planData, usersData, invitesData] = await Promise.all([
         api.getCompany(),
         api.getCompanyUsage(),
         api.getCompanyPlan(),
         canManageRoles ? api.getUsers() : Promise.resolve([]),
+        canManageRoles ? api.getCompanyInvites().catch(() => []) : Promise.resolve([]),
       ]);
 
       setCompany(companyData.company);
@@ -51,6 +63,7 @@ export default function CompanySettings() {
       setPlan(planData.plan);
       if (canManageRoles) {
         setCompanyUsers(usersData);
+        setInvites(invitesData);
       }
 
       setFormData({
@@ -65,6 +78,40 @@ export default function CompanySettings() {
     }
   };
 
+  const handleCreateInvite = async () => {
+    setIsCreatingInvite(true);
+    try {
+      const result = await api.createCompanyInvite();
+      await loadData(); // Reload to get the new invite
+      toast.success('Invite created successfully!', {
+        description: `Invite code: ${result.code}`,
+        duration: 6000,
+      });
+    } catch (error: any) {
+      toast.error(error.response?.data?.error || 'Failed to create invite');
+    } finally {
+      setIsCreatingInvite(false);
+    }
+  };
+
+  const handleDeleteInvite = async (id: number) => {
+    if (!confirm('Are you sure you want to deactivate this invite?')) {
+      return;
+    }
+    try {
+      await api.deleteCompanyInvite(id);
+      await loadData(); // Reload to refresh the list
+      toast.success('Invite deactivated successfully');
+    } catch (error: any) {
+      toast.error(error.response?.data?.error || 'Failed to deactivate invite');
+    }
+  };
+
+  const handleCopyInviteCode = (code: string) => {
+    navigator.clipboard.writeText(code);
+    toast.success('Invite code copied to clipboard!');
+  };
+
   const handleUpdateUserRoles = async (userId: number, roles: string[]) => {
     try {
       await api.updateUserRoles(userId, roles);
@@ -76,11 +123,60 @@ export default function CompanySettings() {
     }
   };
 
+  const handleCreateUser = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    // Validation
+    if (!newUserData.name || !newUserData.email || !newUserData.password) {
+      toast.error('Name, email and password are required');
+      return;
+    }
+
+    if (newUserData.password.length < 8) {
+      toast.error('Password must be at least 8 characters');
+      return;
+    }
+
+    if (newUserData.password !== newUserData.password_confirmation) {
+      toast.error('Passwords do not match');
+      return;
+    }
+
+    if (newUserData.roles.length === 0) {
+      toast.error('At least one role must be selected');
+      return;
+    }
+
+    setIsLoading(true);
+    try {
+      await api.createUser({
+        name: newUserData.name,
+        email: newUserData.email,
+        password: newUserData.password,
+        roles: newUserData.roles,
+      });
+      toast.success('User created successfully');
+      setShowAddUserForm(false);
+      setNewUserData({
+        name: '',
+        email: '',
+        password: '',
+        password_confirmation: '',
+        roles: [],
+      });
+      await loadData();
+    } catch (error: any) {
+      toast.error(error.response?.data?.error || 'Failed to create user');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const availableRoles = [
     { value: 'admin', label: 'Admin' },
     { value: 'gestor', label: 'Manager' },
     { value: 'tecnico', label: 'Technician' },
-    { value: 'consulta', label: 'Consulta' },
+    { value: 'viewer', label: 'Viewer' },
   ];
 
   const handleUpdate = async (e: React.FormEvent) => {
@@ -102,13 +198,13 @@ export default function CompanySettings() {
   const getPlanBadgeColor = (planType: string) => {
     switch (planType) {
       case 'FREE':
-        return 'bg-gray-100 text-gray-800';
+        return 'bg-surface-alt text-text-primary dark:bg-surface-alt dark:text-text-primary';
       case 'PRO':
-        return 'bg-blue-100 text-blue-800';
+        return 'bg-accent-primary/10 text-accent-primary dark:bg-accent-primary/20 dark:text-accent-primary';
       case 'ENTERPRISE':
-        return 'bg-purple-100 text-purple-800';
+        return 'bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-300';
       default:
-        return 'bg-gray-100 text-gray-800';
+        return 'bg-surface-alt text-text-primary dark:bg-surface-alt dark:text-text-primary';
     }
   };
 
@@ -138,11 +234,11 @@ export default function CompanySettings() {
     return (
       <div className="space-y-6">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Company Settings</h1>
+          <h1 className="text-3xl font-bold text-text-primary">Company Settings</h1>
         </div>
         <Card>
           <CardContent className="pt-6">
-            <p className="text-center text-gray-500">Company not found</p>
+            <p className="text-center text-text-secondary">Company not found</p>
           </CardContent>
         </Card>
       </div>
@@ -152,8 +248,8 @@ export default function CompanySettings() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-3xl font-bold text-gray-900">Company Settings</h1>
-        <p className="mt-1 text-sm text-gray-500">Manage your company information and settings</p>
+        <h1 className="text-3xl font-bold text-text-primary">Company Settings</h1>
+        <p className="mt-1 text-sm text-text-secondary">Manage your company information and settings</p>
       </div>
 
       {/* Company Information */}
@@ -200,7 +296,7 @@ export default function CompanySettings() {
                     id="timezone"
                     value={formData.timezone}
                     onChange={(e) => setFormData({ ...formData, timezone: e.target.value })}
-                    className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                    className="flex h-10 w-full rounded-md border border-border bg-background px-3 py-2 text-sm text-text-primary ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-surface dark:text-text-primary"
                   >
                     <option value="UTC">UTC</option>
                     <option value="Europe/Lisbon">Europe/Lisbon</option>
@@ -236,19 +332,19 @@ export default function CompanySettings() {
             <div className="space-y-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <dt className="text-sm font-medium text-gray-600">Company Name</dt>
-                  <dd className="mt-1 text-sm font-semibold text-gray-900">{company.name}</dd>
+                  <dt className="text-sm font-medium text-text-secondary">Company Name</dt>
+                  <dd className="mt-1 text-sm font-semibold text-text-primary">{company.name}</dd>
                 </div>
                 <div>
-                  <dt className="text-sm font-medium text-gray-600">Country</dt>
-                  <dd className="mt-1 text-sm text-gray-900">{company.country || 'N/A'}</dd>
+                  <dt className="text-sm font-medium text-text-secondary">Country</dt>
+                  <dd className="mt-1 text-sm text-text-primary">{company.country || 'N/A'}</dd>
                 </div>
                 <div>
-                  <dt className="text-sm font-medium text-gray-600">Timezone</dt>
-                  <dd className="mt-1 text-sm text-gray-900">{company.timezone}</dd>
+                  <dt className="text-sm font-medium text-text-secondary">Timezone</dt>
+                  <dd className="mt-1 text-sm text-text-primary">{company.timezone}</dd>
                 </div>
                 <div>
-                  <dt className="text-sm font-medium text-gray-600">Plan Type</dt>
+                  <dt className="text-sm font-medium text-text-secondary">Plan Type</dt>
                   <dd className="mt-1">
                     <span className={`px-2 py-1 text-xs rounded ${getPlanBadgeColor(company.plan_type)}`}>
                       {company.plan_type}
@@ -256,15 +352,15 @@ export default function CompanySettings() {
                   </dd>
                 </div>
                 <div>
-                  <dt className="text-sm font-medium text-gray-600">Company Created</dt>
-                  <dd className="mt-1 text-sm text-gray-900">
+                  <dt className="text-sm font-medium text-text-secondary">Company Created</dt>
+                  <dd className="mt-1 text-sm text-text-primary">
                     {new Date(company.created_at).toLocaleDateString()}
                   </dd>
                 </div>
                 {owner && (
                   <div>
-                    <dt className="text-sm font-medium text-gray-600">Owner</dt>
-                    <dd className="mt-1 text-sm text-gray-900">{owner.name} ({owner.email})</dd>
+                    <dt className="text-sm font-medium text-text-secondary">Owner</dt>
+                    <dd className="mt-1 text-sm text-text-primary">{owner.name} ({owner.email})</dd>
                   </div>
                 )}
               </div>
@@ -282,25 +378,25 @@ export default function CompanySettings() {
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              <div className="text-center p-4 border rounded-lg">
-                <Users className="w-8 h-8 mx-auto text-blue-600 mb-2" />
-                <div className="text-2xl font-bold text-gray-900">{statistics.total_users}</div>
-                <div className="text-sm text-gray-600">Users</div>
+              <div className="text-center p-4 border border-border rounded-lg">
+                <Users className="w-8 h-8 mx-auto text-accent-primary mb-2" />
+                <div className="text-2xl font-bold text-text-primary">{statistics.total_users}</div>
+                <div className="text-sm text-text-secondary">Users</div>
               </div>
-              <div className="text-center p-4 border rounded-lg">
-                <Package className="w-8 h-8 mx-auto text-green-600 mb-2" />
-                <div className="text-2xl font-bold text-gray-900">{statistics.total_products}</div>
-                <div className="text-sm text-gray-600">Products</div>
+              <div className="text-center p-4 border border-border rounded-lg">
+                <Package className="w-8 h-8 mx-auto text-success mb-2" />
+                <div className="text-2xl font-bold text-text-primary">{statistics.total_products}</div>
+                <div className="text-sm text-text-secondary">Products</div>
               </div>
-              <div className="text-center p-4 border rounded-lg">
-                <Users className="w-8 h-8 mx-auto text-purple-600 mb-2" />
-                <div className="text-2xl font-bold text-gray-900">{statistics.total_employees}</div>
-                <div className="text-sm text-gray-600">Employees</div>
+              <div className="text-center p-4 border border-border rounded-lg">
+                <Users className="w-8 h-8 mx-auto text-accent-secondary mb-2" />
+                <div className="text-2xl font-bold text-text-primary">{statistics.total_employees}</div>
+                <div className="text-sm text-text-secondary">Employees</div>
               </div>
-              <div className="text-center p-4 border rounded-lg">
-                <Ticket className="w-8 h-8 mx-auto text-orange-600 mb-2" />
-                <div className="text-2xl font-bold text-gray-900">{statistics.total_tickets}</div>
-                <div className="text-sm text-gray-600">Tickets</div>
+              <div className="text-center p-4 border border-border rounded-lg">
+                <Ticket className="w-8 h-8 mx-auto text-warning mb-2" />
+                <div className="text-2xl font-bold text-text-primary">{statistics.total_tickets}</div>
+                <div className="text-sm text-text-secondary">Tickets</div>
               </div>
             </div>
           </CardContent>
@@ -318,14 +414,14 @@ export default function CompanySettings() {
             {/* Plan Information */}
             <div>
               <div className="flex items-center justify-between mb-4">
-                <h3 className="text-md font-semibold text-gray-900">Current Plan</h3>
+                <h3 className="text-md font-semibold text-text-primary">Current Plan</h3>
                 <span className={`px-3 py-1 text-sm rounded ${getPlanBadgeColor(plan.plan_type)}`}>
                   {plan.plan_type}
                 </span>
               </div>
-              <div className="bg-gray-50 rounded-lg p-4">
-                <p className="text-sm text-gray-600 mb-2">Plan Limits:</p>
-                <ul className="text-sm text-gray-900 space-y-1">
+              <div className="bg-surface-alt rounded-lg p-4">
+                <p className="text-sm text-text-secondary mb-2">Plan Limits:</p>
+                <ul className="text-sm text-text-primary space-y-1">
                   <li>• {plan.limits.max_users} users</li>
                   <li>• {plan.limits.max_products} products</li>
                   <li>• {plan.limits.max_tickets} tickets per month</li>
@@ -335,24 +431,24 @@ export default function CompanySettings() {
 
             {/* Usage Statistics */}
             <div>
-              <h3 className="text-md font-semibold text-gray-900 mb-4">Usage Statistics</h3>
+              <h3 className="text-md font-semibold text-text-primary mb-4">Usage Statistics</h3>
               <div className="space-y-4">
                 {/* Users Usage */}
                 <div>
                   <div className="flex items-center justify-between mb-2">
-                    <span className="text-sm font-medium text-gray-700">Users</span>
-                    <span className="text-sm text-gray-600">
+                    <span className="text-sm font-medium text-text-secondary">Users</span>
+                    <span className="text-sm text-text-secondary">
                       {usage.users.current} / {usage.users.max}
                     </span>
                   </div>
-                  <div className="w-full bg-gray-200 rounded-full h-2">
+                  <div className="w-full bg-surface-alt rounded-full h-2 dark:bg-surface-alt">
                     <div
                       className={`h-2 rounded-full ${getUsageColor(usage.users.percentage)}`}
                       style={{ width: `${Math.min(usage.users.percentage, 100)}%` }}
                     ></div>
                   </div>
                   {usage.users.percentage >= 80 && (
-                    <p className="text-xs text-orange-600 mt-1 flex items-center gap-1">
+                    <p className="text-xs text-warning mt-1 flex items-center gap-1">
                       <AlertTriangle className="w-3 h-3" />
                       {usage.users.percentage >= 100
                         ? 'Limit exceeded'
@@ -364,19 +460,19 @@ export default function CompanySettings() {
                 {/* Products Usage */}
                 <div>
                   <div className="flex items-center justify-between mb-2">
-                    <span className="text-sm font-medium text-gray-700">Products</span>
-                    <span className="text-sm text-gray-600">
+                    <span className="text-sm font-medium text-text-secondary">Products</span>
+                    <span className="text-sm text-text-secondary">
                       {usage.products.current} / {usage.products.max}
                     </span>
                   </div>
-                  <div className="w-full bg-gray-200 rounded-full h-2">
+                  <div className="w-full bg-surface-alt rounded-full h-2 dark:bg-surface-alt">
                     <div
                       className={`h-2 rounded-full ${getUsageColor(usage.products.percentage)}`}
                       style={{ width: `${Math.min(usage.products.percentage, 100)}%` }}
                     ></div>
                   </div>
                   {usage.products.percentage >= 80 && (
-                    <p className="text-xs text-orange-600 mt-1 flex items-center gap-1">
+                    <p className="text-xs text-warning mt-1 flex items-center gap-1">
                       <AlertTriangle className="w-3 h-3" />
                       {usage.products.percentage >= 100
                         ? 'Limit exceeded'
@@ -388,19 +484,19 @@ export default function CompanySettings() {
                 {/* Tickets Usage */}
                 <div>
                   <div className="flex items-center justify-between mb-2">
-                    <span className="text-sm font-medium text-gray-700">Tickets (This Month)</span>
-                    <span className="text-sm text-gray-600">
+                    <span className="text-sm font-medium text-text-secondary">Tickets (This Month)</span>
+                    <span className="text-sm text-text-secondary">
                       {usage.tickets_this_month.current} / {usage.tickets_this_month.max}
                     </span>
                   </div>
-                  <div className="w-full bg-gray-200 rounded-full h-2">
+                  <div className="w-full bg-surface-alt rounded-full h-2 dark:bg-surface-alt">
                     <div
                       className={`h-2 rounded-full ${getUsageColor(usage.tickets_this_month.percentage)}`}
                       style={{ width: `${Math.min(usage.tickets_this_month.percentage, 100)}%` }}
                     ></div>
                   </div>
                   {usage.tickets_this_month.percentage >= 80 && (
-                    <p className="text-xs text-orange-600 mt-1 flex items-center gap-1">
+                    <p className="text-xs text-warning mt-1 flex items-center gap-1">
                       <AlertTriangle className="w-3 h-3" />
                       {usage.tickets_this_month.percentage >= 100
                         ? 'Limit exceeded'
@@ -413,11 +509,11 @@ export default function CompanySettings() {
 
             {/* Upgrade CTA */}
             {plan.plan_type === 'FREE' && (
-              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+              <div className="bg-accent-primary/10 border border-accent-primary/20 rounded-lg p-4 dark:bg-accent-primary/20 dark:border-accent-primary/30">
                 <div className="flex items-center justify-between">
                   <div>
-                    <h4 className="font-semibold text-blue-900 mb-1">Upgrade to Pro</h4>
-                    <p className="text-sm text-blue-700">
+                    <h4 className="font-semibold text-accent-primary mb-1">Upgrade to Pro</h4>
+                    <p className="text-sm text-text-secondary">
                       Get more resources and features with a Pro plan
                     </p>
                   </div>
@@ -431,27 +527,274 @@ export default function CompanySettings() {
         </Card>
       )}
 
+      {/* Company Invites */}
+      {canManageRoles && (
+        <Card>
+          <CardHeader>
+            <div className="flex items-center justify-between">
+              <div>
+                <CardTitle className="flex items-center gap-2">
+                  <UserPlus className="w-5 h-5" />
+                  Company Invites
+                </CardTitle>
+                <CardDescription>
+                  Generate invite codes for users to join your company. Codes are unique, permanent, and reusable.
+                </CardDescription>
+              </div>
+              <Button onClick={handleCreateInvite} disabled={isCreatingInvite || isLoading}>
+                <Plus className="w-4 h-4 mr-2" />
+                {isCreatingInvite ? 'Creating...' : 'Generate Invite'}
+              </Button>
+            </div>
+          </CardHeader>
+          <CardContent>
+            {isLoadingInvites ? (
+              <div className="space-y-2">
+                {[...Array(2)].map((_, i) => (
+                  <Skeleton key={i} className="h-20 w-full" />
+                ))}
+              </div>
+            ) : invites.length === 0 ? (
+              <div className="text-center py-8">
+                <UserPlus className="w-12 h-12 mx-auto text-text-muted mb-3 opacity-50" />
+                <p className="text-sm text-text-secondary mb-4">No invite codes yet</p>
+                <Button onClick={handleCreateInvite} disabled={isCreatingInvite || isLoading} variant="outline">
+                  <Plus className="w-4 h-4 mr-2" />
+                  Generate Your First Invite
+                </Button>
+              </div>
+            ) : (
+              <div className="space-y-3">
+                {invites.map((invite) => (
+                  <div
+                    key={invite.id}
+                    className={`border rounded-lg p-4 ${
+                      invite.is_active
+                        ? 'border-border bg-surface-alt dark:bg-surface-alt/50'
+                        : 'border-border/50 bg-surface-alt/50 opacity-60'
+                    }`}
+                  >
+                    <div className="flex items-center justify-between">
+                      <div className="flex-1">
+                        <div className="flex items-center gap-3 mb-2">
+                          <div className="font-mono text-lg font-semibold text-text-primary tracking-wider">
+                            {invite.code}
+                          </div>
+                          {invite.is_active ? (
+                            <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-success/10 text-success border border-success/20">
+                              <CheckCircle2 className="w-3 h-3 mr-1" />
+                              Active
+                            </span>
+                          ) : (
+                            <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-danger/10 text-danger border border-danger/20">
+                              <XCircle className="w-3 h-3 mr-1" />
+                              Deactivated
+                            </span>
+                          )}
+                        </div>
+                        <div className="flex items-center gap-4 text-xs text-text-secondary">
+                          <span>
+                            Created: {new Date(invite.created_at).toLocaleDateString()}
+                            {invite.creator && ` by ${invite.creator.name}`}
+                          </span>
+                          {invite.used_count > 0 && (
+                            <span>
+                              Used {invite.used_count} time{invite.used_count !== 1 ? 's' : ''}
+                              {invite.last_used_at && ` (Last: ${new Date(invite.last_used_at).toLocaleDateString()})`}
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        {invite.is_active && (
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handleCopyInviteCode(invite.code)}
+                            title="Copy invite code"
+                          >
+                            <Copy className="w-4 h-4" />
+                          </Button>
+                        )}
+                        {invite.is_active && (
+                          <Button
+                            variant="destructive"
+                            size="sm"
+                            onClick={() => handleDeleteInvite(invite.id)}
+                            title="Deactivate invite"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </Button>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+            {invites.length > 0 && (
+              <div className="mt-4 p-3 bg-accent-primary/5 border border-accent-primary/10 rounded-lg">
+                <p className="text-xs text-text-secondary">
+                  <strong className="text-text-primary">Note:</strong> Users joining via invite code will automatically receive the "Viewer" (Read-only) role. You can update their roles later through User Roles Management.
+                </p>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      )}
+
       {/* User Roles Management */}
       {canManageRoles && (
         <Card>
           <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Shield className="w-5 h-5" />
-              User Roles Management
-            </CardTitle>
-            <CardDescription>
-              Manage roles for users in your company. Only owner and admin can assign roles.
-            </CardDescription>
+            <div className="flex items-center justify-between">
+              <div>
+                <CardTitle className="flex items-center gap-2">
+                  <Shield className="w-5 h-5" />
+                  User Roles Management
+                </CardTitle>
+                <CardDescription>
+                  Manage roles for users in your company. Only owner and admin can assign roles.
+                </CardDescription>
+              </div>
+              {!showAddUserForm && (
+                <Button onClick={() => setShowAddUserForm(true)}>
+                  <Plus className="w-4 h-4 mr-2" />
+                  Add User
+                </Button>
+              )}
+            </div>
           </CardHeader>
           <CardContent>
+            {showAddUserForm && (
+              <div className="mb-6 border border-border rounded-lg p-4 bg-surface-alt">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-lg font-semibold text-text-primary">Add New User</h3>
+                  <Button variant="ghost" size="sm" onClick={() => setShowAddUserForm(false)}>
+                    <X className="w-4 h-4" />
+                  </Button>
+                </div>
+                <form onSubmit={handleCreateUser} className="space-y-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <Label htmlFor="new_user_name" className="block text-sm font-medium text-text-primary">
+                        Full Name *
+                      </Label>
+                      <Input
+                        id="new_user_name"
+                        type="text"
+                        value={newUserData.name}
+                        onChange={(e) => setNewUserData({ ...newUserData, name: e.target.value })}
+                        required
+                        className="mt-1"
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="new_user_email" className="block text-sm font-medium text-text-primary">
+                        Email *
+                      </Label>
+                      <Input
+                        id="new_user_email"
+                        type="email"
+                        value={newUserData.email}
+                        onChange={(e) => setNewUserData({ ...newUserData, email: e.target.value })}
+                        required
+                        className="mt-1"
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="new_user_password" className="block text-sm font-medium text-text-primary">
+                        Password *
+                      </Label>
+                      <Input
+                        id="new_user_password"
+                        type="password"
+                        value={newUserData.password}
+                        onChange={(e) => setNewUserData({ ...newUserData, password: e.target.value })}
+                        required
+                        minLength={8}
+                        className="mt-1"
+                      />
+                      <p className="text-xs text-text-muted mt-1">Must be at least 8 characters</p>
+                    </div>
+                    <div>
+                      <Label htmlFor="new_user_password_confirmation" className="block text-sm font-medium text-text-primary">
+                        Confirm Password *
+                      </Label>
+                      <Input
+                        id="new_user_password_confirmation"
+                        type="password"
+                        value={newUserData.password_confirmation}
+                        onChange={(e) => setNewUserData({ ...newUserData, password_confirmation: e.target.value })}
+                        required
+                        minLength={8}
+                        className="mt-1"
+                      />
+                    </div>
+                  </div>
+                  <div>
+                    <Label className="block text-sm font-medium text-text-primary mb-2">Roles *</Label>
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+                      {availableRoles.map((role) => (
+                        <label key={role.value} className="flex items-center space-x-2 cursor-pointer">
+                          <input
+                            type="checkbox"
+                            checked={newUserData.roles.includes(role.value)}
+                            onChange={(e) => {
+                              if (e.target.checked) {
+                                setNewUserData({
+                                  ...newUserData,
+                                  roles: [...newUserData.roles, role.value],
+                                });
+                              } else {
+                                setNewUserData({
+                                  ...newUserData,
+                                  roles: newUserData.roles.filter((r) => r !== role.value),
+                                });
+                              }
+                            }}
+                            className="rounded border-border"
+                          />
+                          <span className="text-sm text-text-primary">{role.label}</span>
+                        </label>
+                      ))}
+                    </div>
+                  </div>
+                  <div className="flex gap-2 pt-2">
+                    <Button type="submit" disabled={isLoading}>
+                      <Save className="w-4 h-4 mr-2" />
+                      {isLoading ? 'Creating...' : 'Create User'}
+                    </Button>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={() => {
+                        setShowAddUserForm(false);
+                        setNewUserData({
+                          name: '',
+                          email: '',
+                          password: '',
+                          password_confirmation: '',
+                          roles: [],
+                        });
+                      }}
+                      disabled={isLoading}
+                    >
+                      <X className="w-4 h-4 mr-2" />
+                      Cancel
+                    </Button>
+                  </div>
+                </form>
+              </div>
+            )}
             {isLoading ? (
               <div className="space-y-2">
                 {[...Array(3)].map((_, i) => (
                   <Skeleton key={i} className="h-16 w-full" />
                 ))}
               </div>
-            ) : companyUsers.length === 0 ? (
-              <p className="text-sm text-gray-500 text-center py-4">No users found</p>
+            ) : companyUsers.length === 0 && !showAddUserForm ? (
+              <p className="text-sm text-text-secondary text-center py-4">No users found</p>
             ) : (
               <div className="space-y-4">
                 {companyUsers.map((companyUser) => {
@@ -461,26 +804,26 @@ export default function CompanySettings() {
                   return (
                     <div
                       key={companyUser.id}
-                      className="border rounded-lg p-4 space-y-3"
+                      className="border border-border rounded-lg p-4 space-y-3"
                     >
                       <div className="flex items-center justify-between">
                         <div className="flex-1">
                           <div className="flex items-center gap-2">
-                            <UserCog className="w-4 h-4 text-gray-500" />
-                            <span className="font-medium text-gray-900">{companyUser.name}</span>
+                            <UserCog className="w-4 h-4 text-text-muted" />
+                            <span className="font-medium text-text-primary">{companyUser.name}</span>
                             {companyUser.is_owner && (
-                              <span className="px-2 py-0.5 text-xs rounded bg-purple-100 text-purple-800">
+                              <span className="px-2 py-0.5 text-xs rounded bg-accent-secondary/10 text-accent-secondary dark:bg-accent-secondary/20 dark:text-accent-secondary">
                                 Owner
                               </span>
                             )}
                           </div>
-                          <p className="text-sm text-gray-600 mt-1">{companyUser.email}</p>
+                          <p className="text-sm text-text-secondary mt-1">{companyUser.email}</p>
                           {!isEditing && currentRoles.length > 0 && (
                             <div className="flex flex-wrap gap-2 mt-2">
                               {currentRoles.map((role) => (
                                 <span
                                   key={role}
-                                  className="px-2 py-1 text-xs rounded bg-blue-100 text-blue-800"
+                                  className="px-2 py-1 text-xs rounded bg-accent-primary/10 text-accent-primary dark:bg-accent-primary/20 dark:text-accent-primary"
                                 >
                                   {role}
                                 </span>
@@ -568,9 +911,9 @@ function UserRoleEditor({ user, currentRoles, availableRoles, onSave, onCancel }
               disabled={user.is_owner && role.value === 'admin'} // Owner must always have admin
               className="rounded border-gray-300"
             />
-            <span className="text-sm text-gray-700">{role.label}</span>
+            <span className="text-sm text-text-primary">{role.label}</span>
             {user.is_owner && role.value === 'admin' && (
-              <span className="text-xs text-gray-500">(Required for owner)</span>
+              <span className="text-xs text-text-muted">(Required for owner)</span>
             )}
           </label>
         ))}
