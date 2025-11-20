@@ -1,7 +1,7 @@
 import { Outlet, Link, useLocation } from 'react-router-dom';
 import { useAuthStore } from '@/stores/authStore';
 import { Button } from '@/components/ui/button';
-import { LayoutDashboard, Package, Ticket, Users, Building2, LogOut, Menu, X, Shield } from 'lucide-react';
+import { LayoutDashboard, Package, Ticket, Users, Building2, LogOut, Menu, X, Shield, User, Settings } from 'lucide-react';
 import { useState } from 'react';
 import NotificationBell from '@/components/notifications/NotificationBell';
 
@@ -86,7 +86,19 @@ export default function Layout() {
             {/* Desktop user info, notifications and logout */}
             <div className="hidden sm:flex items-center space-x-4">
               <NotificationBell />
-              <span className="text-sm text-gray-700">{user?.name}</span>
+              <Link
+                to="/profile"
+                className="text-sm text-gray-700 hover:text-gray-900 flex items-center gap-1"
+              >
+                <User className="w-4 h-4" />
+                {user?.name}
+              </Link>
+              <Link
+                to="/settings"
+                className="text-sm text-gray-700 hover:text-gray-900"
+              >
+                <Settings className="w-4 h-4" />
+              </Link>
               <Button variant="ghost" size="sm" onClick={handleLogout}>
                 <LogOut className="w-4 h-4 mr-2" />
                 Logout
@@ -126,6 +138,22 @@ export default function Layout() {
                 <div className="text-base font-medium text-gray-800">{user?.name}</div>
                 <div className="text-sm font-medium text-gray-500">{user?.email}</div>
               </div>
+              <Link
+                to="/profile"
+                onClick={closeMobileMenu}
+                className="flex items-center px-3 py-2 rounded-md text-base font-medium text-gray-600 hover:bg-gray-50 hover:text-gray-900"
+              >
+                <User className="w-5 h-5 mr-3" />
+                Profile
+              </Link>
+              <Link
+                to="/settings"
+                onClick={closeMobileMenu}
+                className="flex items-center px-3 py-2 rounded-md text-base font-medium text-gray-600 hover:bg-gray-50 hover:text-gray-900"
+              >
+                <Settings className="w-5 h-5 mr-3" />
+                Settings
+              </Link>
               <Button
                 variant="ghost"
                 className="w-full justify-start text-gray-600 hover:bg-gray-50 hover:text-gray-900"

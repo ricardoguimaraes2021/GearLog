@@ -27,6 +27,8 @@ import Landing from './pages/Landing/Landing';
 import Register from './pages/Auth/Register';
 import Onboarding from './pages/Auth/Onboarding';
 import AdminPanel from './pages/Admin/AdminPanel';
+import Profile from './pages/Profile/Profile';
+import CompanySettings from './pages/Settings/CompanySettings';
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { isAuthenticated, isLoading, isInitializing } = useAuthStore();
@@ -107,6 +109,8 @@ function App() {
               <Route path="departments/new" element={<DepartmentForm />} />
               <Route path="departments/:id" element={<DepartmentDetail />} />
               <Route path="departments/:id/edit" element={<DepartmentForm />} />
+              <Route path="profile" element={<Profile />} />
+              <Route path="settings" element={<CompanySettings />} />
               <Route path="admin" element={<AdminPanel />} />
             </Route>
           </Routes>

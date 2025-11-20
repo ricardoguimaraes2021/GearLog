@@ -639,6 +639,43 @@ class ApiClient {
       const response = await this.client.post<{ message: string }>('/admin/stop-impersonation');
       return response.data;
     }
+
+    // Profile endpoints
+    async getProfile(): Promise<{ user: User }> {
+      const response = await this.client.get<{ user: User }>('/profile');
+      return response.data;
+    }
+
+    async updateProfile(data: { name: string }): Promise<{ message: string; user: User }> {
+      const response = await this.client.put<{ message: string; user: User }>('/profile', data);
+      return response.data;
+    }
+
+    async updatePassword(data: { current_password: string; password: string; password_confirmation: string }): Promise<{ message: string }> {
+      const response = await this.client.put<{ message: string }>('/profile/password', data);
+      return response.data;
+    }
+
+    // Company Settings endpoints
+    async getCompany(): Promise<{ company: Company; owner: User | null; statistics: any }> {
+      const response = await this.client.get<{ company: Company; owner: User | null; statistics: any }>('/company');
+      return response.data;
+    }
+
+    async updateCompany(data: { name: string; country?: string; timezone?: string }): Promise<{ message: string; company: Company }> {
+      const response = await this.client.put<{ message: string; company: Company }>('/company', data);
+      return response.data;
+    }
+
+    async getCompanyUsage(): Promise<{ usage: CompanyUsageStats }> {
+      const response = await this.client.get<{ usage: CompanyUsageStats }>('/company/usage');
+      return response.data;
+    }
+
+    async getCompanyPlan(): Promise<{ plan: any }> {
+      const response = await this.client.get<{ plan: any }>('/company/plan');
+      return response.data;
+    }
   }
 
   export const api = new ApiClient();
