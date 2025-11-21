@@ -1,0 +1,37 @@
+# Netlify Configuration for GearLog Frontend
+
+[build]
+  # Diretório base (se o Netlify estiver configurado na raiz do projeto)
+  base = "frontend"
+  # Comando de build
+  command = "npm run build"
+  # Diretório de publicação
+  publish = "frontend/dist"
+
+# Redirects para React Router (SPA)
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
+
+# Headers de segurança
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Frame-Options = "DENY"
+    X-Content-Type-Options = "nosniff"
+    X-XSS-Protection = "1; mode=block"
+    Referrer-Policy = "strict-origin-when-cross-origin"
+
+# Cache para assets estáticos
+[[headers]]
+  for = "/assets/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+# Cache para index.html (sem cache para sempre ter a versão mais recente)
+[[headers]]
+  for = "/index.html"
+  [headers.values]
+    Cache-Control = "public, max-age=0, must-revalidate"
+
