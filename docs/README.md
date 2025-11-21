@@ -31,6 +31,15 @@ Complete guide to the real-time notifications system, including:
 - Troubleshooting
 - API endpoints
 
+### [DATABASE_SETUP.md](./DATABASE_SETUP.md)
+Database security and setup guide, including:
+- Database user permissions and security
+- SSL/TLS configuration
+- Automated backup setup
+- Connection security settings
+- Performance optimization
+- Troubleshooting
+
 ### [MIGRATION_ORDER.md](./MIGRATION_ORDER.md)
 Migration order and dependencies guide, including:
 - Complete migration execution order

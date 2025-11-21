@@ -322,12 +322,14 @@ GearLog/
 ├── docs/                         # Documentation
 │   ├── API_REFERENCE.md          # Complete API reference
 │   ├── CHANGELOG.md              # Version history
+│   ├── DATABASE_SETUP.md         # Database security and setup guide
 │   ├── IMPROVEMENTS.md           # Future roadmap
 │   ├── MIGRATION_ORDER.md        # Migration dependencies
 │   ├── NOTIFICATIONS.md          # Notifications guide
 │   ├── PRD.md                    # Product Requirements Document
 │   ├── PROJECT_GAPS.md           # Project gaps analysis
 │   ├── PROJECT_PLAN.md           # Architecture & design
+│   ├── PUSHER_SETUP.md          # Pusher configuration guide
 │   └── README.md                 # Documentation index
 ├── .github/                      # GitHub workflows
 └── README.md                     # This file
@@ -344,6 +346,9 @@ php artisan storage:link         # Create storage symlink
 php artisan rate-limit:clear     # Clear rate limiting cache
 php artisan l5-swagger:generate  # Regenerate API docs
 php artisan tickets:update-sla-violations  # Update SLA violations
+php artisan db:backup            # Create database backup
+php artisan db:backup --compress # Create compressed backup
+php artisan env:validate          # Validate environment configuration
 ```
 
 ### Frontend Commands
@@ -390,13 +395,31 @@ The API follows RESTful conventions and uses Laravel Sanctum for authentication.
 
 ## 🔒 Security Features
 
+### Authentication & Authorization
 - **Authentication**: Laravel Sanctum token-based authentication
 - **Authorization**: Role-based access control with Spatie Permissions
+- **Password Security**: 
+  - Minimum 12 characters with complexity requirements (mixed case, numbers, symbols)
+  - Password history tracking (prevents reuse of last 5 passwords)
+  - Uncompromised password checking (Have I Been Pwned integration)
 - **CSRF Protection**: Built-in CSRF token validation
-- **Rate Limiting**: API rate limiting to prevent abuse
-- **Input Validation**: Server-side validation on all inputs
+- **Rate Limiting**: API rate limiting to prevent abuse (stricter limits for login/register)
+
+### Database Security
+- **SSL/TLS Encryption**: Support for encrypted database connections
+- **Connection Security**: Configurable timeouts and connection pooling
+- **Database Backups**: Automated daily backups with compression and 30-day retention
+- **Audit Logging**: Complete audit trail of user actions (logins, password changes, data modifications)
+- **Data Encryption**: Encrypted storage for sensitive fields (serial numbers, employee codes)
+- **Query Security**: All queries use parameter binding (no SQL injection vulnerabilities)
+- **Index Optimization**: Performance indexes to prevent DoS attacks via slow queries
+
+### Application Security
+- **Input Validation**: Server-side validation on all inputs with Zod schemas
 - **File Upload Security**: Validated file types and sizes
 - **SQL Injection Protection**: Eloquent ORM with parameter binding
+- **API Result Sanitization**: API Resources ensure sensitive data is never exposed
+- **Error Handling**: Standardized error responses without exposing sensitive information
 
 ## 📄 License
 
