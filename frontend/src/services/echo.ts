@@ -26,10 +26,12 @@ export const initializeEcho = (token: string): Echo => {
   const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:8000/api/v1';
   const baseUrl = apiUrl.replace('/api/v1', '');
 
+  const cluster = import.meta.env.VITE_PUSHER_APP_CLUSTER || 'mt1';
+
   echoInstance = new Echo({
     broadcaster: 'pusher',
     key: pusherKey,
-    cluster: import.meta.env.VITE_PUSHER_APP_CLUSTER || 'mt1',
+    cluster: cluster,
     forceTLS: true,
     encrypted: true,
     authEndpoint: `${baseUrl}/broadcasting/auth`,
@@ -40,6 +42,14 @@ export const initializeEcho = (token: string): Echo => {
       },
     },
   });
+
+  // Bind error handler for connection issues
+  if (echoInstance.connector && echoInstance.connector.pusher) {
+    const pusher = echoInstance.connector.pusher;
+    pusher.connection.bind('error', (err: any) => {
+      console.error('❌ Pusher connection error:', err);
+    });
+  }
 
   window.Echo = echoInstance;
   return echoInstance;
