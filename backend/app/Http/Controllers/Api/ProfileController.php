@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use App\Services\AuditLogService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
@@ -13,6 +14,10 @@ use OpenApi\Attributes as OA;
 #[OA\Tag(name: 'Profile', description: 'User profile management endpoints')]
 class ProfileController extends Controller
 {
+    public function __construct(
+        protected AuditLogService $auditLogService
+    ) {
+    }
     #[OA\Get(
         path: '/api/v1/profile',
         summary: 'Get current user profile',
@@ -126,7 +131,16 @@ class ProfileController extends Controller
 
         $validated = $request->validate([
             'current_password' => 'required|string',
-            'password' => ['required', 'string', 'confirmed', Password::min(8)],
+            'password' => [
+                'required',
+                'string',
+                'confirmed',
+                Password::min(12)
+                    ->mixedCase()
+                    ->numbers()
+                    ->symbols()
+                    ->uncompromised(),
+            ],
         ]);
 
         // Verify current password
@@ -136,14 +150,29 @@ class ProfileController extends Controller
             ], 422);
         }
 
+        // Check if password was used recently
+        if ($user->hasUsedPassword($validated['password'])) {
+            return response()->json([
+                'error' => 'You cannot reuse your last 5 passwords. Please choose a different password.',
+            ], 422);
+        }
+
+        // Save current password to history before updating
+        $user->savePasswordToHistory($user->password);
+
         // Update password
+        $newPasswordHash = Hash::make($validated['password']);
         $user->update([
-            'password' => Hash::make($validated['password']),
+            'password' => $newPasswordHash,
         ]);
+
+        // Log password change to audit log
+        $this->auditLogService->logPasswordChange($user->id, $request);
 
         Log::info('User password changed', [
             'user_id' => $user->id,
             'email' => $user->email,
+            'ip_address' => $request->ip(),
         ]);
 
         return response()->json([

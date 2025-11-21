@@ -26,6 +26,9 @@ class Employee extends Model
 
     protected $casts = [
         'status' => 'string',
+        // Encrypt sensitive employee codes and emails
+        'employee_code' => \App\Casts\Encrypted::class,
+        'email' => \App\Casts\Encrypted::class,
     ];
 
     public function department(): BelongsTo

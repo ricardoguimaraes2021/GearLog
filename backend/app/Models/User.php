@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\PasswordHistory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Foundation\Auth\User as Authenticatable;
@@ -32,6 +33,8 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
             'is_owner' => 'boolean',
+            // Email encryption is optional - uncomment if needed
+            // 'email' => \App\Casts\Encrypted::class,
         ];
     }
 
@@ -67,6 +70,62 @@ class User extends Authenticatable
     public function unreadNotifications()
     {
         return $this->notifications()->whereNull('read_at');
+    }
+
+    /**
+     * Get password history for this user
+     */
+    public function passwordHistory()
+    {
+        return $this->hasMany(PasswordHistory::class)->orderBy('created_at', 'desc');
+    }
+
+    /**
+     * Check if password was used recently (last 5 passwords)
+     */
+    public function hasUsedPassword(string $password): bool
+    {
+        $recentPasswords = $this->passwordHistory()
+            ->limit(5)
+            ->pluck('password_hash');
+
+        foreach ($recentPasswords as $hash) {
+            if (\Illuminate\Support\Facades\Hash::check($password, $hash)) {
+                return true;
+            }
+        }
+
+        // Also check current password
+        if (\Illuminate\Support\Facades\Hash::check($password, $this->password)) {
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
+     * Save password to history
+     */
+    public function savePasswordToHistory(string $passwordHash): void
+    {
+        PasswordHistory::create([
+            'user_id' => $this->id,
+            'password_hash' => $passwordHash,
+        ]);
+
+        // Keep only last 5 passwords
+        $this->passwordHistory()
+            ->skip(5)
+            ->delete();
+    }
+
+    /**
+     * Check if user is super admin
+     */
+    public function isSuperAdmin(): bool
+    {
+        $superAdminEmails = config('app.super_admin_emails', ['admin@gearlog.local']);
+        return in_array($this->email, array_map('trim', $superAdminEmails));
     }
 }
 

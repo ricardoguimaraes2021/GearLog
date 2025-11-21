@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Resources\ProductResource;
 use App\Models\Product;
 use App\Services\ProductService;
 use Illuminate\Http\Request;
@@ -78,15 +79,7 @@ class ProductController extends Controller
         $perPage = $request->get('per_page', 15);
         $products = $query->paginate($perPage);
 
-        // Add warranty info to each product
-        $products->getCollection()->transform(function ($product) {
-            $productData = $product->toArray();
-            $productData['warranty_expires_at'] = $product->warranty_expires_at;
-            $productData['is_warranty_valid'] = $product->isWarrantyValid();
-            return $productData;
-        });
-
-        return response()->json($products);
+        return ProductResource::collection($products);
     }
 
     #[OA\Get(
@@ -105,11 +98,7 @@ class ProductController extends Controller
     public function show(Product $product)
     {
         $product->load(['category', 'movements']);
-        // Add warranty_expires_at to response
-        $productData = $product->toArray();
-        $productData['warranty_expires_at'] = $product->warranty_expires_at;
-        $productData['is_warranty_valid'] = $product->isWarrantyValid();
-        return response()->json($productData);
+        return new ProductResource($product);
     }
 
     /**

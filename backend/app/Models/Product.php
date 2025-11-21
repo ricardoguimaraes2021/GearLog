@@ -36,6 +36,8 @@ class Product extends Model
         'purchase_date' => 'date',
         'value' => 'decimal:2',
         'quantity' => 'integer',
+        // Encrypt sensitive serial numbers
+        'serial_number' => \App\Casts\Encrypted::class,
     ];
 
     public function category(): BelongsTo

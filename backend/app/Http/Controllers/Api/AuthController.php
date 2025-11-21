@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\Company;
 use App\Models\User;
+use App\Services\AuditLogService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -17,6 +18,10 @@ use OpenApi\Attributes as OA;
 #[OA\Tag(name: 'Authentication', description: 'User authentication endpoints')]
 class AuthController extends Controller
 {
+    public function __construct(
+        protected AuditLogService $auditLogService
+    ) {
+    }
     #[OA\Post(
         path: '/api/v1/login',
         summary: 'User login',
@@ -61,14 +66,17 @@ class AuthController extends Controller
         $user = Auth::user();
         $token = $user->createToken('auth-token')->plainTextToken;
 
+        // Log successful login
+        $this->auditLogService->logLogin($user->id, $request);
+
         // Load company only if user has one
-        $userData = $user->load('roles');
+        $user->load('roles');
         if ($user->company_id) {
-            $userData->load('company');
+            $user->load('company');
         }
 
         return response()->json([
-            'user' => $userData,
+            'user' => new UserResource($user),
             'token' => $token,
             'requires_onboarding' => $user->company_id === null,
         ]);
@@ -184,7 +192,16 @@ class AuthController extends Controller
         $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users',
-            'password' => 'required|string|min:8|confirmed',
+            'password' => [
+                'required',
+                'string',
+                'confirmed',
+                \Illuminate\Validation\Rules\Password::min(12)
+                    ->mixedCase()
+                    ->numbers()
+                    ->symbols()
+                    ->uncompromised(),
+            ],
         ]);
 
         $user = User::create([
