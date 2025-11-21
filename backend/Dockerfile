@@ -42,11 +42,26 @@ RUN chown -R www-data:www-data /var/www \
 # Expor porta (Railway usa variável $PORT)
 EXPOSE 8000
 
+# Criar script de start robusto
+RUN echo '#!/bin/bash\n\
+set -e\n\
+\n\
+# Tentar executar migrações (não falhar se BD não estiver pronta)\n\
+php artisan migrate --force || echo "Migration failed, continuing..."\n\
+\n\
+# Criar storage link (ignorar se já existir)\n\
+php artisan storage:link || true\n\
+\n\
+# Cache de configuração (ignorar erros)\n\
+php artisan config:cache || true\n\
+php artisan route:cache || true\n\
+php artisan view:cache || true\n\
+\n\
+# Iniciar servidor PHP\n\
+echo "Starting PHP server on port ${PORT:-8000}"\n\
+exec php -S 0.0.0.0:${PORT:-8000} -t public\n\
+' > /start.sh && chmod +x /start.sh
+
 # Comando de start
-CMD php artisan migrate --force && \
-    php artisan storage:link && \
-    php artisan config:cache && \
-    php artisan route:cache && \
-    php artisan view:cache && \
-    php -S 0.0.0.0:${PORT:-8000} -t public
+CMD ["/start.sh"]
 
