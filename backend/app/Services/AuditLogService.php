@@ -19,7 +19,7 @@ class AuditLogService
         ?array $oldValue = null,
         ?array $newValue = null,
         ?Request $request = null
-    ): AuditLog {
+    ): ?AuditLog {
         try {
             $ipAddress = $request?->ip();
             $userAgent = $request?->userAgent();
@@ -36,11 +36,15 @@ class AuditLogService
             ]);
         } catch (\Exception $e) {
             // Log error but don't fail the operation
-            Log::error('Failed to create audit log', [
-                'action' => $action,
-                'error' => $e->getMessage(),
-            ]);
-            throw $e;
+            // Only log in development to avoid performance issues
+            if (config('app.env') === 'local') {
+                Log::error('Failed to create audit log', [
+                    'action' => $action,
+                    'error' => $e->getMessage(),
+                ]);
+            }
+            // Don't throw - allow operation to continue even if audit log fails
+            return null;
         }
     }
 
@@ -58,6 +62,14 @@ class AuditLogService
     public function logPasswordChange(int $userId, Request $request): void
     {
         $this->log('password_changed', $userId, 'users', $userId, null, null, $request);
+    }
+
+    /**
+     * Log password reset
+     */
+    public function logPasswordReset(int $userId, Request $request): void
+    {
+        $this->log('password_reset', $userId, 'users', $userId, null, null, $request);
     }
 
     /**

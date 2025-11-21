@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Models\PasswordHistory;
+use App\Notifications\ResetPasswordNotification;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Foundation\Auth\User as Authenticatable;
@@ -77,7 +78,8 @@ class User extends Authenticatable
      */
     public function passwordHistory()
     {
-        return $this->hasMany(PasswordHistory::class)->orderBy('created_at', 'desc');
+        return $this->hasMany(PasswordHistory::class, 'user_id', 'id')
+            ->orderBy('created_at', 'desc');
     }
 
     /**
@@ -85,14 +87,23 @@ class User extends Authenticatable
      */
     public function hasUsedPassword(string $password): bool
     {
-        $recentPasswords = $this->passwordHistory()
-            ->limit(5)
-            ->pluck('password_hash');
+        try {
+            $recentPasswords = $this->passwordHistory()
+                ->limit(5)
+                ->pluck('password_hash');
 
-        foreach ($recentPasswords as $hash) {
-            if (\Illuminate\Support\Facades\Hash::check($password, $hash)) {
-                return true;
+            foreach ($recentPasswords as $hash) {
+                if (\Illuminate\Support\Facades\Hash::check($password, $hash)) {
+                    return true;
+                }
             }
+        } catch (\Exception $e) {
+            // Se a tabela não existir ou houver erro, apenas logar e continuar
+            // Não bloquear a mudança de password por causa do histórico
+            \Illuminate\Support\Facades\Log::warning('Erro ao verificar histórico de passwords', [
+                'error' => $e->getMessage(),
+                'user_id' => $this->id,
+            ]);
         }
 
         // Also check current password
@@ -108,15 +119,34 @@ class User extends Authenticatable
      */
     public function savePasswordToHistory(string $passwordHash): void
     {
-        PasswordHistory::create([
-            'user_id' => $this->id,
-            'password_hash' => $passwordHash,
-        ]);
+        try {
+            PasswordHistory::create([
+                'user_id' => $this->id,
+                'password_hash' => $passwordHash,
+            ]);
 
-        // Keep only last 5 passwords
-        $this->passwordHistory()
-            ->skip(5)
-            ->delete();
+            // Keep only last 5 passwords
+            $totalPasswords = $this->passwordHistory()->count();
+            if ($totalPasswords > 5) {
+                // Get IDs of passwords to keep (last 5)
+                $passwordsToKeep = $this->passwordHistory()
+                    ->orderBy('created_at', 'desc')
+                    ->limit(5)
+                    ->pluck('id');
+                
+                // Delete all passwords except the last 5
+                $this->passwordHistory()
+                    ->whereNotIn('id', $passwordsToKeep)
+                    ->delete();
+            }
+        } catch (\Exception $e) {
+            // Se a tabela não existir ou houver erro, apenas logar
+            // Não bloquear a mudança de password por causa do histórico
+            \Illuminate\Support\Facades\Log::warning('Erro ao salvar histórico de password', [
+                'error' => $e->getMessage(),
+                'user_id' => $this->id,
+            ]);
+        }
     }
 
     /**
@@ -126,6 +156,17 @@ class User extends Authenticatable
     {
         $superAdminEmails = config('app.super_admin_emails', ['admin@gearlog.local']);
         return in_array($this->email, array_map('trim', $superAdminEmails));
+    }
+
+    /**
+     * Send the password reset notification.
+     *
+     * @param  string  $token
+     * @return void
+     */
+    public function sendPasswordResetNotification($token)
+    {
+        $this->notify(new ResetPasswordNotification($token));
     }
 }
 

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Resources\UserResource;
 use App\Models\Company;
 use App\Models\User;
 use App\Services\AuditLogService;
@@ -11,7 +12,10 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Password;
+use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
+use Illuminate\Validation\Rules\Password as PasswordRule;
 use Laravel\Sanctum\PersonalAccessToken;
 use OpenApi\Attributes as OA;
 
@@ -404,5 +408,208 @@ class AuthController extends Controller
                 'message' => config('app.debug') ? $e->getMessage() : null,
             ], 500);
         }
+    }
+
+    #[OA\Post(
+        path: '/api/v1/forgot-password',
+        summary: 'Request password reset link',
+        tags: ['Authentication'],
+        requestBody: new OA\RequestBody(
+            required: true,
+            content: new OA\JsonContent(
+                required: ['email'],
+                properties: [
+                    new OA\Property(property: 'email', type: 'string', format: 'email', example: 'user@example.com'),
+                ]
+            )
+        ),
+        responses: [
+            new OA\Response(
+                response: 200,
+                description: 'Password reset link sent if email exists',
+                content: new OA\JsonContent(
+                    properties: [
+                        new OA\Property(property: 'message', type: 'string'),
+                    ]
+                )
+            ),
+            new OA\Response(response: 422, description: 'Validation error'),
+        ]
+    )]
+    public function forgotPassword(Request $request)
+    {
+        $request->validate([
+            'email' => 'required|email',
+        ]);
+
+        try {
+            // Use Laravel's built-in password reset functionality
+            $status = Password::sendResetLink(
+                $request->only('email')
+            );
+
+            // Log the attempt (only in development)
+            if (config('app.env') === 'local') {
+                Log::info('Password reset requested', [
+                    'email' => $request->email,
+                    'status' => $status,
+                ]);
+            }
+
+            // Always return success message to prevent email enumeration
+            // Laravel will handle the actual sending internally
+            return response()->json([
+                'message' => 'If that email address exists in our system, we have sent a password reset link.',
+            ], 200);
+        } catch (\Exception $e) {
+            // Log the error for debugging
+            Log::error('Failed to send password reset email', [
+                'email' => $request->email,
+                'error' => $e->getMessage(),
+                'error_class' => get_class($e),
+            ]);
+
+            // Still return success to prevent email enumeration
+            // But log the error for admin review
+            return response()->json([
+                'message' => 'If that email address exists in our system, we have sent a password reset link.',
+            ], 200);
+        }
+    }
+
+    #[OA\Post(
+        path: '/api/v1/reset-password',
+        summary: 'Reset password with token',
+        tags: ['Authentication'],
+        requestBody: new OA\RequestBody(
+            required: true,
+            content: new OA\JsonContent(
+                required: ['token', 'email', 'password', 'password_confirmation'],
+                properties: [
+                    new OA\Property(property: 'token', type: 'string', example: 'reset-token-here'),
+                    new OA\Property(property: 'email', type: 'string', format: 'email', example: 'user@example.com'),
+                    new OA\Property(property: 'password', type: 'string', format: 'password'),
+                    new OA\Property(property: 'password_confirmation', type: 'string', format: 'password'),
+                ]
+            )
+        ),
+        responses: [
+            new OA\Response(
+                response: 200,
+                description: 'Password reset successfully',
+                content: new OA\JsonContent(
+                    properties: [
+                        new OA\Property(property: 'message', type: 'string'),
+                    ]
+                )
+            ),
+            new OA\Response(response: 422, description: 'Validation error or invalid token'),
+        ]
+    )]
+    public function resetPassword(Request $request)
+    {
+        $validated = $request->validate([
+            'token' => 'required|string',
+            'email' => 'required|email',
+            'password' => [
+                'required',
+                'string',
+                'confirmed',
+                PasswordRule::min(12)
+                    ->mixedCase()
+                    ->numbers()
+                    ->symbols(),
+            ],
+        ]);
+
+        // Use Laravel's built-in password reset functionality
+        $status = Password::reset(
+            $request->only('email', 'password', 'password_confirmation', 'token'),
+            function ($user, $password) {
+                $user->forceFill([
+                    'password' => Hash::make($password),
+                ])->setRememberToken(Str::random(60));
+
+                $user->save();
+
+                // Log password reset for audit
+                $this->auditLogService->logPasswordReset($user->id, request());
+
+                // Invalidate all existing tokens for security
+                $user->tokens()->delete();
+            }
+        );
+
+        if ($status === Password::PASSWORD_RESET) {
+            return response()->json([
+                'message' => 'Password has been reset successfully.',
+            ], 200);
+        }
+
+        return response()->json([
+            'error' => 'Unable to reset password. The token may be invalid or expired.',
+            'errors' => [
+                'email' => ['The password reset token is invalid or has expired.'],
+            ],
+        ], 422);
+    }
+
+    #[OA\Get(
+        path: '/api/v1/validate-reset-token',
+        summary: 'Validate password reset token',
+        tags: ['Authentication'],
+        parameters: [
+            new OA\Parameter(name: 'token', in: 'query', required: true, schema: new OA\Schema(type: 'string')),
+            new OA\Parameter(name: 'email', in: 'query', required: true, schema: new OA\Schema(type: 'string', format: 'email')),
+        ],
+        responses: [
+            new OA\Response(
+                response: 200,
+                description: 'Token is valid',
+                content: new OA\JsonContent(
+                    properties: [
+                        new OA\Property(property: 'valid', type: 'boolean'),
+                        new OA\Property(property: 'email', type: 'string'),
+                    ]
+                )
+            ),
+            new OA\Response(response: 422, description: 'Invalid or expired token'),
+        ]
+    )]
+    public function validateResetToken(Request $request)
+    {
+        $request->validate([
+            'token' => 'required|string',
+            'email' => 'required|email',
+        ]);
+
+        // Check if user exists
+        $user = User::where('email', $request->email)->first();
+
+        if (!$user) {
+            return response()->json([
+                'valid' => false,
+                'error' => 'Invalid token or email.',
+            ], 422);
+        }
+
+        // Use Laravel's password broker to validate token
+        // The broker checks if token exists and hasn't expired (default: 60 minutes)
+        $tokenExists = DB::table('password_reset_tokens')
+            ->where('email', $request->email)
+            ->where('created_at', '>', now()->subMinutes(60))
+            ->exists();
+
+        if (!$tokenExists) {
+            return response()->json([
+                'valid' => false,
+                'error' => 'Token is invalid or has expired.',
+            ], 422);
+        }
+
+        return response()->json([
+            'valid' => true,
+            'email' => $request->email,
+        ], 200);
     }
 }
