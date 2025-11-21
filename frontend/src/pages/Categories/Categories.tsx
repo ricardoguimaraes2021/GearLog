@@ -103,7 +103,7 @@ export default function Categories() {
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
-                <Label htmlFor="category-name" className="block text-sm font-medium text-gray-700 mb-1">
+                <Label htmlFor="category-name" className="block text-sm font-medium text-text-primary mb-1">
                   Name
                 </Label>
                 <Input
@@ -114,10 +114,10 @@ export default function Categories() {
                     setError('');
                   }}
                   placeholder="Category name"
-                  className={error ? 'border-red-500' : ''}
+                  className={error ? 'border-destructive' : ''}
                   required
                 />
-                {error && <p className="text-sm text-red-500 mt-1">{error}</p>}
+                {error && <p className="text-sm text-destructive mt-1">{error}</p>}
               </div>
               <div className="flex gap-2">
                 <Button type="submit">{editingId ? 'Update' : 'Create'}</Button>
@@ -149,7 +149,7 @@ export default function Categories() {
               </CardHeader>
               <CardContent>
                 <div className="flex justify-between items-center">
-                  <span className="text-sm text-gray-500">
+                  <span className="text-sm text-text-secondary">
                     {category.products_count || 0} products
                   </span>
                   <div className="flex gap-2">
@@ -167,7 +167,7 @@ export default function Categories() {
                           size="sm"
                           onClick={() => handleDelete(category.id)}
                         >
-                          <Trash2 className="w-4 h-4 text-red-600" />
+                          <Trash2 className="w-4 h-4 text-destructive" />
                         </Button>
                       </>
                     )}

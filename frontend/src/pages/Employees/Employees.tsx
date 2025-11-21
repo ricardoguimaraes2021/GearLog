@@ -83,8 +83,8 @@ export default function Employees() {
 
   const getStatusColor = (status: Employee['status']) => {
     return status === 'active'
-      ? 'bg-green-100 text-green-800'
-      : 'bg-gray-100 text-gray-800';
+      ? 'bg-success/20 dark:bg-success/30 text-success dark:text-green-400'
+      : 'bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-gray-200';
   };
 
   return (
@@ -136,7 +136,7 @@ export default function Employees() {
         <CardContent>
           <div className="space-y-4">
             <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-text-muted w-4 h-4" />
               <Input
                 placeholder="Search employees by name, email, code, or position..."
                 value={filters.search || ''}
@@ -146,9 +146,9 @@ export default function Employees() {
             </div>
 
             {showFilters && (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-4 border-t">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-4 border-t border-border">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label className="block text-sm font-medium text-text-primary mb-1">
                     Status
                   </label>
                   <select
@@ -156,7 +156,7 @@ export default function Employees() {
                     onChange={(e) =>
                       handleFilterChange('status', e.target.value || undefined)
                     }
-                    className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+                    className="w-full rounded-md border border-border bg-background dark:bg-surface text-text-primary px-3 py-2 text-sm focus:border-accent-primary focus:outline-none focus:ring-2 focus:ring-accent-primary/20"
                   >
                     <option value="">All Statuses</option>
                     <option value="active">Active</option>
@@ -165,7 +165,7 @@ export default function Employees() {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label className="block text-sm font-medium text-text-primary mb-1">
                     Department
                   </label>
                   <select
@@ -173,7 +173,7 @@ export default function Employees() {
                     onChange={(e) =>
                       handleFilterChange('department_id', e.target.value ? parseInt(e.target.value) : undefined)
                     }
-                    className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+                    className="w-full rounded-md border border-border bg-background dark:bg-surface text-text-primary px-3 py-2 text-sm focus:border-accent-primary focus:outline-none focus:ring-2 focus:ring-accent-primary/20"
                   >
                     <option value="">All Departments</option>
                     {departments.map((dept) => (
@@ -238,7 +238,7 @@ export default function Employees() {
         </div>
       ) : employees.length === 0 ? (
         <Card>
-          <CardContent className="py-8 text-center text-gray-500">
+          <CardContent className="py-8 text-center text-text-secondary">
             No employees found
           </CardContent>
         </Card>
@@ -251,7 +251,7 @@ export default function Employees() {
                   <div className="flex justify-between items-start">
                     <div>
                       <CardTitle className="text-lg">{employee.name}</CardTitle>
-                      <p className="text-sm text-gray-500 mt-1">{employee.employee_code}</p>
+                      <p className="text-sm text-text-secondary mt-1">{employee.employee_code}</p>
                     </div>
                     <span
                       className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(
@@ -265,29 +265,29 @@ export default function Employees() {
                 <CardContent>
                   <div className="space-y-2 text-sm">
                     <div className="flex items-center gap-2">
-                      <Mail className="w-4 h-4 text-gray-400" />
-                      <span className="text-gray-600">{employee.email}</span>
+                      <Mail className="w-4 h-4 text-text-muted" />
+                      <span className="text-text-secondary">{employee.email}</span>
                     </div>
                     {employee.phone && (
                       <div className="flex items-center gap-2">
-                        <Phone className="w-4 h-4 text-gray-400" />
-                        <span className="text-gray-600">{employee.phone}</span>
+                        <Phone className="w-4 h-4 text-text-muted" />
+                        <span className="text-text-secondary">{employee.phone}</span>
                       </div>
                     )}
                     <div className="flex items-center gap-2">
-                      <Building2 className="w-4 h-4 text-gray-400" />
-                      <span className="text-gray-600">
+                      <Building2 className="w-4 h-4 text-text-muted" />
+                      <span className="text-text-secondary">
                         {employee.department?.name || 'No Department'}
                       </span>
                     </div>
                     <div>
-                      <span className="text-gray-500">Position: </span>
-                      <span className="font-medium">{employee.position}</span>
+                      <span className="text-text-secondary">Position: </span>
+                      <span className="font-medium text-text-primary">{employee.position}</span>
                     </div>
                     {employee.active_assignments && employee.active_assignments.length > 0 && (
                       <div>
-                        <span className="text-gray-500">Active Assets: </span>
-                        <span className="font-semibold text-blue-600">
+                        <span className="text-text-secondary">Active Assets: </span>
+                        <span className="font-semibold text-accent-primary">
                           {employee.active_assignments.length}
                         </span>
                       </div>
@@ -325,7 +325,7 @@ export default function Employees() {
               >
                 Previous
               </Button>
-              <span className="text-sm text-gray-600">
+              <span className="text-sm text-text-secondary">
                 Page {currentPage} of {pagination.last_page}
               </span>
               <Button

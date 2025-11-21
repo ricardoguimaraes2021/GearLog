@@ -311,7 +311,7 @@ export default function TicketForm() {
           <ArrowLeft className="w-4 h-4 mr-2" />
           Back
         </Button>
-        <h1 className="text-3xl font-bold text-gray-900">
+        <h1 className="text-3xl font-bold text-text-primary">
           {isEditing ? 'Edit Ticket' : 'New Ticket'}
         </h1>
       </div>
@@ -334,7 +334,7 @@ export default function TicketForm() {
                 className={errors.title ? 'border-red-500' : ''}
                 required
               />
-              {errors.title && <p className="text-sm text-red-500 mt-1">{errors.title}</p>}
+              {errors.title && <p className="text-sm text-destructive mt-1">{errors.title}</p>}
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -420,7 +420,7 @@ export default function TicketForm() {
                     required
                   />
                   {errors.description && (
-                    <p className="text-sm text-red-500 mt-1">{errors.description}</p>
+                    <p className="text-sm text-destructive mt-1">{errors.description}</p>
                   )}
                 </div>
 
@@ -455,7 +455,7 @@ export default function TicketForm() {
                       <Paperclip className="w-4 h-4 mr-2" />
                       Add Files
                     </Button>
-                    <p className="text-xs text-gray-500 mt-1">
+                    <p className="text-xs text-text-secondary mt-1">
                       <strong>Allowed formats:</strong> JPG, JPEG, PNG, GIF, PDF, DOC, DOCX, TXT
                       <br />
                       <strong>Maximum size:</strong> 10MB per file
@@ -467,8 +467,8 @@ export default function TicketForm() {
                     <div className="mt-4 space-y-2">
                       <Label className="text-sm">Existing Attachments</Label>
                       {existingAttachments.map((path, index) => (
-                        <div key={index} className="flex items-center justify-between p-2 bg-gray-50 rounded border">
-                          <span className="text-sm text-gray-700">{getFileName(path)}</span>
+                        <div key={index} className="flex items-center justify-between p-2 bg-surface-alt dark:bg-surface-alt rounded border border-border">
+                          <span className="text-sm text-text-primary">{getFileName(path)}</span>
                           <Button
                             type="button"
                             variant="ghost"
@@ -487,9 +487,9 @@ export default function TicketForm() {
                     <div className="mt-4 space-y-2">
                       <Label className="text-sm">New Files</Label>
                       {selectedFiles.map((file, index) => (
-                        <div key={index} className="flex items-center justify-between p-2 bg-blue-50 rounded border">
-                          <span className="text-sm text-gray-700">{file.name}</span>
-                          <span className="text-xs text-gray-500">
+                        <div key={index} className="flex items-center justify-between p-2 bg-accent-primary/10 dark:bg-accent-primary/20 rounded border border-border">
+                          <span className="text-sm text-text-primary">{file.name}</span>
+                          <span className="text-xs text-text-secondary">
                             {(file.size / 1024 / 1024).toFixed(2)} MB
                           </span>
                           <Button

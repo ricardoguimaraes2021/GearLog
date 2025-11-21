@@ -119,23 +119,23 @@ export default function TicketDetail() {
 
   const getPriorityColor = (priority: string) => {
     const colors = {
-      low: 'bg-gray-100 text-gray-800',
-      medium: 'bg-blue-100 text-blue-800',
-      high: 'bg-orange-100 text-orange-800',
-      critical: 'bg-red-100 text-red-800',
+      low: 'bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-gray-200',
+      medium: 'bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-200',
+      high: 'bg-orange-100 dark:bg-orange-900/30 text-orange-800 dark:text-orange-200',
+      critical: 'bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-200',
     };
-    return colors[priority as keyof typeof colors] || 'bg-gray-100 text-gray-800';
+    return colors[priority as keyof typeof colors] || 'bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-gray-200';
   };
 
   const getStatusColor = (status: string) => {
     const colors = {
-      open: 'bg-green-100 text-green-800',
-      in_progress: 'bg-blue-100 text-blue-800',
-      waiting_parts: 'bg-yellow-100 text-yellow-800',
-      resolved: 'bg-purple-100 text-purple-800',
-      closed: 'bg-gray-100 text-gray-800',
+      open: 'bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-200',
+      in_progress: 'bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-200',
+      waiting_parts: 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-200',
+      resolved: 'bg-purple-100 dark:bg-purple-900/30 text-purple-800 dark:text-purple-200',
+      closed: 'bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-gray-200',
     };
-    return colors[status as keyof typeof colors] || 'bg-gray-100 text-gray-800';
+    return colors[status as keyof typeof colors] || 'bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-gray-200';
   };
 
   const formatStatus = (status: string) => {
@@ -287,8 +287,8 @@ export default function TicketDetail() {
             </Button>
           </Link>
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">{currentTicket.title}</h1>
-            <p className="text-sm text-gray-500">Ticket #{currentTicket.id}</p>
+            <h1 className="text-3xl font-bold text-text-primary">{currentTicket.title}</h1>
+            <p className="text-sm text-text-secondary">Ticket #{currentTicket.id}</p>
           </div>
         </div>
         {canEdit && (
@@ -335,38 +335,38 @@ export default function TicketDetail() {
               </CardHeader>
               <CardContent className="space-y-4">
                 {/* First Response SLA */}
-                <div className="border rounded-lg p-4">
+                <div className="border border-border rounded-lg p-4">
                   <div className="flex items-center justify-between mb-2">
-                    <span className="font-medium">First Response</span>
+                    <span className="font-medium text-text-primary">First Response</span>
                     {currentTicket.sla.first_response_violated ? (
-                      <span className="flex items-center gap-1 text-red-600 text-sm font-medium">
+                      <span className="flex items-center gap-1 text-destructive dark:text-red-400 text-sm font-medium">
                         <AlertCircle className="w-4 h-4" />
                         Violated
                       </span>
                     ) : currentTicket.sla.sla_at_risk.first_response ? (
-                      <span className="flex items-center gap-1 text-orange-600 text-sm font-medium">
+                      <span className="flex items-center gap-1 text-warning dark:text-orange-400 text-sm font-medium">
                         <AlertCircle className="w-4 h-4" />
                         At Risk
                       </span>
                     ) : currentTicket.first_response_at ? (
-                      <span className="flex items-center gap-1 text-green-600 text-sm font-medium">
+                      <span className="flex items-center gap-1 text-success dark:text-green-400 text-sm font-medium">
                         <CheckCircle2 className="w-4 h-4" />
                         Responded
                       </span>
                     ) : (
-                      <span className="text-gray-600 text-sm">Pending</span>
+                      <span className="text-text-secondary text-sm">Pending</span>
                     )}
                   </div>
                   {currentTicket.first_response_deadline && (
-                    <div className="text-sm text-gray-600">
+                    <div className="text-sm text-text-secondary">
                       <div>Deadline: {new Date(currentTicket.first_response_deadline).toLocaleString()}</div>
                       {currentTicket.first_response_at && (
-                        <div className="text-green-600 mt-1">
+                        <div className="text-success dark:text-green-400 mt-1">
                           Responded: {new Date(currentTicket.first_response_at).toLocaleString()}
                         </div>
                       )}
                       {currentTicket.sla.time_remaining_first_response !== null && !currentTicket.first_response_at && (
-                        <div className={`mt-1 ${currentTicket.sla.time_remaining_first_response < 60 ? 'text-red-600' : 'text-gray-600'}`}>
+                        <div className={`mt-1 ${currentTicket.sla.time_remaining_first_response < 60 ? 'text-destructive dark:text-red-400' : 'text-text-secondary'}`}>
                           Time remaining: {Math.floor(currentTicket.sla.time_remaining_first_response / 60)}h {currentTicket.sla.time_remaining_first_response % 60}m
                         </div>
                       )}
@@ -375,33 +375,33 @@ export default function TicketDetail() {
                 </div>
 
                 {/* Resolution SLA */}
-                <div className="border rounded-lg p-4">
+                <div className="border border-border rounded-lg p-4">
                   <div className="flex items-center justify-between mb-2">
-                    <span className="font-medium">Resolution</span>
+                    <span className="font-medium text-text-primary">Resolution</span>
                     {currentTicket.sla.resolution_violated ? (
-                      <span className="flex items-center gap-1 text-red-600 text-sm font-medium">
+                      <span className="flex items-center gap-1 text-destructive dark:text-red-400 text-sm font-medium">
                         <AlertCircle className="w-4 h-4" />
                         Violated
                       </span>
                     ) : currentTicket.sla.sla_at_risk.resolution ? (
-                      <span className="flex items-center gap-1 text-orange-600 text-sm font-medium">
+                      <span className="flex items-center gap-1 text-warning dark:text-orange-400 text-sm font-medium">
                         <AlertCircle className="w-4 h-4" />
                         At Risk
                       </span>
                     ) : ['resolved', 'closed'].includes(currentTicket.status) ? (
-                      <span className="flex items-center gap-1 text-green-600 text-sm font-medium">
+                      <span className="flex items-center gap-1 text-success dark:text-green-400 text-sm font-medium">
                         <CheckCircle2 className="w-4 h-4" />
                         Resolved
                       </span>
                     ) : (
-                      <span className="text-gray-600 text-sm">In Progress</span>
+                      <span className="text-text-secondary text-sm">In Progress</span>
                     )}
                   </div>
                   {currentTicket.resolution_deadline && (
-                    <div className="text-sm text-gray-600">
+                    <div className="text-sm text-text-secondary">
                       <div>Deadline: {new Date(currentTicket.resolution_deadline).toLocaleString()}</div>
                       {currentTicket.sla.time_remaining_resolution !== null && !['resolved', 'closed'].includes(currentTicket.status) && (
-                        <div className={`mt-1 ${currentTicket.sla.time_remaining_resolution < 120 ? 'text-red-600' : 'text-gray-600'}`}>
+                        <div className={`mt-1 ${currentTicket.sla.time_remaining_resolution < 120 ? 'text-destructive dark:text-red-400' : 'text-text-secondary'}`}>
                           Time remaining: {Math.floor(currentTicket.sla.time_remaining_resolution / 60)}h {currentTicket.sla.time_remaining_resolution % 60}m
                         </div>
                       )}
@@ -424,18 +424,18 @@ export default function TicketDetail() {
               <CardContent>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                   {currentTicket.attachments.map((path: string, index: number) => (
-                    <div key={index} className="flex items-center justify-between p-2 bg-gray-50 rounded border">
+                    <div key={index} className="flex items-center justify-between p-2 bg-surface-alt dark:bg-surface-alt rounded border border-border">
                       <div className="flex items-center gap-2 flex-1 min-w-0">
-                        <Paperclip className="w-4 h-4 text-gray-500 flex-shrink-0" />
-                        <span className="text-sm text-gray-700 truncate">{getFileName(path)}</span>
+                        <Paperclip className="w-4 h-4 text-text-secondary flex-shrink-0" />
+                        <span className="text-sm text-text-primary truncate">{getFileName(path)}</span>
                       </div>
                       <a
                         href={getFileUrl(path)}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="ml-2 p-1 hover:bg-gray-200 rounded"
+                        className="ml-2 p-1 hover:bg-surface-alt dark:hover:bg-surface-alt rounded"
                       >
-                        <Download className="w-4 h-4 text-blue-600" />
+                        <Download className="w-4 h-4 text-accent-primary" />
                       </a>
                     </div>
                   ))}
@@ -455,29 +455,29 @@ export default function TicketDetail() {
             <CardContent className="space-y-4">
               {currentTicket.comments && currentTicket.comments.length > 0 ? (
                 currentTicket.comments.map((comment: TicketComment) => (
-                  <div key={comment.id} className="border-l-4 border-blue-500 pl-4 py-2">
+                  <div key={comment.id} className="border-l-4 border-accent-primary pl-4 py-2">
                     <div className="flex items-center gap-2 mb-2">
-                      <User className="w-4 h-4 text-gray-500" />
-                      <span className="font-medium">{comment.user?.name || 'Unknown'}</span>
-                      <span className="text-sm text-gray-500">
+                      <User className="w-4 h-4 text-text-secondary" />
+                      <span className="font-medium text-text-primary">{comment.user?.name || 'Unknown'}</span>
+                      <span className="text-sm text-text-secondary">
                         <Clock className="w-3 h-3 inline mr-1" />
                         {new Date(comment.created_at).toLocaleString()}
                       </span>
                     </div>
-                        <p className="text-gray-700 whitespace-pre-wrap">{comment.message}</p>
+                        <p className="text-text-primary whitespace-pre-wrap">{comment.message}</p>
                         {comment.attachments && comment.attachments.length > 0 && (
                           <div className="mt-2 space-y-1">
                             {comment.attachments.map((path: string, attIndex: number) => (
-                              <div key={attIndex} className="flex items-center gap-2 p-2 bg-gray-50 rounded border text-sm">
-                                <Paperclip className="w-4 h-4 text-gray-500" />
-                                <span className="text-gray-700 flex-1 truncate">{getFileName(path)}</span>
+                              <div key={attIndex} className="flex items-center gap-2 p-2 bg-surface-alt dark:bg-surface-alt rounded border border-border text-sm">
+                                <Paperclip className="w-4 h-4 text-text-secondary" />
+                                <span className="text-text-primary flex-1 truncate">{getFileName(path)}</span>
                                 <a
                                   href={getFileUrl(path)}
                                   target="_blank"
                                   rel="noopener noreferrer"
-                                  className="p-1 hover:bg-gray-200 rounded"
+                                  className="p-1 hover:bg-surface-alt dark:hover:bg-surface-alt rounded"
                                 >
-                                  <Download className="w-4 h-4 text-blue-600" />
+                                  <Download className="w-4 h-4 text-accent-primary" />
                                 </a>
                               </div>
                             ))}
@@ -486,7 +486,7 @@ export default function TicketDetail() {
                       </div>
                     ))
                   ) : (
-                    <p className="text-gray-500 text-center py-4">No comments yet</p>
+                    <p className="text-text-secondary text-center py-4">No comments yet</p>
                   )}
 
                   {canEdit && (
@@ -527,8 +527,8 @@ export default function TicketDetail() {
                         {commentFiles.length > 0 && (
                           <div className="mt-2 space-y-1">
                             {commentFiles.map((file, index) => (
-                              <div key={index} className="flex items-center justify-between p-2 bg-blue-50 rounded border text-sm">
-                                <span className="text-gray-700">{file.name}</span>
+                              <div key={index} className="flex items-center justify-between p-2 bg-accent-primary/10 dark:bg-accent-primary/20 rounded border border-border text-sm">
+                                <span className="text-text-primary">{file.name}</span>
                                 <Button
                                   type="button"
                                   variant="ghost"
@@ -561,7 +561,7 @@ export default function TicketDetail() {
             </CardHeader>
             <CardContent className="space-y-4">
               <div>
-                <Label className="text-gray-500">Status</Label>
+                <Label className="text-text-secondary">Status</Label>
                 <div className="mt-1">
                   <span className={`px-2 py-1 text-xs font-medium rounded-full ${getStatusColor(currentTicket.status)}`}>
                     {formatStatus(currentTicket.status)}
@@ -614,7 +614,7 @@ export default function TicketDetail() {
               </div>
 
               <div>
-                <Label className="text-gray-500">Priority</Label>
+                <Label className="text-text-secondary">Priority</Label>
                 <div className="mt-1">
                   <span className={`px-2 py-1 text-xs font-medium rounded-full ${getPriorityColor(currentTicket.priority)}`}>
                     {currentTicket.priority.toUpperCase()}
@@ -623,14 +623,14 @@ export default function TicketDetail() {
               </div>
 
               <div>
-                <Label className="text-gray-500">Type</Label>
-                <p className="mt-1 capitalize">{currentTicket.type}</p>
+                <Label className="text-text-secondary">Type</Label>
+                <p className="mt-1 capitalize text-text-primary">{currentTicket.type}</p>
               </div>
 
               {currentTicket.product && (
                 <div>
-                  <Label className="text-gray-500">Product</Label>
-                  <Link to={`/inventory/products/${currentTicket.product.id}`} className="mt-1 text-blue-600 hover:underline block">
+                  <Label className="text-text-secondary">Product</Label>
+                  <Link to={`/inventory/products/${currentTicket.product.id}`} className="mt-1 text-accent-primary hover:text-accent-primary/80 hover:underline block">
                     {currentTicket.product.name}
                   </Link>
                 </div>
@@ -638,23 +638,23 @@ export default function TicketDetail() {
 
               {(currentTicket as any).employee && (
                 <div>
-                  <Label className="text-gray-500">Employee</Label>
-                  <Link to={`/employees/${(currentTicket as any).employee.id}`} className="mt-1 text-blue-600 hover:underline block">
+                  <Label className="text-text-secondary">Employee</Label>
+                  <Link to={`/employees/${(currentTicket as any).employee.id}`} className="mt-1 text-accent-primary hover:text-accent-primary/80 hover:underline block">
                     {(currentTicket as any).employee.name} ({(currentTicket as any).employee.employee_code})
                   </Link>
                 </div>
               )}
 
               <div>
-                <Label className="text-gray-500">Opened By</Label>
-                <p className="mt-1">{currentTicket.openedBy?.name || 'Unknown'}</p>
+                <Label className="text-text-secondary">Opened By</Label>
+                <p className="mt-1 text-text-primary">{currentTicket.openedBy?.name || 'Unknown'}</p>
               </div>
 
               <div>
-                <Label className="text-gray-500">Assigned To</Label>
+                <Label className="text-text-secondary">Assigned To</Label>
                 {currentTicket.assignedTo ? (
                   <div className="mt-1">
-                    <p className="mb-2">
+                    <p className="mb-2 text-text-primary">
                       {currentTicket.assignedTo.name}
                     </p>
                     {canAssign && canEdit && (
@@ -670,7 +670,7 @@ export default function TicketDetail() {
                   </div>
                 ) : (
                   <div className="mt-1">
-                    <p className="text-gray-400 mb-2">Not assigned</p>
+                    <p className="text-text-muted mb-2">Not assigned</p>
                     {canAssign && canEdit && (
                       <Button
                         size="sm"
@@ -689,8 +689,8 @@ export default function TicketDetail() {
               </div>
 
               <div>
-                <Label className="text-gray-500">Created</Label>
-                <p className="mt-1">{new Date(currentTicket.created_at).toLocaleString()}</p>
+                <Label className="text-text-secondary">Created</Label>
+                <p className="mt-1 text-text-primary">{new Date(currentTicket.created_at).toLocaleString()}</p>
               </div>
             </CardContent>
           </Card>

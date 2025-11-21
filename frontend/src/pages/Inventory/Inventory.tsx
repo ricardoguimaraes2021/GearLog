@@ -12,7 +12,7 @@ export default function Inventory() {
   return (
     <div className="space-y-6">
       {/* Sub-navigation tabs */}
-      <div className="border-b border-gray-200">
+      <div className="border-b border-border">
         <nav className="-mb-px flex space-x-8" aria-label="Tabs">
           {tabs.map((tab) => {
             const Icon = tab.icon;
@@ -26,8 +26,8 @@ export default function Inventory() {
                 className={`
                   inline-flex items-center px-1 pt-4 pb-4 border-b-2 text-sm font-medium
                   ${isActive
-                    ? 'border-blue-500 text-blue-600'
-                    : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700'
+                    ? 'border-accent-primary text-accent-primary'
+                    : 'border-transparent text-text-secondary hover:border-border hover:text-text-primary'
                   }
                 `}
               >

@@ -295,7 +295,7 @@ export default function Dashboard() {
           <CardContent>
             <div className="space-y-4">
               {data.alerts.low_stock > 0 && (
-                <div className="border-b pb-4 last:border-b-0 last:pb-0">
+                <div className="border-b border-border pb-4 last:border-b-0 last:pb-0">
                   <button
                     onClick={() => toggleAlert('low_stock')}
                     className="flex items-center justify-between w-full text-left text-warning hover:text-warning/80"
@@ -338,7 +338,7 @@ export default function Dashboard() {
                 </div>
               )}
               {data.alerts.damaged > 0 && (
-                <div className="border-b pb-4 last:border-b-0 last:pb-0">
+                <div className="border-b border-border pb-4 last:border-b-0 last:pb-0">
                   <button
                     onClick={() => toggleAlert('damaged')}
                     className="flex items-center justify-between w-full text-left text-danger hover:text-danger/80"
@@ -381,7 +381,7 @@ export default function Dashboard() {
                 </div>
               )}
               {data.alerts.inactive > 0 && (
-                <div className="border-b pb-4 last:border-b-0 last:pb-0">
+                <div className="border-b border-border pb-4 last:border-b-0 last:pb-0">
                   <button
                     onClick={() => toggleAlert('inactive')}
                     className="flex items-center justify-between w-full text-left text-warning hover:text-warning/80"
@@ -425,7 +425,7 @@ export default function Dashboard() {
               )}
               {/* SLA Violated Tickets - hidden for viewers */}
               {!isViewer && data.alerts.sla_violated !== undefined && data.alerts.sla_violated > 0 && (
-                <div className="border-b pb-4 last:border-b-0 last:pb-0">
+                <div className="border-b border-border pb-4 last:border-b-0 last:pb-0">
                   <button
                     onClick={() => toggleAlert('sla_violated')}
                     className="flex items-center justify-between w-full text-left text-danger hover:text-danger/80"
@@ -476,7 +476,7 @@ export default function Dashboard() {
               )}
               {/* SLA At Risk Tickets - hidden for viewers */}
               {!isViewer && data.alerts.sla_at_risk !== undefined && data.alerts.sla_at_risk > 0 && (
-                <div className="border-b pb-4 last:border-b-0 last:pb-0">
+                <div className="border-b border-border pb-4 last:border-b-0 last:pb-0">
                   <button
                     onClick={() => toggleAlert('sla_at_risk')}
                     className="flex items-center justify-between w-full text-left text-warning hover:text-warning/80"
@@ -515,7 +515,7 @@ export default function Dashboard() {
                                 <span className="ml-2">Assigned to: {ticket.assigned_to}</span>
                               )}
                               {(ticket.first_response_at_risk || ticket.resolution_at_risk) && (
-                                <span className="ml-2 text-orange-600">
+                                <span className="ml-2 text-warning dark:text-warning">
                                   {ticket.first_response_at_risk && ticket.resolution_at_risk
                                     ? 'First Response & Resolution at risk'
                                     : ticket.first_response_at_risk
@@ -536,7 +536,7 @@ export default function Dashboard() {
               )}
               {/* Critical Tickets - hidden for viewers */}
               {!isViewer && data.alerts.critical_tickets !== undefined && data.alerts.critical_tickets > 0 && (
-                <div className="border-b pb-4 last:border-b-0 last:pb-0">
+                <div className="border-b border-border pb-4 last:border-b-0 last:pb-0">
                   <button
                     onClick={() => toggleAlert('critical_tickets')}
                     className="flex items-center justify-between w-full text-left text-danger hover:text-danger/80"
@@ -587,7 +587,7 @@ export default function Dashboard() {
               )}
               {/* Unassigned Tickets - hidden for viewers */}
               {!isViewer && data.alerts.unassigned_tickets !== undefined && data.alerts.unassigned_tickets > 0 && (
-                <div className="border-b pb-4 last:border-b-0 last:pb-0">
+                <div className="border-b border-border pb-4 last:border-b-0 last:pb-0">
                   <button
                     onClick={() => toggleAlert('unassigned_tickets')}
                     className="flex items-center justify-between w-full text-left text-warning hover:text-warning/80"
@@ -647,8 +647,8 @@ export default function Dashboard() {
           <div className="space-y-2">
             {data.products_by_category.map((item) => (
               <div key={item.name} className="flex justify-between items-center">
-                <span>{item.name}</span>
-                <span className="font-semibold">{item.count}</span>
+                <span className="text-text-primary">{item.name}</span>
+                <span className="font-semibold text-text-primary">{item.count}</span>
               </div>
             ))}
           </div>
@@ -672,7 +672,7 @@ export default function Dashboard() {
                   const timestamp = activity.timestamp || activity.created_at || activity.assigned_at || activity.returned_at;
                   
                   return (
-                    <div key={activity.id} className="flex justify-between items-start text-sm border-b pb-2 last:border-b-0 last:pb-0">
+                    <div key={activity.id} className="flex justify-between items-start text-sm border-b border-border pb-2 last:border-b-0 last:pb-0">
                       <div className="flex-1">
                         {isAssignment ? (
                           <div>

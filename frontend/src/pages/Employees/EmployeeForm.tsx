@@ -73,6 +73,12 @@ export default function EmployeeForm() {
       setErrors({ position: 'Position is required' });
       return;
     }
+    
+    // Phone validation - only numbers, spaces, +, -, and parentheses
+    if (formData.phone && !/^[\d\s\+\-\(\)]+$/.test(formData.phone)) {
+      setErrors({ phone: 'Phone number can only contain numbers, spaces, +, -, and parentheses' });
+      return;
+    }
 
     try {
       const data = {
@@ -142,10 +148,10 @@ export default function EmployeeForm() {
           Back
         </Button>
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">
+          <h1 className="text-3xl font-bold text-text-primary">
             {isEditing ? 'Edit Employee' : 'Add Employee'}
           </h1>
-          <p className="text-sm text-gray-500">
+          <p className="text-sm text-text-secondary">
             {isEditing ? 'Update employee information' : 'Create a new employee'}
           </p>
         </div>
@@ -168,7 +174,7 @@ export default function EmployeeForm() {
                   disabled={isEditing}
                 />
                 {errors.employee_code && (
-                  <p className="text-sm text-red-500 mt-1">{errors.employee_code}</p>
+                  <p className="text-sm text-destructive mt-1">{errors.employee_code}</p>
                 )}
               </div>
 
@@ -181,7 +187,7 @@ export default function EmployeeForm() {
                   required
                 />
                 {errors.name && (
-                  <p className="text-sm text-red-500 mt-1">{errors.name}</p>
+                  <p className="text-sm text-destructive mt-1">{errors.name}</p>
                 )}
               </div>
 
@@ -195,7 +201,7 @@ export default function EmployeeForm() {
                   required
                 />
                 {errors.email && (
-                  <p className="text-sm text-red-500 mt-1">{errors.email}</p>
+                  <p className="text-sm text-destructive mt-1">{errors.email}</p>
                 )}
               </div>
 
@@ -204,18 +210,23 @@ export default function EmployeeForm() {
                 <Input
                   id="phone"
                   type="tel"
-                  value={formData.phone}
-                  onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                  value={formData.phone || ''}
+                  onChange={(e) => {
+                    // Only allow numbers, spaces, +, -, and parentheses for country codes
+                    const value = e.target.value.replace(/[^\d+\-() ]/g, '');
+                    setFormData({ ...formData, phone: value });
+                  }}
+                  placeholder="+1234567890 or (123) 456-7890"
                 />
                 {errors.phone && (
-                  <p className="text-sm text-red-500 mt-1">{errors.phone}</p>
+                  <p className="text-sm text-destructive mt-1">{errors.phone}</p>
                 )}
               </div>
 
               <div>
                 <Label htmlFor="department_id">Department</Label>
                 <Select
-                  value={formData.department_id || undefined}
+                  value={formData.department_id || 'none'}
                   onValueChange={(value) => setFormData({ ...formData, department_id: value === 'none' ? '' : value })}
                 >
                   <SelectTrigger>
@@ -231,7 +242,7 @@ export default function EmployeeForm() {
                   </SelectContent>
                 </Select>
                 {errors.department_id && (
-                  <p className="text-sm text-red-500 mt-1">{errors.department_id}</p>
+                  <p className="text-sm text-destructive mt-1">{errors.department_id}</p>
                 )}
               </div>
 
@@ -244,7 +255,7 @@ export default function EmployeeForm() {
                   required
                 />
                 {errors.position && (
-                  <p className="text-sm text-red-500 mt-1">{errors.position}</p>
+                  <p className="text-sm text-destructive mt-1">{errors.position}</p>
                 )}
               </div>
 

@@ -265,7 +265,7 @@ export default function ProductForm() {
           Back
         </Button>
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">
+          <h1 className="text-3xl font-bold text-text-primary">
             {isEditing ? 'Edit Product' : 'New Product'}
           </h1>
         </div>
@@ -279,7 +279,7 @@ export default function ProductForm() {
           <CardContent className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <Label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
+                <Label htmlFor="name" className="block text-sm font-medium text-text-primary mb-1">
                   Name *
                 </Label>
                 <Input
@@ -289,10 +289,10 @@ export default function ProductForm() {
                     setFormData({ ...formData, name: e.target.value });
                     if (errors.name) setErrors({ ...errors, name: '' });
                   }}
-                  className={errors.name ? 'border-red-500' : ''}
+                  className={errors.name ? 'border-destructive' : ''}
                   required
                 />
-                {errors.name && <p className="text-sm text-red-500 mt-1">{errors.name}</p>}
+                {errors.name && <p className="text-sm text-destructive mt-1">{errors.name}</p>}
               </div>
 
               <div>
@@ -316,11 +316,11 @@ export default function ProductForm() {
                     </option>
                   ))}
                 </select>
-                {errors.category_id && <p className="text-sm text-red-500 mt-1">{errors.category_id}</p>}
+                {errors.category_id && <p className="text-sm text-destructive mt-1">{errors.category_id}</p>}
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Brand</label>
+                <label className="block text-sm font-medium text-text-primary mb-1">Brand</label>
                 <Input
                   value={formData.brand}
                   onChange={(e) => setFormData({ ...formData, brand: e.target.value })}
@@ -328,7 +328,7 @@ export default function ProductForm() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Model</label>
+                <label className="block text-sm font-medium text-text-primary mb-1">Model</label>
                 <Input
                   value={formData.model}
                   onChange={(e) => setFormData({ ...formData, model: e.target.value })}
@@ -336,7 +336,7 @@ export default function ProductForm() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-sm font-medium text-text-primary mb-1">
                   Serial Number
                 </label>
                 <Input
@@ -364,7 +364,7 @@ export default function ProductForm() {
               </div>
 
               <div>
-                <Label htmlFor="quantity" className="block text-sm font-medium text-gray-700 mb-1">
+                <Label htmlFor="quantity" className="block text-sm font-medium text-text-primary mb-1">
                   Quantity *
                 </Label>
                 <Input
@@ -376,14 +376,14 @@ export default function ProductForm() {
                     setFormData({ ...formData, quantity: parseInt(e.target.value) || 0 });
                     if (errors.quantity) setErrors({ ...errors, quantity: '' });
                   }}
-                  className={errors.quantity ? 'border-red-500' : ''}
+                  className={errors.quantity ? 'border-destructive' : ''}
                   required
                 />
-                {errors.quantity && <p className="text-sm text-red-500 mt-1">{errors.quantity}</p>}
+                {errors.quantity && <p className="text-sm text-destructive mt-1">{errors.quantity}</p>}
               </div>
 
               <div>
-                <Label htmlFor="value" className="block text-sm font-medium text-gray-700 mb-1">Value</Label>
+                <Label htmlFor="value" className="block text-sm font-medium text-text-primary mb-1">Value</Label>
                 <Input
                   id="value"
                   type="number"
@@ -394,13 +394,13 @@ export default function ProductForm() {
                     setFormData({ ...formData, value: e.target.value });
                     if (errors.value) setErrors({ ...errors, value: '' });
                   }}
-                  className={errors.value ? 'border-red-500' : ''}
+                  className={errors.value ? 'border-destructive' : ''}
                 />
-                {errors.value && <p className="text-sm text-red-500 mt-1">{errors.value}</p>}
+                {errors.value && <p className="text-sm text-destructive mt-1">{errors.value}</p>}
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-sm font-medium text-text-primary mb-1">
                   Purchase Date
                 </label>
                 <Input
@@ -417,15 +417,15 @@ export default function ProductForm() {
                     setFormData({ ...formData, purchase_date: selectedDate });
                     if (errors.purchase_date) setErrors({ ...errors, purchase_date: '' });
                   }}
-                  className={errors.purchase_date ? 'border-red-500' : ''}
+                  className={errors.purchase_date ? 'border-destructive' : ''}
                 />
                 {errors.purchase_date && (
-                  <p className="text-sm text-red-500 mt-1">{errors.purchase_date}</p>
+                  <p className="text-sm text-destructive mt-1">{errors.purchase_date}</p>
                 )}
               </div>
 
               <div className="md:col-span-2">
-                <label className="block text-sm font-medium text-gray-700 mb-1">Image</label>
+                <label className="block text-sm font-medium text-text-primary mb-1">Image</label>
                 <Input 
                   id="image-input"
                   type="file" 
@@ -449,7 +449,7 @@ export default function ProductForm() {
               </div>
 
               <div className="md:col-span-2">
-                <label className="block text-sm font-medium text-gray-700 mb-1">Invoice (PDF or Image)</label>
+                <label className="block text-sm font-medium text-text-primary mb-1">Invoice (PDF or Image)</label>
                 <Input 
                   id="invoice-input"
                   type="file" 
@@ -472,7 +472,7 @@ export default function ProductForm() {
                 )}
                 {invoice && !invoicePreview && (
                   <div className="mt-2 flex items-center gap-3">
-                    <span className="text-sm text-gray-600">{invoice.name}</span>
+                    <span className="text-sm text-text-secondary">{invoice.name}</span>
                     <Button
                       type="button"
                       variant="outline"
@@ -485,12 +485,12 @@ export default function ProductForm() {
                 )}
                 {invoicePreview && !invoice && currentProduct?.invoice_url && (
                   <div className="mt-2">
-                    <p className="text-sm text-gray-600 mb-2">Current invoice:</p>
+                    <p className="text-sm text-text-secondary mb-2">Current invoice:</p>
                     <a
                       href={invoicePreview}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="text-blue-600 hover:underline text-sm"
+                      className="text-accent-primary hover:text-accent-primary/80 hover:underline text-sm"
                     >
                       View Invoice
                     </a>
@@ -499,22 +499,22 @@ export default function ProductForm() {
               </div>
 
               <div className="md:col-span-2">
-                <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
+                <label className="block text-sm font-medium text-text-primary mb-1">Description</label>
                 <textarea
                   value={formData.description}
                   onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                  className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+                  className="w-full rounded-md border border-border bg-background dark:bg-surface text-text-primary px-3 py-2 text-sm focus:border-accent-primary focus:outline-none focus:ring-2 focus:ring-accent-primary/20"
                   rows={4}
                 />
               </div>
 
               <div className="md:col-span-2">
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-sm font-medium text-text-primary mb-1">
                   Specifications
                 </label>
-                <div className="space-y-2 border rounded-md p-4 bg-gray-50">
+                <div className="space-y-2 border border-border rounded-md p-4 bg-surface-alt dark:bg-surface-alt">
                   {specsEntries.length === 0 ? (
-                    <p className="text-sm text-gray-500 text-center py-2">
+                    <p className="text-sm text-text-secondary text-center py-2">
                       No specifications added. Click "Add Specification" to add one.
                     </p>
                   ) : (
@@ -565,7 +565,7 @@ export default function ProductForm() {
                     + Add Specification
                   </Button>
                 </div>
-                <p className="text-xs text-gray-500 mt-1">
+                <p className="text-xs text-text-secondary mt-1">
                   Add key-value pairs for product specifications (e.g., RAM: 16GB, Storage: 512GB)
                 </p>
               </div>

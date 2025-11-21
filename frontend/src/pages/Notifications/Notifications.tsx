@@ -28,11 +28,11 @@ export default function Notifications() {
   }, [page, fetchNotifications]);
 
   const getNotificationIcon = (type: string) => {
-    if (type.includes('sla')) return <AlertTriangle className="h-5 w-5 text-red-500" />;
-    if (type.includes('ticket')) return <Ticket className="h-5 w-5 text-blue-500" />;
-    if (type.includes('stock')) return <Package className="h-5 w-5 text-orange-500" />;
-    if (type.includes('damaged')) return <AlertTriangle className="h-5 w-5 text-red-500" />;
-    return <Bell className="h-5 w-5 text-gray-500" />;
+    if (type.includes('sla')) return <AlertTriangle className="h-5 w-5 text-danger dark:text-danger" />;
+    if (type.includes('ticket')) return <Ticket className="h-5 w-5 text-accent-primary dark:text-accent-primary" />;
+    if (type.includes('stock')) return <Package className="h-5 w-5 text-warning dark:text-warning" />;
+    if (type.includes('damaged')) return <AlertTriangle className="h-5 w-5 text-danger dark:text-danger" />;
+    return <Bell className="h-5 w-5 text-text-muted" />;
   };
 
   const getNotificationLink = (notification: Notification): string | null => {
@@ -71,8 +71,8 @@ export default function Notifications() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Notifications</h1>
-          <p className="mt-1 text-sm text-gray-500">
+          <h1 className="text-3xl font-bold text-text-primary">Notifications</h1>
+          <p className="mt-1 text-sm text-text-secondary">
             {unreadCount > 0 ? `${unreadCount} unread notification${unreadCount !== 1 ? 's' : ''}` : 'All caught up!'}
           </p>
         </div>
@@ -99,8 +99,8 @@ export default function Notifications() {
         <CardContent className="pt-6">
           <div className="flex flex-wrap gap-4">
             <div className="flex items-center gap-2">
-              <Filter className="h-4 w-4 text-gray-500" />
-              <span className="text-sm font-medium text-gray-700">Filter:</span>
+              <Filter className="h-4 w-4 text-text-muted" />
+              <span className="text-sm font-medium text-text-primary">Filter:</span>
             </div>
             <div className="flex gap-2">
               <Button
@@ -129,7 +129,7 @@ export default function Notifications() {
               <select
                 value={typeFilter}
                 onChange={(e) => setTypeFilter(e.target.value)}
-                className="rounded-md border border-input bg-background px-3 py-2 text-sm"
+                className="rounded-md border border-border bg-background dark:bg-surface text-text-primary px-3 py-2 text-sm focus:border-accent-primary focus:outline-none focus:ring-2 focus:ring-accent-primary/20"
               >
                 <option value="all">All Types</option>
                 {notificationTypes.map((type) => (
@@ -147,9 +147,9 @@ export default function Notifications() {
       {filteredNotifications.length === 0 ? (
         <Card>
           <CardContent className="py-12 text-center">
-            <Bell className="h-16 w-16 mx-auto mb-4 text-gray-300" />
-            <p className="text-lg font-medium text-gray-900 mb-2">No notifications</p>
-            <p className="text-gray-500">
+            <Bell className="h-16 w-16 mx-auto mb-4 text-text-muted opacity-50" />
+            <p className="text-lg font-medium text-text-primary mb-2">No notifications</p>
+            <p className="text-text-secondary">
               {filter === 'all' ? "You're all caught up!" : `No ${filter} notifications`}
             </p>
           </CardContent>
@@ -160,24 +160,24 @@ export default function Notifications() {
             const link = getNotificationLink(notification);
             const isUnread = !notification.read_at;
             const NotificationContent = (
-              <Card className={isUnread ? 'border-blue-500 border-2' : ''}>
+              <Card className={isUnread ? 'border-accent-primary border-2' : ''}>
                 <CardContent className="p-6">
                   <div className="flex items-start gap-4">
                     <div className="mt-1">{getNotificationIcon(notification.type)}</div>
                     <div className="flex-1 min-w-0">
                       <div className="flex items-start justify-between gap-4 mb-2">
                         <div className="flex-1">
-                          <h3 className={`text-lg font-semibold ${isUnread ? 'text-gray-900' : 'text-gray-700'}`}>
+                          <h3 className={`text-lg font-semibold ${isUnread ? 'text-text-primary' : 'text-text-primary'}`}>
                             {notification.title}
                           </h3>
-                          <p className="text-gray-600 mt-1">{notification.message}</p>
+                          <p className="text-text-secondary mt-1">{notification.message}</p>
                         </div>
                         {isUnread && (
-                          <span className="h-3 w-3 rounded-full bg-blue-500 flex-shrink-0 mt-2" />
+                          <span className="h-3 w-3 rounded-full bg-accent-primary dark:bg-accent-primary flex-shrink-0 mt-2" />
                         )}
                       </div>
                       <div className="flex items-center gap-4 mt-4">
-                        <div className="flex items-center gap-2 text-sm text-gray-500">
+                        <div className="flex items-center gap-2 text-sm text-text-muted">
                           <Clock className="h-4 w-4" />
                           {formatDistanceToNow(new Date(notification.created_at), { addSuffix: true })}
                         </div>
@@ -228,7 +228,7 @@ export default function Notifications() {
           >
             Previous
           </Button>
-          <span className="flex items-center px-4 text-sm text-gray-600">Page {page}</span>
+          <span className="flex items-center px-4 text-sm text-text-secondary">Page {page}</span>
           <Button
             variant="outline"
             onClick={() => setPage((p) => p + 1)}

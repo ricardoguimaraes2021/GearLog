@@ -82,13 +82,13 @@ export default function Products() {
 
   const getStatusColor = (status: Product['status']) => {
     const colors = {
-      new: 'bg-green-100 text-green-800',
-      used: 'bg-blue-100 text-blue-800',
-      damaged: 'bg-red-100 text-red-800',
-      repair: 'bg-yellow-100 text-yellow-800',
-      reserved: 'bg-purple-100 text-purple-800',
+      new: 'bg-success/20 dark:bg-success/30 text-success dark:text-green-400',
+      used: 'bg-accent-primary/20 dark:bg-accent-primary/30 text-accent-primary dark:text-blue-300',
+      damaged: 'bg-destructive/20 dark:bg-destructive/30 text-destructive dark:text-red-400',
+      repair: 'bg-warning/20 dark:bg-warning/30 text-warning dark:text-yellow-400',
+      reserved: 'bg-purple-100 dark:bg-purple-900/30 text-purple-800 dark:text-purple-200',
     };
-    return colors[status] || 'bg-gray-100 text-gray-800';
+    return colors[status] || 'bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-gray-200';
   };
 
   return (
@@ -150,7 +150,7 @@ export default function Products() {
             </div>
 
             {showFilters && (
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-4 border-t">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-4 border-t border-border">
                 <div>
                   <label className="block text-sm font-medium text-text-primary mb-1">
                     Category
@@ -256,7 +256,7 @@ export default function Products() {
         </div>
       ) : products.length === 0 ? (
         <Card>
-          <CardContent className="py-8 text-center text-gray-500">
+          <CardContent className="py-8 text-center text-text-secondary">
             No products found
           </CardContent>
         </Card>
@@ -280,23 +280,23 @@ export default function Products() {
                 <CardContent>
                   <div className="space-y-2 text-sm">
                     <div>
-                      <span className="text-gray-500">Category: </span>
-                      <span>{product.category?.name}</span>
+                      <span className="text-text-secondary">Category: </span>
+                      <span className="text-text-primary">{product.category?.name}</span>
                     </div>
                     {product.brand && (
                       <div>
-                        <span className="text-gray-500">Brand: </span>
-                        <span>{product.brand}</span>
+                        <span className="text-text-secondary">Brand: </span>
+                        <span className="text-text-primary">{product.brand}</span>
                       </div>
                     )}
                     <div>
-                      <span className="text-gray-500">Quantity: </span>
-                      <span className="font-semibold">{product.quantity}</span>
+                      <span className="text-text-secondary">Quantity: </span>
+                      <span className="font-semibold text-text-primary">{product.quantity}</span>
                     </div>
                     {product.value && (
                       <div>
-                        <span className="text-gray-500">Value: </span>
-                        <span>€{product.value.toLocaleString()}</span>
+                        <span className="text-text-secondary">Value: </span>
+                        <span className="text-text-primary">€{product.value.toLocaleString()}</span>
                       </div>
                     )}
                   </div>
@@ -332,7 +332,7 @@ export default function Products() {
               >
                 Previous
               </Button>
-              <span className="text-sm text-gray-600">
+              <span className="text-sm text-text-secondary">
                 Page {currentPage} of {pagination.last_page}
               </span>
               <Button

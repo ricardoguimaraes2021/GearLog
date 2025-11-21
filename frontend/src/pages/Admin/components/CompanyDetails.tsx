@@ -182,7 +182,7 @@ export default function CompanyDetails({ companyId, onClose }: CompanyDetailsPro
 
       <CardContent>
         {/* Tabs */}
-        <div className="border-b mb-6">
+        <div className="border-b border-border mb-6">
           <div className="flex">
             <button
               onClick={() => setActiveTab('overview')}
@@ -278,7 +278,7 @@ export default function CompanyDetails({ companyId, onClose }: CompanyDetailsPro
                     <div className="mt-2">
                       <div className="w-full bg-surface-alt rounded-full h-2">
                         <div
-                          className="bg-blue-600 h-2 rounded-full"
+                          className="bg-accent-primary dark:bg-accent-primary h-2 rounded-full"
                           style={{ width: `${Math.min(companyStats.usage.users.percentage, 100)}%` }}
                         ></div>
                       </div>
@@ -296,7 +296,7 @@ export default function CompanyDetails({ companyId, onClose }: CompanyDetailsPro
                     <div className="mt-2">
                       <div className="w-full bg-surface-alt rounded-full h-2">
                         <div
-                          className="bg-green-600 h-2 rounded-full"
+                          className="bg-success dark:bg-success h-2 rounded-full"
                           style={{ width: `${Math.min(companyStats.usage.products.percentage, 100)}%` }}
                         ></div>
                       </div>
@@ -314,7 +314,7 @@ export default function CompanyDetails({ companyId, onClose }: CompanyDetailsPro
                     <div className="mt-2">
                       <div className="w-full bg-surface-alt rounded-full h-2">
                         <div
-                          className="bg-purple-600 h-2 rounded-full"
+                          className="bg-accent-secondary dark:bg-accent-secondary h-2 rounded-full"
                           style={{ width: `${Math.min(companyStats.usage.tickets_this_month.percentage, 100)}%` }}
                         ></div>
                       </div>
@@ -500,7 +500,7 @@ export default function CompanyDetails({ companyId, onClose }: CompanyDetailsPro
                     id="plan-type"
                     value={planData.plan_type}
                     onChange={(e) => setPlanData({ ...planData, plan_type: e.target.value as any })}
-                    className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                    className="flex h-10 w-full rounded-md border border-border bg-background dark:bg-surface px-3 py-2 text-sm text-text-primary ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-primary/20 focus-visible:ring-offset-2 focus-visible:border-accent-primary"
                   >
                     <option value="FREE">FREE</option>
                     <option value="PRO">PRO</option>

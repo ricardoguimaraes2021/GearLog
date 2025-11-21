@@ -93,7 +93,7 @@ export default function Departments() {
         </CardHeader>
         <CardContent>
           <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-text-muted w-4 h-4" />
             <Input
               placeholder="Search departments by name, description, or cost center..."
               value={searchTerm}
@@ -125,7 +125,7 @@ export default function Departments() {
         </div>
       ) : filteredDepartments.length === 0 ? (
         <Card>
-          <CardContent className="py-8 text-center text-gray-500">
+          <CardContent className="py-8 text-center text-text-secondary">
             {searchTerm ? 'No departments found matching your search' : 'No departments found'}
           </CardContent>
         </Card>
@@ -136,59 +136,59 @@ export default function Departments() {
               <CardHeader>
                 <div className="flex justify-between items-start">
                   <CardTitle className="text-lg flex items-center">
-                    <Building2 className="w-5 h-5 mr-2 text-blue-600" />
+                    <Building2 className="w-5 h-5 mr-2 text-accent-primary" />
                     {department.name}
                   </CardTitle>
                 </div>
                 {department.description && (
-                  <p className="text-sm text-gray-600 mt-2 line-clamp-2">{department.description}</p>
+                  <p className="text-sm text-text-secondary mt-2 line-clamp-2">{department.description}</p>
                 )}
               </CardHeader>
               <CardContent>
                 <div className="space-y-3">
                   {department.cost_center && (
                     <div className="text-sm">
-                      <span className="text-gray-500">Cost Center:</span>{' '}
-                      <span className="font-medium">{department.cost_center}</span>
+                      <span className="text-text-secondary">Cost Center:</span>{' '}
+                      <span className="font-medium text-text-primary">{department.cost_center}</span>
                     </div>
                   )}
                   <div className="text-sm min-h-[20px]">
                     {department.manager ? (
                       <>
-                        <span className="text-gray-500">Manager:</span>{' '}
-                        <span className="font-medium">{department.manager.name}</span>
+                        <span className="text-text-secondary">Manager:</span>{' '}
+                        <span className="font-medium text-text-primary">{department.manager.name}</span>
                       </>
                     ) : (
                       <span className="invisible">Manager:</span>
                     )}
                   </div>
 
-                  <div className="grid grid-cols-2 gap-4 pt-3 border-t">
+                  <div className="grid grid-cols-2 gap-4 pt-3 border-t border-border">
                     <div className="text-center">
-                      <div className="flex items-center justify-center text-gray-500 mb-1">
+                      <div className="flex items-center justify-center text-text-secondary mb-1">
                         <Users className="w-4 h-4 mr-1" />
                       </div>
-                      <div className="text-2xl font-bold text-gray-900">
+                      <div className="text-2xl font-bold text-text-primary">
                         {department.employees?.length || 0}
                       </div>
-                      <div className="text-xs text-gray-500">Employees</div>
+                      <div className="text-xs text-text-secondary">Employees</div>
                     </div>
                     <div className="text-center">
-                      <div className="flex items-center justify-center text-gray-500 mb-1">
+                      <div className="flex items-center justify-center text-text-secondary mb-1">
                         <Package className="w-4 h-4 mr-1" />
                       </div>
-                      <div className="text-2xl font-bold text-gray-900">
+                      <div className="text-2xl font-bold text-text-primary">
                         {department.total_assigned_assets || 0}
                       </div>
-                      <div className="text-xs text-gray-500">Assets</div>
+                      <div className="text-xs text-text-secondary">Assets</div>
                     </div>
                   </div>
 
                   {department.total_asset_value !== undefined && department.total_asset_value > 0 && (
-                    <div className="pt-2 border-t">
+                    <div className="pt-2 border-t border-border">
                       <div className="flex items-center justify-between text-sm">
-                        <span className="text-gray-500">Total Value:</span>
-                        <span className="font-semibold text-green-600">
+                        <span className="text-text-secondary">Total Value:</span>
+                        <span className="font-semibold text-success dark:text-green-400">
                           €{department.total_asset_value.toLocaleString('en-US', {
                             minimumFractionDigits: 2,
                             maximumFractionDigits: 2,

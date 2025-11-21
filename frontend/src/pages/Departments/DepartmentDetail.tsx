@@ -73,12 +73,12 @@ export default function DepartmentDetail() {
             </Button>
           </Link>
           <div>
-            <h1 className="text-3xl font-bold text-gray-900 flex items-center">
-              <Building2 className="w-8 h-8 mr-3 text-blue-600" />
+            <h1 className="text-3xl font-bold text-text-primary flex items-center">
+              <Building2 className="w-8 h-8 mr-3 text-accent-primary" />
               {currentDepartment.name}
             </h1>
             {currentDepartment.description && (
-              <p className="mt-1 text-sm text-gray-500">{currentDepartment.description}</p>
+              <p className="mt-1 text-sm text-text-secondary">{currentDepartment.description}</p>
             )}
           </div>
         </div>
@@ -96,12 +96,12 @@ export default function DepartmentDetail() {
           <CardContent className="pt-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-600">Employees</p>
-                <p className="text-2xl font-bold text-gray-900 mt-1">
+                <p className="text-sm font-medium text-text-secondary">Employees</p>
+                <p className="text-2xl font-bold text-text-primary mt-1">
                   {currentDepartment.employees?.length || 0}
                 </p>
               </div>
-              <Users className="w-8 h-8 text-blue-600" />
+              <Users className="w-8 h-8 text-accent-primary" />
             </div>
           </CardContent>
         </Card>
@@ -110,12 +110,12 @@ export default function DepartmentDetail() {
           <CardContent className="pt-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-600">Assigned Assets</p>
-                <p className="text-2xl font-bold text-gray-900 mt-1">
+                <p className="text-sm font-medium text-text-secondary">Assigned Assets</p>
+                <p className="text-2xl font-bold text-text-primary mt-1">
                   {currentDepartment.total_assigned_assets || 0}
                 </p>
               </div>
-              <Package className="w-8 h-8 text-green-600" />
+              <Package className="w-8 h-8 text-success dark:text-green-400" />
             </div>
           </CardContent>
         </Card>
@@ -124,12 +124,12 @@ export default function DepartmentDetail() {
           <CardContent className="pt-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-600">Total Value</p>
-                <p className="text-2xl font-bold text-gray-900 mt-1">
+                <p className="text-sm font-medium text-text-secondary">Total Value</p>
+                <p className="text-2xl font-bold text-text-primary mt-1">
                   €{((currentDepartment.total_asset_value || 0) / 1000).toFixed(1)}k
                 </p>
               </div>
-              <DollarSign className="w-8 h-8 text-green-600" />
+              <DollarSign className="w-8 h-8 text-success dark:text-green-400" />
             </div>
           </CardContent>
         </Card>
@@ -138,26 +138,26 @@ export default function DepartmentDetail() {
           <CardContent className="pt-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-600">Active Tickets</p>
-                <p className="text-2xl font-bold text-gray-900 mt-1">
+                <p className="text-sm font-medium text-text-secondary">Active Tickets</p>
+                <p className="text-2xl font-bold text-text-primary mt-1">
                   {currentDepartment.active_tickets_count || 0}
                 </p>
               </div>
-              <Ticket className="w-8 h-8 text-orange-600" />
+              <Ticket className="w-8 h-8 text-warning dark:text-orange-400" />
             </div>
           </CardContent>
         </Card>
       </div>
 
       {/* Tabs */}
-      <div className="border-b border-gray-200">
+      <div className="border-b border-border">
         <nav className="-mb-px flex space-x-8">
           <button
             onClick={() => setActiveTab('overview')}
             className={`py-4 px-1 border-b-2 font-medium text-sm ${
               activeTab === 'overview'
-                ? 'border-blue-500 text-blue-600'
-                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                ? 'border-accent-primary text-accent-primary'
+                : 'border-transparent text-text-secondary hover:text-text-primary hover:border-border'
             }`}
           >
             Overview
@@ -166,8 +166,8 @@ export default function DepartmentDetail() {
             onClick={() => setActiveTab('employees')}
             className={`py-4 px-1 border-b-2 font-medium text-sm ${
               activeTab === 'employees'
-                ? 'border-blue-500 text-blue-600'
-                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                ? 'border-accent-primary text-accent-primary'
+                : 'border-transparent text-text-secondary hover:text-text-primary hover:border-border'
             }`}
           >
             Employees ({departmentEmployees.length})
@@ -176,8 +176,8 @@ export default function DepartmentDetail() {
             onClick={() => setActiveTab('assets')}
             className={`py-4 px-1 border-b-2 font-medium text-sm ${
               activeTab === 'assets'
-                ? 'border-blue-500 text-blue-600'
-                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                ? 'border-accent-primary text-accent-primary'
+                : 'border-transparent text-text-secondary hover:text-text-primary hover:border-border'
             }`}
           >
             Assets ({currentDepartment.total_assigned_assets || 0})
@@ -186,8 +186,8 @@ export default function DepartmentDetail() {
             onClick={() => setActiveTab('analytics')}
             className={`py-4 px-1 border-b-2 font-medium text-sm ${
               activeTab === 'analytics'
-                ? 'border-blue-500 text-blue-600'
-                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                ? 'border-accent-primary text-accent-primary'
+                : 'border-transparent text-text-secondary hover:text-text-primary hover:border-border'
             }`}
           >
             Analytics
@@ -205,33 +205,33 @@ export default function DepartmentDetail() {
               </CardHeader>
               <CardContent className="space-y-4">
                 <div>
-                  <label className="text-sm font-medium text-gray-500">Name</label>
-                  <p className="mt-1 text-sm text-gray-900">{currentDepartment.name}</p>
+                  <label className="text-sm font-medium text-text-secondary">Name</label>
+                  <p className="mt-1 text-sm text-text-primary">{currentDepartment.name}</p>
                 </div>
                 {currentDepartment.description && (
                   <div>
-                    <label className="text-sm font-medium text-gray-500">Description</label>
-                    <p className="mt-1 text-sm text-gray-900">{currentDepartment.description}</p>
+                    <label className="text-sm font-medium text-text-secondary">Description</label>
+                    <p className="mt-1 text-sm text-text-primary">{currentDepartment.description}</p>
                   </div>
                 )}
                 {currentDepartment.cost_center && (
                   <div>
-                    <label className="text-sm font-medium text-gray-500">Cost Center</label>
-                    <p className="mt-1 text-sm text-gray-900">{currentDepartment.cost_center}</p>
+                    <label className="text-sm font-medium text-text-secondary">Cost Center</label>
+                    <p className="mt-1 text-sm text-text-primary">{currentDepartment.cost_center}</p>
                   </div>
                 )}
                 {currentDepartment.manager && (
                   <div>
-                    <label className="text-sm font-medium text-gray-500">Manager</label>
+                    <label className="text-sm font-medium text-text-secondary">Manager</label>
                     <div className="mt-1">
                       <Link
                         to={`/employees/${currentDepartment.manager.id}`}
-                        className="text-sm text-blue-600 hover:underline"
+                        className="text-sm text-accent-primary hover:text-accent-primary/80 hover:underline"
                       >
                         {currentDepartment.manager.name}
                       </Link>
                       {currentDepartment.manager.employee_code && (
-                        <span className="text-sm text-gray-500 ml-2">
+                        <span className="text-sm text-text-secondary ml-2">
                           ({currentDepartment.manager.employee_code})
                         </span>
                       )}
@@ -247,16 +247,16 @@ export default function DepartmentDetail() {
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="flex justify-between">
-                  <span className="text-sm text-gray-600">Total Employees</span>
-                  <span className="text-sm font-medium">{currentDepartment.employees?.length || 0}</span>
+                  <span className="text-sm text-text-secondary">Total Employees</span>
+                  <span className="text-sm font-medium text-text-primary">{currentDepartment.employees?.length || 0}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-sm text-gray-600">Assigned Assets</span>
-                  <span className="text-sm font-medium">{currentDepartment.total_assigned_assets || 0}</span>
+                  <span className="text-sm text-text-secondary">Assigned Assets</span>
+                  <span className="text-sm font-medium text-text-primary">{currentDepartment.total_assigned_assets || 0}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-sm text-gray-600">Total Asset Value</span>
-                  <span className="text-sm font-medium text-green-600">
+                  <span className="text-sm text-text-secondary">Total Asset Value</span>
+                  <span className="text-sm font-medium text-success dark:text-green-400">
                     €{(currentDepartment.total_asset_value || 0).toLocaleString('en-US', {
                       minimumFractionDigits: 2,
                       maximumFractionDigits: 2,
@@ -264,8 +264,8 @@ export default function DepartmentDetail() {
                   </span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-sm text-gray-600">Active Tickets</span>
-                  <span className="text-sm font-medium">{currentDepartment.active_tickets_count || 0}</span>
+                  <span className="text-sm text-text-secondary">Active Tickets</span>
+                  <span className="text-sm font-medium text-text-primary">{currentDepartment.active_tickets_count || 0}</span>
                 </div>
               </CardContent>
             </Card>
@@ -279,30 +279,30 @@ export default function DepartmentDetail() {
             </CardHeader>
             <CardContent>
               {departmentEmployees.length === 0 ? (
-                <p className="text-sm text-gray-500 text-center py-8">No employees in this department</p>
+                <p className="text-sm text-text-secondary text-center py-8">No employees in this department</p>
               ) : (
                 <div className="space-y-4">
                   {departmentEmployees.map((employee) => (
                     <div
                       key={employee.id}
-                      className="flex items-center justify-between p-4 border rounded-lg hover:bg-gray-50"
+                      className="flex items-center justify-between p-4 border border-border rounded-lg hover:bg-surface-alt dark:hover:bg-surface-alt"
                     >
                       <div className="flex items-center space-x-4">
-                        <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center">
-                          <User className="w-5 h-5 text-blue-600" />
+                        <div className="w-10 h-10 rounded-full bg-accent-primary/10 dark:bg-accent-primary/20 flex items-center justify-center">
+                          <User className="w-5 h-5 text-accent-primary" />
                         </div>
                         <div>
                           <Link
                             to={`/employees/${employee.id}`}
-                            className="font-medium text-gray-900 hover:text-blue-600"
+                            className="font-medium text-text-primary hover:text-accent-primary"
                           >
                             {employee.name}
                           </Link>
-                          <div className="text-sm text-gray-500">
+                          <div className="text-sm text-text-secondary">
                             {employee.position} • {employee.employee_code}
                           </div>
                           {employee.email && (
-                            <div className="text-xs text-gray-400 flex items-center mt-1">
+                            <div className="text-xs text-text-muted flex items-center mt-1">
                               <Mail className="w-3 h-3 mr-1" />
                               {employee.email}
                             </div>
@@ -313,8 +313,8 @@ export default function DepartmentDetail() {
                         <span
                           className={`px-2 py-1 rounded-full text-xs font-medium ${
                             employee.status === 'active'
-                              ? 'bg-green-100 text-green-800'
-                              : 'bg-red-100 text-red-800'
+                              ? 'bg-success/20 dark:bg-success/30 text-success dark:text-green-400'
+                              : 'bg-destructive/20 dark:bg-destructive/30 text-destructive dark:text-red-400'
                           }`}
                         >
                           {employee.status}
@@ -334,7 +334,7 @@ export default function DepartmentDetail() {
               <CardTitle>Assigned Assets</CardTitle>
             </CardHeader>
             <CardContent>
-              <p className="text-sm text-gray-500 text-center py-8">
+              <p className="text-sm text-text-secondary text-center py-8">
                 Asset assignment details will be displayed here. This feature is coming soon.
               </p>
             </CardContent>
@@ -431,7 +431,7 @@ export default function DepartmentDetail() {
                 {(!usageStats.asset_usage || usageStats.asset_usage.length === 0) && 
                  (!usageStats.ticket_usage || usageStats.ticket_usage.length === 0) && (
                   <Card>
-                    <CardContent className="py-8 text-center text-gray-500">
+                    <CardContent className="py-8 text-center text-text-secondary">
                       No usage statistics available
                     </CardContent>
                   </Card>
@@ -439,7 +439,7 @@ export default function DepartmentDetail() {
               </>
             ) : (
               <Card>
-                <CardContent className="py-8 text-center text-gray-500">
+                <CardContent className="py-8 text-center text-text-secondary">
                   Failed to load usage statistics
                 </CardContent>
               </Card>

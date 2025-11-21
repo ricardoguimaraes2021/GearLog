@@ -250,44 +250,44 @@ export default function AdminDashboard() {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Total Companies</CardTitle>
-            <Building2 className="h-4 w-4 text-muted-foreground" />
+            <Building2 className="h-4 w-4 text-text-muted" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{stats.total_companies}</div>
-            <p className="text-xs text-muted-foreground">Active tenants</p>
+            <div className="text-2xl font-bold text-text-primary">{stats.total_companies}</div>
+            <p className="text-xs text-text-secondary">Active tenants</p>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Active Users</CardTitle>
-            <Users className="h-4 w-4 text-muted-foreground" />
+            <Users className="h-4 w-4 text-text-muted" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{stats.total_active_users}</div>
-            <p className="text-xs text-muted-foreground">Across all companies</p>
+            <div className="text-2xl font-bold text-text-primary">{stats.total_active_users}</div>
+            <p className="text-xs text-text-secondary">Across all companies</p>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Total Assets</CardTitle>
-            <Package className="h-4 w-4 text-muted-foreground" />
+            <Package className="h-4 w-4 text-text-muted" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{stats.total_assets}</div>
-            <p className="text-xs text-muted-foreground">Products tracked</p>
+            <div className="text-2xl font-bold text-text-primary">{stats.total_assets}</div>
+            <p className="text-xs text-text-secondary">Products tracked</p>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Total Tickets</CardTitle>
-            <Ticket className="h-4 w-4 text-muted-foreground" />
+            <Ticket className="h-4 w-4 text-text-muted" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{stats.total_tickets}</div>
-            <p className="text-xs text-muted-foreground">All time</p>
+            <div className="text-2xl font-bold text-text-primary">{stats.total_tickets}</div>
+            <p className="text-xs text-text-secondary">All time</p>
           </CardContent>
         </Card>
       </div>

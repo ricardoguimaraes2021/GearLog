@@ -128,7 +128,7 @@ export default function AnalyticsReports() {
                 <select
                   value={filters.company_id || ''}
                   onChange={(e) => handleFilterChange('company_id', e.target.value ? parseInt(e.target.value) : null)}
-                  className="flex h-10 w-full rounded-md border border-border dark:bg-surface dark:text-text-primary text-text-primary bg-background px-3 py-2 text-sm"
+                  className="flex h-10 w-full rounded-md border border-border bg-background dark:bg-surface text-text-primary px-3 py-2 text-sm focus:border-accent-primary focus:outline-none focus:ring-2 focus:ring-accent-primary/20"
                 >
                   <option value="">All Companies</option>
                   {companies.map((company) => (
@@ -144,7 +144,7 @@ export default function AnalyticsReports() {
                 <select
                   value={filters.plan_type || ''}
                   onChange={(e) => handleFilterChange('plan_type', e.target.value || null)}
-                  className="flex h-10 w-full rounded-md border border-border dark:bg-surface dark:text-text-primary text-text-primary bg-background px-3 py-2 text-sm"
+                  className="flex h-10 w-full rounded-md border border-border bg-background dark:bg-surface text-text-primary px-3 py-2 text-sm focus:border-accent-primary focus:outline-none focus:ring-2 focus:ring-accent-primary/20"
                 >
                   <option value="">All Plans</option>
                   <option value="FREE">FREE</option>
@@ -162,40 +162,40 @@ export default function AnalyticsReports() {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Total Companies</CardTitle>
-            <Building2 className="h-4 w-4 text-muted-foreground" />
+            <Building2 className="h-4 w-4 text-text-muted" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{analytics.total_companies}</div>
+            <div className="text-2xl font-bold text-text-primary">{analytics.total_companies}</div>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Total Users</CardTitle>
-            <Users className="h-4 w-4 text-muted-foreground" />
+            <Users className="h-4 w-4 text-text-muted" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{analytics.total_active_users}</div>
+            <div className="text-2xl font-bold text-text-primary">{analytics.total_active_users}</div>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Total Products</CardTitle>
-            <Package className="h-4 w-4 text-muted-foreground" />
+            <Package className="h-4 w-4 text-text-muted" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{analytics.total_assets}</div>
+            <div className="text-2xl font-bold text-text-primary">{analytics.total_assets}</div>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Total Tickets</CardTitle>
-            <Ticket className="h-4 w-4 text-muted-foreground" />
+            <Ticket className="h-4 w-4 text-text-muted" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{analytics.total_tickets}</div>
+            <div className="text-2xl font-bold text-text-primary">{analytics.total_tickets}</div>
           </CardContent>
         </Card>
       </div>
@@ -207,15 +207,15 @@ export default function AnalyticsReports() {
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-3 gap-4">
-            <div className="text-center p-4 border rounded-lg">
+            <div className="text-center p-4 border border-border rounded-lg">
               <div className="text-2xl font-bold text-text-primary">{analytics.plan_distribution.FREE}</div>
               <div className="text-sm text-text-secondary">FREE</div>
             </div>
-            <div className="text-center p-4 border rounded-lg">
+            <div className="text-center p-4 border border-border rounded-lg">
               <div className="text-2xl font-bold text-accent-primary">{analytics.plan_distribution.PRO}</div>
               <div className="text-sm text-text-secondary">PRO</div>
             </div>
-            <div className="text-center p-4 border rounded-lg">
+            <div className="text-center p-4 border border-border rounded-lg">
               <div className="text-2xl font-bold text-accent-secondary">{analytics.plan_distribution.ENTERPRISE}</div>
               <div className="text-sm text-text-secondary">ENTERPRISE</div>
             </div>

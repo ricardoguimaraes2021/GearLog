@@ -38,13 +38,13 @@ export default function SecurityLogs() {
   const getLogIcon = (type: string) => {
     switch (type) {
       case 'failed_login':
-        return <AlertTriangle className="w-5 h-5 text-red-500" />;
+        return <AlertTriangle className="w-5 h-5 text-danger dark:text-danger" />;
       case 'suspicious_activity':
-        return <Shield className="w-5 h-5 text-orange-500" />;
+        return <Shield className="w-5 h-5 text-warning dark:text-warning" />;
       case 'password_reset':
-        return <Lock className="w-5 h-5 text-blue-500" />;
+        return <Lock className="w-5 h-5 text-accent-primary dark:text-accent-primary" />;
       case 'rate_limit':
-        return <UserX className="w-5 h-5 text-purple-500" />;
+        return <UserX className="w-5 h-5 text-accent-secondary dark:text-accent-secondary" />;
       default:
         return <Shield className="w-5 h-5 text-text-muted" />;
     }
@@ -53,15 +53,15 @@ export default function SecurityLogs() {
   const getLogColor = (type: string) => {
     switch (type) {
       case 'failed_login':
-        return 'border-red-200 bg-red-50';
+        return 'border-danger/20 bg-danger/10 dark:bg-danger/20 dark:border-danger/30';
       case 'suspicious_activity':
-        return 'border-orange-200 bg-orange-50';
+        return 'border-warning/20 bg-warning/10 dark:bg-warning/20 dark:border-warning/30';
       case 'password_reset':
-        return 'border-blue-200 bg-blue-50';
+        return 'border-accent-primary/20 bg-accent-primary/10 dark:bg-accent-primary/20 dark:border-accent-primary/30';
       case 'rate_limit':
-        return 'border-purple-200 bg-purple-50';
+        return 'border-accent-secondary/20 bg-accent-secondary/10 dark:bg-accent-secondary/20 dark:border-accent-secondary/30';
       default:
-        return 'border-border bg-background';
+        return 'border-border bg-background dark:bg-surface';
     }
   };
 

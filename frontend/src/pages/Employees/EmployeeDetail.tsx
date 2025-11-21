@@ -73,8 +73,8 @@ export default function EmployeeDetail() {
             </Button>
           </Link>
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">{currentEmployee.name}</h1>
-            <p className="text-sm text-gray-500">Employee Details</p>
+            <h1 className="text-3xl font-bold text-text-primary">{currentEmployee.name}</h1>
+            <p className="text-sm text-text-secondary">Employee Details</p>
           </div>
         </div>
         <div className="flex gap-2">
@@ -106,17 +106,17 @@ export default function EmployeeDetail() {
             <CardContent>
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="text-sm font-medium text-gray-500">Employee Code</label>
-                  <p className="mt-1 font-mono">{currentEmployee.employee_code}</p>
+                  <label className="text-sm font-medium text-text-secondary">Employee Code</label>
+                  <p className="mt-1 font-mono text-text-primary">{currentEmployee.employee_code}</p>
                 </div>
                 <div>
-                  <label className="text-sm font-medium text-gray-500">Status</label>
+                  <label className="text-sm font-medium text-text-secondary">Status</label>
                   <p className="mt-1">
                     <span
                       className={`px-2 py-1 rounded-full text-xs font-medium ${
                         currentEmployee.status === 'active'
-                          ? 'bg-green-100 text-green-800'
-                          : 'bg-gray-100 text-gray-800'
+                          ? 'bg-success/20 dark:bg-success/30 text-success dark:text-green-400'
+                          : 'bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-gray-200'
                       }`}
                     >
                       {currentEmployee.status}
@@ -124,36 +124,36 @@ export default function EmployeeDetail() {
                   </p>
                 </div>
                 <div>
-                  <label className="text-sm font-medium text-gray-500 flex items-center gap-2">
+                  <label className="text-sm font-medium text-text-secondary flex items-center gap-2">
                     <Mail className="w-4 h-4" />
                     Email
                   </label>
-                  <p className="mt-1">{currentEmployee.email}</p>
+                  <p className="mt-1 text-text-primary">{currentEmployee.email}</p>
                 </div>
                 {currentEmployee.phone && (
                   <div>
-                    <label className="text-sm font-medium text-gray-500 flex items-center gap-2">
+                    <label className="text-sm font-medium text-text-secondary flex items-center gap-2">
                       <Phone className="w-4 h-4" />
                       Phone
                     </label>
-                    <p className="mt-1">{currentEmployee.phone}</p>
+                    <p className="mt-1 text-text-primary">{currentEmployee.phone}</p>
                   </div>
                 )}
                 <div>
-                  <label className="text-sm font-medium text-gray-500 flex items-center gap-2">
+                  <label className="text-sm font-medium text-text-secondary flex items-center gap-2">
                     <Building2 className="w-4 h-4" />
                     Department
                   </label>
-                  <p className="mt-1">{currentEmployee.department?.name || 'No Department'}</p>
+                  <p className="mt-1 text-text-primary">{currentEmployee.department?.name || 'No Department'}</p>
                 </div>
                 <div>
-                  <label className="text-sm font-medium text-gray-500">Position</label>
-                  <p className="mt-1 font-medium">{currentEmployee.position}</p>
+                  <label className="text-sm font-medium text-text-secondary">Position</label>
+                  <p className="mt-1 font-medium text-text-primary">{currentEmployee.position}</p>
                 </div>
                 {currentEmployee.notes && (
                   <div className="col-span-2">
-                    <label className="text-sm font-medium text-gray-500">Notes</label>
-                    <p className="mt-1">{currentEmployee.notes}</p>
+                    <label className="text-sm font-medium text-text-secondary">Notes</label>
+                    <p className="mt-1 text-text-primary">{currentEmployee.notes}</p>
                   </div>
                 )}
               </div>
@@ -171,19 +171,19 @@ export default function EmployeeDetail() {
                   {currentEmployee.active_assignments.map((assignment) => (
                     <div
                       key={assignment.id}
-                      className="flex items-center justify-between p-4 border rounded-lg"
+                      className="flex items-center justify-between p-4 border border-border rounded-lg"
                     >
                       <div className="flex-1">
                         <div className="flex items-center gap-2">
-                          <Package className="w-5 h-5 text-blue-600" />
+                          <Package className="w-5 h-5 text-accent-primary" />
                           <Link
                             to={`/inventory/products/${assignment.product?.id}`}
-                            className="font-medium text-blue-600 hover:underline"
+                            className="font-medium text-accent-primary hover:text-accent-primary/80 hover:underline"
                           >
                             {assignment.product?.name}
                           </Link>
                         </div>
-                        <div className="mt-2 text-sm text-gray-600">
+                        <div className="mt-2 text-sm text-text-secondary">
                           <div>
                             Assigned: {new Date(assignment.assigned_at).toLocaleDateString()}
                           </div>
@@ -216,23 +216,23 @@ export default function EmployeeDetail() {
             </CardHeader>
             <CardContent>
               {assignments.length === 0 ? (
-                <p className="text-gray-500 text-center py-4">No assignment history</p>
+                <p className="text-text-secondary text-center py-4">No assignment history</p>
               ) : (
                 <div className="space-y-4">
                   {assignments.map((assignment) => (
                     <div
                       key={assignment.id}
-                      className="p-4 border rounded-lg"
+                      className="p-4 border border-border rounded-lg"
                     >
                       <div className="flex items-center justify-between">
                         <div className="flex-1">
                           <Link
                             to={`/inventory/products/${assignment.product?.id}`}
-                            className="font-medium text-blue-600 hover:underline"
+                            className="font-medium text-accent-primary hover:text-accent-primary/80 hover:underline"
                           >
                             {assignment.product?.name}
                           </Link>
-                          <div className="mt-2 text-sm text-gray-600 space-y-1">
+                          <div className="mt-2 text-sm text-text-secondary space-y-1">
                             <div className="flex items-center gap-2">
                               <Clock className="w-4 h-4" />
                               Assigned: {new Date(assignment.assigned_at).toLocaleString()}
@@ -253,11 +253,11 @@ export default function EmployeeDetail() {
                         </div>
                         <div className="text-right">
                           {assignment.returned_at ? (
-                            <span className="px-2 py-1 bg-gray-100 text-gray-800 rounded text-xs">
+                            <span className="px-2 py-1 bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-gray-200 rounded text-xs">
                               Returned
                             </span>
                           ) : (
-                            <span className="px-2 py-1 bg-blue-100 text-blue-800 rounded text-xs">
+                            <span className="px-2 py-1 bg-accent-primary/20 dark:bg-accent-primary/30 text-accent-primary dark:text-blue-300 rounded text-xs">
                               Active
                             </span>
                           )}
@@ -275,7 +275,7 @@ export default function EmployeeDetail() {
                       >
                         Previous
                       </Button>
-                      <span className="text-sm text-gray-600 flex items-center">
+                      <span className="text-sm text-text-secondary flex items-center">
                         Page {assignmentPage} of {pagination.last_page}
                       </span>
                       <Button
@@ -319,14 +319,14 @@ export default function EmployeeDetail() {
             <CardContent>
               <div className="space-y-4">
                 <div>
-                  <div className="text-sm text-gray-500">Active Assignments</div>
-                  <div className="text-2xl font-bold">
+                  <div className="text-sm text-text-secondary">Active Assignments</div>
+                  <div className="text-2xl font-bold text-text-primary">
                     {currentEmployee.active_assignments?.length || 0}
                   </div>
                 </div>
                 <div>
-                  <div className="text-sm text-gray-500">Total Assignments</div>
-                  <div className="text-2xl font-bold">
+                  <div className="text-sm text-text-secondary">Total Assignments</div>
+                  <div className="text-2xl font-bold text-text-primary">
                     {currentEmployee.assignments?.length || 0}
                   </div>
                 </div>

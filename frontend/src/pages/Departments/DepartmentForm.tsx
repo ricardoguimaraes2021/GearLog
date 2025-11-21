@@ -131,7 +131,7 @@ export default function DepartmentForm() {
                 onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                 required
               />
-              {errors.name && <p className="text-sm text-red-500 mt-1">{errors.name}</p>}
+              {errors.name && <p className="text-sm text-destructive mt-1">{errors.name}</p>}
             </div>
 
             <div>
@@ -144,14 +144,14 @@ export default function DepartmentForm() {
                 placeholder="Enter department description..."
               />
               {errors.description && (
-                <p className="text-sm text-red-500 mt-1">{errors.description}</p>
+                <p className="text-sm text-destructive mt-1">{errors.description}</p>
               )}
             </div>
 
             <div>
               <Label htmlFor="manager_employee_id">Manager</Label>
               <Select
-                value={formData.manager_employee_id || undefined}
+                value={formData.manager_employee_id || 'none'}
                 onValueChange={(value) =>
                   setFormData({ ...formData, manager_employee_id: value === 'none' ? '' : value })
                 }
@@ -171,7 +171,7 @@ export default function DepartmentForm() {
                 </SelectContent>
               </Select>
               {errors.manager_employee_id && (
-                <p className="text-sm text-red-500 mt-1">{errors.manager_employee_id}</p>
+                <p className="text-sm text-destructive mt-1">{errors.manager_employee_id}</p>
               )}
             </div>
 
@@ -184,7 +184,7 @@ export default function DepartmentForm() {
                 placeholder="e.g., CC001"
               />
               {errors.cost_center && (
-                <p className="text-sm text-red-500 mt-1">{errors.cost_center}</p>
+                <p className="text-sm text-destructive mt-1">{errors.cost_center}</p>
               )}
             </div>
 
