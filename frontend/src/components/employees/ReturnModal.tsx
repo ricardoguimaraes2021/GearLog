@@ -67,7 +67,7 @@ export default function ReturnModal({ assignment, onClose, onSuccess }: ReturnMo
             </div>
             <div>
               <Label htmlFor="status">Update Product Status (Optional)</Label>
-              <Select value={productStatus || undefined} onValueChange={(value) => setProductStatus(value === 'none' ? '' : value)}>
+              <Select value={productStatus || 'none'} onValueChange={(value) => setProductStatus(value === 'none' ? '' : value)}>
                 <SelectTrigger>
                   <SelectValue placeholder="Keep current status" />
                 </SelectTrigger>

@@ -71,7 +71,7 @@ export default function AssignmentModal({ employeeId, onClose, onSuccess }: Assi
             <div>
               <Label htmlFor="product">Product *</Label>
               <Select
-                value={selectedProductId?.toString() || ''}
+                value={selectedProductId ? selectedProductId.toString() : ''}
                 onValueChange={(value) => setSelectedProductId(parseInt(value))}
               >
                 <SelectTrigger>
@@ -79,7 +79,7 @@ export default function AssignmentModal({ employeeId, onClose, onSuccess }: Assi
                 </SelectTrigger>
                 <SelectContent>
                   {assignableProducts.length === 0 ? (
-                    <div className="px-2 py-1.5 text-sm text-gray-500">
+                    <div className="px-2 py-1.5 text-sm text-text-secondary">
                       No assignable products available
                     </div>
                   ) : (
