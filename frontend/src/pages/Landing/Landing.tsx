@@ -26,10 +26,7 @@ import {
   Paperclip,
   Target,
   Activity,
-  ShieldCheck,
-  Database,
-  FileCheck,
-  KeyRound
+  Database
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
@@ -123,7 +120,7 @@ export default function Landing() {
       description: 'Complete audit trail of all actions. Track ticket status changes, assignments, comments, and product movements. Full history for compliance.',
     },
     {
-      icon: ShieldCheck,
+      icon: Shield,
       title: 'Database Security',
       description: 'Enterprise-grade database security with SSL/TLS encryption, automated backups, audit logging, and encrypted sensitive data storage. Daily backups with 30-day retention.',
     },
@@ -133,12 +130,12 @@ export default function Landing() {
       description: 'Daily automated database backups with compression. Easy restore process. Automatic cleanup of old backups. Manual backup command available.',
     },
     {
-      icon: FileCheck,
+      icon: CheckCircle2,
       title: 'Audit Logging',
       description: 'Complete audit trail of all user actions including logins, password changes, and data modifications. Track IP addresses and user agents for security compliance.',
     },
     {
-      icon: KeyRound,
+      icon: Lock,
       title: 'Enhanced Password Security',
       description: 'Strong password policies with 12+ character minimum, complexity requirements, and password history tracking. Prevents reuse of last 5 passwords.',
     },
