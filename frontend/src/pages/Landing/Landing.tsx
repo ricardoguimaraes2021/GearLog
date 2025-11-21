@@ -25,7 +25,11 @@ import {
   MessageSquare,
   Paperclip,
   Target,
-  Activity
+  Activity,
+  ShieldCheck,
+  Database,
+  FileCheck,
+  KeyRound
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
@@ -117,6 +121,26 @@ export default function Landing() {
       icon: Activity,
       title: 'Activity Logs',
       description: 'Complete audit trail of all actions. Track ticket status changes, assignments, comments, and product movements. Full history for compliance.',
+    },
+    {
+      icon: ShieldCheck,
+      title: 'Database Security',
+      description: 'Enterprise-grade database security with SSL/TLS encryption, automated backups, audit logging, and encrypted sensitive data storage. Daily backups with 30-day retention.',
+    },
+    {
+      icon: Database,
+      title: 'Automated Backups',
+      description: 'Daily automated database backups with compression. Easy restore process. Automatic cleanup of old backups. Manual backup command available.',
+    },
+    {
+      icon: FileCheck,
+      title: 'Audit Logging',
+      description: 'Complete audit trail of all user actions including logins, password changes, and data modifications. Track IP addresses and user agents for security compliance.',
+    },
+    {
+      icon: KeyRound,
+      title: 'Enhanced Password Security',
+      description: 'Strong password policies with 12+ character minimum, complexity requirements, and password history tracking. Prevents reuse of last 5 passwords.',
     },
   ];
 
@@ -394,7 +418,7 @@ export default function Landing() {
             {plans.map((plan, index) => (
               <Card 
                 key={index} 
-                className={`relative flex flex-col ${plan.highlighted ? 'border-2 border-accent-primary shadow-lg scale-105' : 'border-2 border-border'} ${plan.comingSoon ? 'opacity-75' : ''}`}
+                className={`relative flex flex-col transition-all duration-300 ease-in-out ${plan.highlighted ? 'border-2 border-accent-primary shadow-lg scale-105 hover:scale-110' : 'border-2 border-border hover:scale-105'} hover:shadow-xl ${plan.comingSoon ? 'opacity-75' : ''}`}
               >
                 {plan.comingSoon && (
                   <div className="absolute -top-4 left-1/2 transform -translate-x-1/2 z-10">
