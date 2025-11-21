@@ -16,6 +16,7 @@ class ApiClient {
         'Accept': 'application/json',
       },
       withCredentials: true,
+      timeout: 30000, // 30 seconds timeout
     });
 
     // Helper to get CSRF token from cookie
@@ -292,6 +293,11 @@ class ApiClient {
 
   async getCurrentUser() {
     const response = await this.client.get<User>('/user');
+    // Validate response in development
+    if (import.meta.env.DEV) {
+      const { validateApiResponse, UserSchema } = await import('@/utils/apiValidation');
+      return validateApiResponse(response.data, UserSchema, 'getCurrentUser');
+    }
     return response.data;
   }
 

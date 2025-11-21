@@ -20,14 +20,14 @@ use App\Http\Controllers\Api\CompanySettingsController;
 use App\Http\Controllers\Api\CompanyInviteController;
 use Illuminate\Support\Facades\Route;
 
-Route::prefix('v1')->middleware('throttle:60,1')->group(function () {
-    // Public routes
-    Route::post('/login', [AuthController::class, 'login'])->middleware('throttle:30,1');
+Route::prefix('v1')->middleware('throttle:api')->group(function () {
+    // Public routes with stricter rate limiting
+    Route::post('/login', [AuthController::class, 'login'])->middleware('throttle:5,1'); // 5 attempts per minute
+    Route::post('/register', [AuthController::class, 'register'])->middleware('throttle:3,1'); // 3 attempts per minute
     Route::get('/products/{product}/public', [ProductController::class, 'showPublic']);
     Route::get('/invites/{code}/validate', [CompanyInviteController::class, 'validateInvite']);
 
     // Public auth routes (no tenant required - for registration/onboarding)
-    Route::post('/register', [AuthController::class, 'register']);
     Route::post('/onboarding', [AuthController::class, 'onboarding'])->middleware('auth:sanctum');
 
     // Protected routes (require auth but not tenant - for logout/user info)
@@ -130,6 +130,9 @@ Route::prefix('v1')->middleware('throttle:60,1')->group(function () {
         // User impersonation
         Route::post('/impersonate/{userId}', [AdminImpersonationController::class, 'impersonate']);
         Route::post('/stop-impersonation', [AdminImpersonationController::class, 'stopImpersonation']);
+
+        // Custom notifications
+        Route::post('/notifications/send', [\App\Http\Controllers\Api\Admin\NotificationController::class, 'send']);
     });
 });
 
