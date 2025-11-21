@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import { api } from '../services/api';
 import { toast } from 'sonner';
-import { initializeEcho, disconnectEcho } from '../services/echo';
+import { initializeEcho, disconnectEcho, getEcho } from '../services/echo';
 import { safeValidateApiResponse, NotificationSchema } from '../utils/apiValidation';
 
 export interface Notification {
@@ -57,11 +57,8 @@ export const useNotificationStore = create<NotificationStore>((set, get) => ({
       // Validate notifications in development
       const validatedNotifications: Notification[] = Array.isArray(notifications)
         ? notifications.map((n: unknown): Notification => {
-            if (import.meta.env.DEV) {
-              const validated = safeValidateApiResponse(n, NotificationSchema, 'notification');
-              if (validated) {
-                return validated as Notification;
-              }
+            if (import.meta.env.DEV && NotificationSchema) {
+              return safeValidateApiResponse(n, NotificationSchema, 'notification');
             }
             return n as Notification;
           })
@@ -231,31 +228,47 @@ export const useNotificationStore = create<NotificationStore>((set, get) => ({
       
       // Handle connection errors
       if (echo.connector?.pusher) {
-        echo.connector.pusher.connection.bind('error', (err: any) => {
+        const pusher = echo.connector.pusher;
+        
+        // Store handlers so we can unbind them later
+        const errorHandler = (err: any) => {
           console.error('❌ Pusher connection error:', err);
           toast.error('Real-time connection lost', {
             description: 'Connection to real-time notifications was lost. Trying to reconnect...',
             duration: 5000,
           });
-        });
-
-        echo.connector.pusher.connection.bind('connected', () => {
+        };
+        
+        const connectedHandler = () => {
           console.info('✅ Pusher connected successfully');
-        });
-
-        echo.connector.pusher.connection.bind('disconnected', () => {
-          console.warn('⚠️ Pusher disconnected');
-        });
+        };
+        
+        // Only bind disconnected handler in development, and only once
+        if (import.meta.env.DEV) {
+          // Unbind any existing disconnected handler first
+          pusher.connection.unbind('disconnected');
+          
+          const disconnectedHandler = () => {
+            // Suppress warning during intentional disconnect
+            // The disconnectEcho function will handle cleanup
+          };
+          
+          pusher.connection.bind('disconnected', disconnectedHandler);
+        }
+        
+        // Bind other handlers
+        pusher.connection.bind('error', errorHandler);
+        pusher.connection.bind('connected', connectedHandler);
       }
       
         // Escutar eventos de notificação
         channel.listen('notification.created', (notification: unknown) => {
           // Validate notification data
-          const validatedNotification = import.meta.env.DEV
-            ? safeValidateApiResponse(notification, NotificationSchema, 'notification.created') || notification
-            : notification;
+          const validatedNotification = import.meta.env.DEV && NotificationSchema
+            ? safeValidateApiResponse(notification, NotificationSchema, 'notification.created')
+            : (notification as Notification);
           if (validatedNotification) {
-            get().addNotification(validatedNotification as Notification);
+            get().addNotification(validatedNotification);
             get().fetchUnreadCount();
           }
         });
@@ -274,6 +287,15 @@ export const useNotificationStore = create<NotificationStore>((set, get) => ({
   },
 
   disconnectEcho: () => {
+    // Unbind all listeners before disconnecting to prevent multiple warnings
+    const echo = getEcho();
+    if (echo?.connector?.pusher) {
+      const pusher = echo.connector.pusher;
+      // Unbind all connection events to prevent multiple disconnect warnings
+      pusher.connection.unbind();
+    }
+    
+    // Now disconnect
     disconnectEcho();
     set({ echoInitialized: false });
   },
