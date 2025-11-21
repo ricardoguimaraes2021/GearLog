@@ -58,9 +58,18 @@ export const useNotificationStore = create<NotificationStore>((set, get) => ({
       const validatedNotifications: Notification[] = Array.isArray(notifications)
         ? notifications.map((n: unknown): Notification => {
             if (import.meta.env.DEV && NotificationSchema) {
-              return safeValidateApiResponse(n, NotificationSchema, 'notification');
+              const validated = safeValidateApiResponse(n, NotificationSchema, 'notification');
+              // Ensure data is properly typed
+              return {
+                ...validated,
+                data: validated.data || undefined,
+              };
             }
-            return n as Notification;
+            const notif = n as any;
+            return {
+              ...notif,
+              data: notif.data || undefined,
+            };
           })
         : [];
       set({
@@ -266,9 +275,13 @@ export const useNotificationStore = create<NotificationStore>((set, get) => ({
           // Validate notification data
           const validatedNotification = import.meta.env.DEV && NotificationSchema
             ? safeValidateApiResponse(notification, NotificationSchema, 'notification.created')
-            : (notification as Notification);
+            : (notification as any);
           if (validatedNotification) {
-            get().addNotification(validatedNotification);
+            const notif: Notification = {
+              ...validatedNotification,
+              data: validatedNotification.data || undefined,
+            };
+            get().addNotification(notif);
             get().fetchUnreadCount();
           }
         });

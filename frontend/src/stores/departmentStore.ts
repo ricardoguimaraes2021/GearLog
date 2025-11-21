@@ -7,11 +7,14 @@ interface DepartmentState {
   departments: Department[];
   currentDepartment: Department | null;
   isLoading: boolean;
+  filters?: Record<string, any>;
   fetchDepartments: () => Promise<void>;
   fetchDepartment: (id: number) => Promise<void>;
   createDepartment: (data: Partial<Department>) => Promise<Department>;
   updateDepartment: (id: number, data: Partial<Department>) => Promise<Department>;
   deleteDepartment: (id: number) => Promise<void>;
+  setFilters?: (filters: Record<string, any>) => void;
+  resetFilters?: () => void;
 }
 
 export const useDepartmentStore = create<DepartmentState>((set, get) => ({

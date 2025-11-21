@@ -7,6 +7,8 @@ export interface User {
   company?: Company;
   roles?: Role[];
   permissions?: Permission[];
+  created_at?: string;
+  updated_at?: string;
 }
 
 export interface Company {
@@ -221,6 +223,7 @@ export interface Department {
   employees?: Employee[];
   total_assigned_assets?: number;
   total_asset_value?: number;
+  active_tickets_count?: number;
   created_at: string;
   updated_at: string;
 }

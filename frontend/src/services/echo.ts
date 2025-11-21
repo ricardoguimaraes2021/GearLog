@@ -5,15 +5,15 @@ import Pusher from 'pusher-js';
 declare global {
   interface Window {
     Pusher: typeof Pusher;
-    Echo: Echo;
+    Echo: Echo<any>;
   }
 }
 
 window.Pusher = Pusher;
 
-let echoInstance: Echo | null = null;
+let echoInstance: Echo<any> | null = null;
 
-export const initializeEcho = (token: string): Echo => {
+export const initializeEcho = (token: string): Echo<any> => {
   if (echoInstance) {
     return echoInstance;
   }
@@ -85,7 +85,7 @@ export const disconnectEcho = (): void => {
   }
 };
 
-export const getEcho = (): Echo | null => {
+export const getEcho = (): Echo<any> | null => {
   return echoInstance;
 };
 

@@ -1,5 +1,6 @@
 import { z } from 'zod';
-import type { User, Product, Notification, Ticket, Employee, Department } from '@/types';
+import type { User, Product, Employee, Department } from '@/types';
+import type { Notification } from '@/stores/notificationStore';
 
 // User schema
 export const UserSchema = z.object({
@@ -122,13 +123,13 @@ export function validateApiResponse<T>(
   } catch (error) {
     if (error instanceof z.ZodError) {
       console.error(`Validation error in ${context}:`, {
-        errors: error.errors,
+        errors: error.issues,
         data,
       });
       // In development, throw detailed errors
       if (import.meta.env.DEV) {
         throw new Error(
-          `${context} validation failed: ${error.errors.map((e) => e.message).join(', ')}`
+          `${context} validation failed: ${error.issues.map((e: z.ZodIssue) => e.message).join(', ')}`
         );
       }
       // In production, return a safe fallback or re-throw

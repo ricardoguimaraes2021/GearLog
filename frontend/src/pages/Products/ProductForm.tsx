@@ -24,18 +24,30 @@ export default function ProductForm() {
     useProductStore();
   const { categories, fetchCategories } = useCategoryStore();
 
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<{
+    name: string;
+    category_id: string;
+    brand: string;
+    model: string;
+    serial_number: string;
+    status: 'new' | 'used' | 'damaged' | 'repair' | 'reserved';
+    quantity: number;
+    value: string;
+    purchase_date: string;
+    description: string;
+    specs: Record<string, any> | undefined;
+  }>({
     name: '',
     category_id: '',
     brand: '',
     model: '',
     serial_number: '',
-    status: 'new' as const,
+    status: 'new',
     quantity: 0,
     value: '',
     purchase_date: '',
     description: '',
-    specs: undefined as Record<string, any> | undefined,
+    specs: undefined,
   });
   const [image, setImage] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);

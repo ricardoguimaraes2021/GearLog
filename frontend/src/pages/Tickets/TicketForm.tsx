@@ -70,12 +70,19 @@ export default function TicketForm() {
   const { products, fetchProducts } = useProductStore();
   const { employees, fetchEmployees } = useEmployeeStore();
 
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<{
+    title: string;
+    product_id: string;
+    employee_id: string;
+    priority: 'low' | 'medium' | 'high' | 'critical';
+    type: 'damage' | 'maintenance' | 'update' | 'audit' | 'other';
+    description: string;
+  }>({
     title: '',
     product_id: '',
     employee_id: '',
-    priority: 'medium' as const,
-    type: 'other' as const,
+    priority: 'medium',
+    type: 'other',
     description: '',
   });
   const [errors, setErrors] = useState<Record<string, string>>({});

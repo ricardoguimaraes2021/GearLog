@@ -342,7 +342,7 @@ export default function TicketDashboard() {
                     label={{ value: 'Compliance Rate (%)', angle: -90, position: 'insideLeft' }}
                   />
                   <Tooltip 
-                    formatter={(value: any, name: string, props: any) => {
+                    formatter={(value: any, name: string) => {
                       if (value === null || value === undefined) return 'No data';
                       if (name === 'compliance_rate') {
                         return `${value}%`;

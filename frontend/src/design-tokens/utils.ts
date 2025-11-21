@@ -75,7 +75,7 @@ export function getCardShadow(mode: ColorMode): string {
 export function getComponentTokens(component: keyof typeof designTokens.components, variant?: string) {
   const componentTokens = designTokens.components[component];
   
-  if (variant && 'primary' in componentTokens || 'secondary' in componentTokens) {
+  if (variant && componentTokens && ('primary' in componentTokens || 'secondary' in componentTokens)) {
     return (componentTokens as any)[variant] || componentTokens;
   }
   
@@ -118,7 +118,7 @@ export function tokenToTailwindClass(token: string, type: 'spacing' | 'radius' |
     '999px': 'full',
     // Font Size
     '12px': 'xs',
-    '14px': 'sm',
+    '14px-font': 'sm',
     '15px': 'md',
     '18px': 'lg',
     '22px': 'xl',
