@@ -6,6 +6,7 @@ import { Building2, Users, Package, Ticket, TrendingUp, AlertTriangle, Edit2, Sa
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { PasswordInput } from '@/components/ui/password-input';
 import { Label } from '@/components/ui/label';
 import { Skeleton } from '@/components/ui/skeleton';
 import type { Company, CompanyUsageStats, User, Role } from '@/types';
@@ -202,16 +203,16 @@ export default function CompanySettings() {
       case 'PRO':
         return 'bg-accent-primary/10 text-accent-primary dark:bg-accent-primary/20 dark:text-accent-primary';
       case 'ENTERPRISE':
-        return 'bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-300';
+        return 'bg-accent-secondary/20 text-accent-secondary dark:bg-accent-secondary/30 dark:text-accent-secondary';
       default:
         return 'bg-surface-alt text-text-primary dark:bg-surface-alt dark:text-text-primary';
     }
   };
 
   const getUsageColor = (percentage: number) => {
-    if (percentage >= 100) return 'bg-red-600';
-    if (percentage >= 80) return 'bg-orange-600';
-    return 'bg-blue-600';
+    if (percentage >= 100) return 'bg-danger dark:bg-danger';
+    if (percentage >= 80) return 'bg-warning dark:bg-warning';
+    return 'bg-accent-primary dark:bg-accent-primary';
   };
 
   if (isLoading && !company) {
@@ -296,7 +297,7 @@ export default function CompanySettings() {
                     id="timezone"
                     value={formData.timezone}
                     onChange={(e) => setFormData({ ...formData, timezone: e.target.value })}
-                    className="flex h-10 w-full rounded-md border border-border bg-background px-3 py-2 text-sm text-text-primary ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-surface dark:text-text-primary"
+                    className="flex h-10 w-full rounded-md border border-border bg-background dark:bg-surface px-3 py-2 text-sm text-text-primary ring-offset-background placeholder:text-text-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-primary/20 focus-visible:ring-offset-2 focus-visible:border-accent-primary disabled:cursor-not-allowed disabled:opacity-50"
                   >
                     <option value="UTC">UTC</option>
                     <option value="Europe/Lisbon">Europe/Lisbon</option>
@@ -702,35 +703,21 @@ export default function CompanySettings() {
                         className="mt-1"
                       />
                     </div>
-                    <div>
-                      <Label htmlFor="new_user_password" className="block text-sm font-medium text-text-primary">
-                        Password *
-                      </Label>
-                      <Input
-                        id="new_user_password"
-                        type="password"
-                        value={newUserData.password}
-                        onChange={(e) => setNewUserData({ ...newUserData, password: e.target.value })}
-                        required
-                        minLength={8}
-                        className="mt-1"
-                      />
-                      <p className="text-xs text-text-muted mt-1">Must be at least 8 characters</p>
-                    </div>
-                    <div>
-                      <Label htmlFor="new_user_password_confirmation" className="block text-sm font-medium text-text-primary">
-                        Confirm Password *
-                      </Label>
-                      <Input
-                        id="new_user_password_confirmation"
-                        type="password"
-                        value={newUserData.password_confirmation}
-                        onChange={(e) => setNewUserData({ ...newUserData, password_confirmation: e.target.value })}
-                        required
-                        minLength={8}
-                        className="mt-1"
-                      />
-                    </div>
+                    <PasswordInput
+                      id="new_user_password"
+                      label="Password *"
+                      value={newUserData.password}
+                      onChange={(e) => setNewUserData({ ...newUserData, password: e.target.value })}
+                      showRequirements={true}
+                      required
+                    />
+                    <PasswordInput
+                      id="new_user_password_confirmation"
+                      label="Confirm Password *"
+                      value={newUserData.password_confirmation}
+                      onChange={(e) => setNewUserData({ ...newUserData, password_confirmation: e.target.value })}
+                      required
+                    />
                   </div>
                   <div>
                     <Label className="block text-sm font-medium text-text-primary mb-2">Roles *</Label>
@@ -909,7 +896,7 @@ function UserRoleEditor({ user, currentRoles, availableRoles, onSave, onCancel }
               checked={selectedRoles.includes(role.value)}
               onChange={() => handleToggleRole(role.value)}
               disabled={user.is_owner && role.value === 'admin'} // Owner must always have admin
-              className="rounded border-gray-300"
+              className="rounded border-border"
             />
             <span className="text-sm text-text-primary">{role.label}</span>
             {user.is_owner && role.value === 'admin' && (

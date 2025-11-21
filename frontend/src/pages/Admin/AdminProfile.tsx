@@ -7,6 +7,7 @@ import { User, Lock, Edit2, Save, X, ArrowLeft } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { PasswordInput } from '@/components/ui/password-input';
 import { Label } from '@/components/ui/label';
 import { Skeleton } from '@/components/ui/skeleton';
 
@@ -69,7 +70,11 @@ export default function AdminProfile() {
       setShowPasswordModal(false);
       toast.success('Password updated successfully');
     } catch (error: any) {
-      toast.error(error.response?.data?.error || 'Failed to update password');
+      const errorMessage = error.message 
+        || error.response?.data?.error 
+        || error.response?.data?.message 
+        || 'Failed to update password';
+      toast.error(errorMessage);
     } finally {
       setIsLoading(false);
     }
@@ -92,7 +97,7 @@ export default function AdminProfile() {
                 Back to Admin Panel
               </Button>
               <h1 className="text-xl font-bold text-text-primary">GearLog</h1>
-              <span className="ml-4 px-2 py-1 text-xs rounded bg-purple-100 text-purple-800">
+              <span className="ml-4 px-2 py-1 text-xs rounded bg-accent-secondary/20 text-accent-secondary dark:bg-accent-secondary/30 dark:text-accent-secondary">
                 Super Admin
               </span>
             </div>
@@ -212,45 +217,37 @@ export default function AdminProfile() {
                 </Button>
               ) : (
                 <form onSubmit={handleUpdatePassword} className="space-y-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="current_password">Current Password</Label>
-                    <Input
-                      id="current_password"
-                      type="password"
-                      value={passwordData.current_password}
-                      onChange={(e) =>
-                        setPasswordData({ ...passwordData, current_password: e.target.value })
-                      }
-                      required
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="password">New Password</Label>
-                    <Input
-                      id="password"
-                      type="password"
-                      value={passwordData.password}
-                      onChange={(e) =>
-                        setPasswordData({ ...passwordData, password: e.target.value })
-                      }
-                      required
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="password_confirmation">Confirm New Password</Label>
-                    <Input
-                      id="password_confirmation"
-                      type="password"
-                      value={passwordData.password_confirmation}
-                      onChange={(e) =>
-                        setPasswordData({
-                          ...passwordData,
-                          password_confirmation: e.target.value,
-                        })
-                      }
-                      required
-                    />
-                  </div>
+                  <PasswordInput
+                    id="current_password"
+                    label="Current Password"
+                    value={passwordData.current_password}
+                    onChange={(e) =>
+                      setPasswordData({ ...passwordData, current_password: e.target.value })
+                    }
+                    required
+                  />
+                  <PasswordInput
+                    id="password"
+                    label="New Password"
+                    value={passwordData.password}
+                    onChange={(e) =>
+                      setPasswordData({ ...passwordData, password: e.target.value })
+                    }
+                    showRequirements={true}
+                    required
+                  />
+                  <PasswordInput
+                    id="password_confirmation"
+                    label="Confirm New Password"
+                    value={passwordData.password_confirmation}
+                    onChange={(e) =>
+                      setPasswordData({
+                        ...passwordData,
+                        password_confirmation: e.target.value,
+                      })
+                    }
+                    required
+                  />
                   <div className="flex gap-2 pt-4">
                     <Button type="submit" disabled={isLoading}>
                       <Save className="w-4 h-4 mr-2" />

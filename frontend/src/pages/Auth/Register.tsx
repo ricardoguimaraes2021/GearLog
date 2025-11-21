@@ -3,6 +3,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import { useAuthStore } from '@/stores/authStore';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { PasswordInput } from '@/components/ui/password-input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { ThemeToggle } from '@/components/ui/theme-toggle';
 import { Label } from '@/components/ui/label';
@@ -116,40 +117,27 @@ export default function Register() {
                 className="mt-1"
               />
             </div>
-            <div>
-              <Label htmlFor="password" className="block text-sm font-medium text-text-primary">
-                Password
-              </Label>
-              <Input
-                id="password"
-                type="password"
-                value={password}
-                onChange={(e) => {
-                  setPassword(e.target.value);
-                  setError('');
-                }}
-                required
-                minLength={8}
-                className="mt-1"
-              />
-              <p className="text-xs text-text-muted mt-1">Must be at least 8 characters</p>
-            </div>
-            <div>
-              <Label htmlFor="password_confirmation" className="block text-sm font-medium text-text-primary">
-                Confirm Password
-              </Label>
-              <Input
-                id="password_confirmation"
-                type="password"
-                value={passwordConfirmation}
-                onChange={(e) => {
-                  setPasswordConfirmation(e.target.value);
-                  setError('');
-                }}
-                required
-                className="mt-1"
-              />
-            </div>
+            <PasswordInput
+              id="password"
+              label="Password"
+              value={password}
+              onChange={(e) => {
+                setPassword(e.target.value);
+                setError('');
+              }}
+              showRequirements={true}
+              required
+            />
+            <PasswordInput
+              id="password_confirmation"
+              label="Confirm Password"
+              value={passwordConfirmation}
+              onChange={(e) => {
+                setPasswordConfirmation(e.target.value);
+                setError('');
+              }}
+              required
+            />
             <Button type="submit" className="w-full" disabled={isSubmitting}>
               {isSubmitting ? 'Creating account...' : 'Create Account'}
             </Button>

@@ -6,6 +6,7 @@ import { User, Lock, Edit2, Save, X } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { PasswordInput } from '@/components/ui/password-input';
 import { Label } from '@/components/ui/label';
 import { Skeleton } from '@/components/ui/skeleton';
 
@@ -126,7 +127,7 @@ export default function Profile() {
                   disabled
                   className="bg-surface-alt"
                 />
-                <p className="text-xs text-muted-foreground">Email cannot be changed</p>
+                <p className="text-xs text-text-secondary">Email cannot be changed</p>
               </div>
               <div className="flex gap-2">
                 <Button type="submit" disabled={isLoading}>
@@ -215,38 +216,28 @@ export default function Profile() {
             </CardHeader>
             <CardContent>
               <form onSubmit={handleUpdatePassword} className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="current-password">Current Password</Label>
-                  <Input
-                    id="current-password"
-                    type="password"
-                    value={passwordData.current_password}
-                    onChange={(e) => setPasswordData({ ...passwordData, current_password: e.target.value })}
-                    required
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="new-password">New Password</Label>
-                  <Input
-                    id="new-password"
-                    type="password"
-                    value={passwordData.password}
-                    onChange={(e) => setPasswordData({ ...passwordData, password: e.target.value })}
-                    required
-                    minLength={8}
-                  />
-                  <p className="text-xs text-muted-foreground">Minimum 8 characters</p>
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="confirm-password">Confirm New Password</Label>
-                  <Input
-                    id="confirm-password"
-                    type="password"
-                    value={passwordData.password_confirmation}
-                    onChange={(e) => setPasswordData({ ...passwordData, password_confirmation: e.target.value })}
-                    required
-                  />
-                </div>
+                <PasswordInput
+                  id="current-password"
+                  label="Current Password"
+                  value={passwordData.current_password}
+                  onChange={(e) => setPasswordData({ ...passwordData, current_password: e.target.value })}
+                  required
+                />
+                <PasswordInput
+                  id="new-password"
+                  label="New Password"
+                  value={passwordData.password}
+                  onChange={(e) => setPasswordData({ ...passwordData, password: e.target.value })}
+                  showRequirements={true}
+                  required
+                />
+                <PasswordInput
+                  id="confirm-password"
+                  label="Confirm New Password"
+                  value={passwordData.password_confirmation}
+                  onChange={(e) => setPasswordData({ ...passwordData, password_confirmation: e.target.value })}
+                  required
+                />
                 <div className="flex gap-2 pt-4">
                   <Button type="submit" disabled={isLoading} className="flex-1">
                     {isLoading ? 'Changing...' : 'Change Password'}
