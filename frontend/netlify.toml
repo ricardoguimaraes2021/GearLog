@@ -5,8 +5,8 @@
   base = "frontend"
   # Comando de build
   command = "npm run build"
-  # Diretório de publicação
-  publish = "frontend/dist"
+  # Diretório de publicação (relativo ao base directory)
+  publish = "dist"
 
 # Redirects para React Router (SPA)
 [[redirects]]

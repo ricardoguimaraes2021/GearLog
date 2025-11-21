@@ -86,5 +86,13 @@ export const useDepartmentStore = create<DepartmentState>((set, get) => ({
       throw error;
     }
   },
+
+  setFilters: (filters: Record<string, any>) => {
+    set({ filters });
+  },
+
+  resetFilters: () => {
+    set({ filters: undefined });
+  },
 }));
 
