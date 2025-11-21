@@ -25,6 +25,8 @@ import { Toaster } from './components/ui/toast';
 import ErrorBoundary from './components/ErrorBoundary';
 import Landing from './pages/Landing/Landing';
 import Register from './pages/Auth/Register';
+import ForgotPassword from './pages/Auth/ForgotPassword';
+import ResetPassword from './pages/Auth/ResetPassword';
 import Onboarding from './pages/Auth/Onboarding';
 import AdminPanel from './pages/Admin/AdminPanel';
 import AdminProfile from './pages/Admin/AdminProfile';
@@ -66,7 +68,12 @@ function App() {
   return (
     <ErrorBoundary>
       <Toaster />
-      <BrowserRouter>
+      <BrowserRouter
+        future={{
+          v7_startTransition: true,
+          v7_relativeSplatPath: true,
+        }}
+      >
           <Routes>
             <Route path="/landing" element={
               <PageTransition animationType="fade">
@@ -81,6 +88,16 @@ function App() {
             <Route path="/register" element={
               <PageTransition animationType="slideUp">
                 <Register />
+              </PageTransition>
+            } />
+            <Route path="/forgot-password" element={
+              <PageTransition animationType="slideUp">
+                <ForgotPassword />
+              </PageTransition>
+            } />
+            <Route path="/reset-password" element={
+              <PageTransition animationType="slideUp">
+                <ResetPassword />
               </PageTransition>
             } />
             <Route 

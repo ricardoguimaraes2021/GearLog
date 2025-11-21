@@ -155,7 +155,9 @@ class ApiClient {
   }
 
   private async ensureCsrfToken(): Promise<void> {
-    await axios.get(`${this.baseURL}/sanctum/csrf-cookie`, {
+    // Sanctum csrf-cookie route is on web routes, not API routes
+    const baseURL = import.meta.env.VITE_API_URL?.replace('/api/v1', '') || 'http://localhost:8000';
+    await axios.get(`${baseURL}/sanctum/csrf-cookie`, {
       withCredentials: true,
       headers: { 'Accept': 'application/json' },
     });
@@ -713,8 +715,62 @@ class ApiClient {
     }
 
     async updatePassword(data: { current_password: string; password: string; password_confirmation: string }): Promise<{ message: string }> {
-      const response = await this.client.put<{ message: string }>('/profile/password', data);
-      return response.data;
+      // Validate password requirements before sending
+      if (data.password.length < 12) {
+        throw new Error('Password must be at least 12 characters long');
+      }
+      
+      if (data.password !== data.password_confirmation) {
+        throw new Error('Password confirmation does not match');
+      }
+      
+      // Check for mixed case
+      const hasUpperCase = /[A-Z]/.test(data.password);
+      const hasLowerCase = /[a-z]/.test(data.password);
+      if (!hasUpperCase || !hasLowerCase) {
+        throw new Error('Password must contain at least one uppercase and one lowercase letter');
+      }
+      
+      // Check for numbers
+      const hasNumber = /[0-9]/.test(data.password);
+      if (!hasNumber) {
+        throw new Error('Password must contain at least one number');
+      }
+      
+      // Check for symbols
+      const hasSymbol = /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(data.password);
+      if (!hasSymbol) {
+        throw new Error('Password must contain at least one symbol');
+      }
+      
+      // Ensure CSRF token before making the request
+      await this.ensureCsrfToken();
+      const csrfToken = this.getCsrfToken();
+      
+      const config: any = {
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+        },
+      };
+      
+      if (csrfToken) {
+        config.headers['X-XSRF-TOKEN'] = csrfToken;
+      }
+      
+      try {
+        const response = await this.client.put<{ message: string }>('/profile/password', data, config);
+        return response.data;
+      } catch (error: any) {
+        // Extract and format validation errors from backend
+        if (error.response?.data?.errors) {
+          const errors = error.response.data.errors;
+          const errorMessages = Object.values(errors).flat() as string[];
+          const formattedError = new Error(errorMessages.join('. '));
+          throw formattedError;
+        }
+        throw error;
+      }
     }
 
     // Company Settings endpoints
@@ -758,6 +814,108 @@ class ApiClient {
     async getAdminSecurityLogs(): Promise<any[]> {
       const response = await this.client.get('/admin/logs/security');
       return response.data;
+    }
+
+    // Password reset endpoints
+    async forgotPassword(email: string): Promise<{ message: string }> {
+      await this.ensureCsrfToken();
+      const csrfToken = this.getCsrfToken();
+      
+      const config: any = {
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+        },
+      };
+      
+      if (csrfToken) {
+        config.headers['X-XSRF-TOKEN'] = csrfToken;
+      }
+      
+      try {
+        const response = await this.client.post<{ message: string }>('/forgot-password', { email }, config);
+        return response.data;
+      } catch (error: any) {
+        if (error.response?.data?.errors) {
+          const errors = error.response.data.errors;
+          const errorMessages = Object.values(errors).flat() as string[];
+          const formattedError = new Error(errorMessages.join('. '));
+          throw formattedError;
+        }
+        throw error;
+      }
+    }
+
+    async validateResetToken(token: string, email: string): Promise<{ valid: boolean; email?: string }> {
+      try {
+        const response = await this.client.get<{ valid: boolean; email?: string }>('/validate-reset-token', {
+          params: { token, email },
+        });
+        return response.data;
+      } catch (error: any) {
+        if (error.response?.data?.valid === false) {
+          return { valid: false };
+        }
+        throw error;
+      }
+    }
+
+    async resetPassword(data: { token: string; email: string; password: string; password_confirmation: string }): Promise<{ message: string }> {
+      // Validate password requirements before sending
+      if (data.password.length < 12) {
+        throw new Error('Password must be at least 12 characters long');
+      }
+      
+      if (data.password !== data.password_confirmation) {
+        throw new Error('Password confirmation does not match');
+      }
+      
+      // Check for mixed case
+      const hasUpperCase = /[A-Z]/.test(data.password);
+      const hasLowerCase = /[a-z]/.test(data.password);
+      if (!hasUpperCase || !hasLowerCase) {
+        throw new Error('Password must contain at least one uppercase and one lowercase letter');
+      }
+      
+      // Check for numbers
+      const hasNumber = /[0-9]/.test(data.password);
+      if (!hasNumber) {
+        throw new Error('Password must contain at least one number');
+      }
+      
+      // Check for symbols
+      const hasSymbol = /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(data.password);
+      if (!hasSymbol) {
+        throw new Error('Password must contain at least one symbol');
+      }
+      
+      await this.ensureCsrfToken();
+      const csrfToken = this.getCsrfToken();
+      
+      const config: any = {
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+        },
+      };
+      
+      if (csrfToken) {
+        config.headers['X-XSRF-TOKEN'] = csrfToken;
+      }
+      
+      try {
+        const response = await this.client.post<{ message: string }>('/reset-password', data, config);
+        return response.data;
+      } catch (error: any) {
+        // Extract and format validation errors from backend
+        if (error.response?.data?.errors) {
+          const errors = error.response.data.errors;
+          const errorMessages = Object.values(errors).flat() as string[];
+          const formattedError = new Error(errorMessages.join('. '));
+          throw formattedError;
+        }
+        throw error;
+      }
     }
   }
 

@@ -3,6 +3,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import { useAuthStore } from '@/stores/authStore';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { PasswordInput } from '@/components/ui/password-input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { ThemeToggle } from '@/components/ui/theme-toggle';
 import { toast } from '@/utils/toast';
@@ -131,30 +132,29 @@ export default function Login() {
                 className="mt-1"
               />
             </div>
-            <div>
-              <Label htmlFor="password" className="block text-sm font-medium text-text-primary">
-                Password
-              </Label>
-              <Input
-                id="password"
-                type="password"
-                value={password}
-                onChange={(e) => {
-                  setPassword(e.target.value);
-                  setError('');
-                }}
-                required
-                className="mt-1"
-              />
-            </div>
+            <PasswordInput
+              id="password"
+              label="Password"
+              value={password}
+              onChange={(e) => {
+                setPassword(e.target.value);
+                setError('');
+              }}
+              required
+            />
             <Button type="submit" className="w-full" disabled={isLoading || isSubmitting}>
               {isLoading || isSubmitting ? 'Signing in...' : 'Sign in'}
             </Button>
           </form>
-          <div className="mt-4 text-center text-sm text-text-secondary">
+          <div className="mt-4 space-y-2 text-center text-sm text-text-secondary">
             <p>Don't have an account?{' '}
               <Link to="/register" className="text-accent-primary hover:text-accent-primary/80 font-medium">
                 Sign up
+              </Link>
+            </p>
+            <p>
+              <Link to="/forgot-password" className="text-accent-primary hover:text-accent-primary/80 font-medium">
+                Forgot your password?
               </Link>
             </p>
           </div>
