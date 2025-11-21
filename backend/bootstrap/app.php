@@ -12,8 +12,21 @@ return Application::configure(basePath: dirname(__DIR__))
         commands: __DIR__.'/../routes/console.php',
         health: '/up',
     )
+    ->withRateLimiting(function () {
+        return [
+            'api' => \Illuminate\Cache\RateLimiting\Limit::perMinute(60)->by(request()->user()?->id ?: request()->ip()),
+        ];
+    })
     ->withMiddleware(function (Middleware $middleware) {
         $middleware->api(prepend: [
+            \Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful::class,
+        ]);
+
+        // Adicionar Sanctum middleware também para rotas web (necessário para broadcasting/auth)
+        // IMPORTANTE: LogBroadcastingAuth deve vir ANTES de EnsureFrontendRequestsAreStateful
+        // para capturar e autenticar antes de qualquer outra coisa
+        $middleware->web(prepend: [
+            \App\Http\Middleware\LogBroadcastingAuth::class,
             \Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful::class,
         ]);
 
@@ -24,6 +37,7 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->validateCsrfTokens(except: [
             'api/*',
             'sanctum/csrf-cookie',
+            'broadcasting/*',
         ]);
 
         $middleware->alias([
@@ -35,6 +49,18 @@ return Application::configure(basePath: dirname(__DIR__))
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {
-        //
+        // Log broadcasting authentication errors (apenas em desenvolvimento)
+        $exceptions->render(function (\Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException $e, \Illuminate\Http\Request $request) {
+            if ($request->is('broadcasting/*') && config('app.env') !== 'production') {
+                \Illuminate\Support\Facades\Log::error('Broadcasting AccessDeniedHttpException', [
+                    'message' => $e->getMessage(),
+                    'url' => $request->fullUrl(),
+                    'method' => $request->method(),
+                    'user_authenticated' => auth()->check(),
+                    'user_id' => auth()->id(),
+                ]);
+            }
+            return null; // Let Laravel handle the response
+        });
     })->create();
 
