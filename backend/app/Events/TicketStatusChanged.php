@@ -32,22 +32,37 @@ class TicketStatusChanged
     public function handle(): void
     {
         $notificationService = app(\App\Services\NotificationService::class);
+        $companyId = $this->ticket->company_id;
+        
+        if (!$companyId) {
+            \Illuminate\Support\Facades\Log::warning(
+                "Ticket has no company_id, cannot notify",
+                ['ticket_id' => $this->ticket->id]
+            );
+            return;
+        }
+        
         $usersToNotify = collect();
 
-        // Notify ticket opener
-        if ($this->ticket->openedBy) {
+        // Notify ticket opener (mesma empresa)
+        if ($this->ticket->openedBy && $this->ticket->openedBy->company_id === $companyId) {
             $usersToNotify->push($this->ticket->openedBy);
         }
 
-        // Notify assigned user
-        if ($this->ticket->assignedTo) {
+        // Notify assigned user (mesma empresa)
+        if ($this->ticket->assignedTo && $this->ticket->assignedTo->company_id === $companyId) {
             $usersToNotify->push($this->ticket->assignedTo);
         }
 
-        // Notify admins and managers
-        $admins = \App\Models\User::role('admin')->get();
-        $managers = \App\Models\User::role('gestor')->get();
-        $usersToNotify = $usersToNotify->merge($admins)->merge($managers)->unique('id');
+        // Notify utilizadores que podem tratar tickets da mesma empresa
+        $ticketHandlers = \App\Models\User::withoutGlobalScopes()
+            ->where('company_id', $companyId)
+            ->whereHas('roles', function ($query) {
+                $query->whereIn('name', ['admin', 'gestor', 'tecnico']);
+            })
+            ->get();
+            
+        $usersToNotify = $usersToNotify->merge($ticketHandlers)->unique('id');
 
         $statusLabels = [
             'open' => 'Open',

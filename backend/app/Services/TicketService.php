@@ -86,7 +86,8 @@ class TicketService
 
             // If assigned, fire assignment event
             if ($ticket->assigned_to) {
-                event(new \App\Events\TicketAssigned($ticket, $ticket->assignedTo));
+                $event = new \App\Events\TicketAssigned($ticket, $ticket->assignedTo);
+                $event->handle(); // Chamar handle() manualmente para criar a notificação
             }
 
             return $ticket->load(['product', 'openedBy', 'assignedTo']);
@@ -237,9 +238,10 @@ class TicketService
             $ticket->refresh();
             $ticket->load(['product', 'openedBy', 'assignedTo']);
 
-            // Fire assignment event
+            // Fire assignment event - usar dispatch() para chamar handle() automaticamente
             $assignedUser = $assignedTo ? \App\Models\User::find($assignedTo) : null;
-            event(new \App\Events\TicketAssigned($ticket, $assignedUser));
+            $event = new \App\Events\TicketAssigned($ticket, $assignedUser);
+            $event->handle(); // Chamar handle() manualmente para criar a notificação
 
             return $ticket;
         });

@@ -30,7 +30,8 @@ class TicketAssigned
      */
     public function handle(): void
     {
-        if ($this->assignedTo) {
+        if ($this->assignedTo && 
+            $this->assignedTo->company_id === $this->ticket->company_id) {
             $notificationService = app(\App\Services\NotificationService::class);
             $notificationService->createNotification(
                 $this->assignedTo,
@@ -43,6 +44,14 @@ class TicketAssigned
                     'priority' => $this->ticket->priority,
                 ]
             );
+        } elseif (config('app.env') !== 'production') {
+            // Log apenas em desenvolvimento para debugging
+            \Illuminate\Support\Facades\Log::warning('TicketAssigned notification NOT created', [
+                'reason' => $this->assignedTo ? 'company_id mismatch' : 'assignedTo is null',
+                'ticket_id' => $this->ticket->id,
+                'ticket_company_id' => $this->ticket->company_id,
+                'assigned_user_company_id' => $this->assignedTo?->company_id,
+            ]);
         }
     }
 }

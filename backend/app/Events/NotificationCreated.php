@@ -6,11 +6,11 @@ use App\Models\Notification;
 use Illuminate\Broadcasting\Channel;
 use Illuminate\Broadcasting\InteractsWithSockets;
 use Illuminate\Broadcasting\PrivateChannel;
-use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
+use Illuminate\Contracts\Broadcasting\ShouldBroadcastNow;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
 
-class NotificationCreated implements ShouldBroadcast
+class NotificationCreated implements ShouldBroadcastNow
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
@@ -31,13 +31,27 @@ class NotificationCreated implements ShouldBroadcast
      */
     public function broadcastOn(): array
     {
-        return [
-            new PrivateChannel('user.' . $this->notification->user_id),
-        ];
+        $channel = new PrivateChannel('user.' . $this->notification->user_id);
+        
+        // Log apenas em desenvolvimento
+        if (config('app.env') !== 'production') {
+            \Illuminate\Support\Facades\Log::info('📡 Broadcasting NotificationCreated event', [
+                'notification_id' => $this->notification->id,
+                'user_id' => $this->notification->user_id,
+                'channel' => 'user.' . $this->notification->user_id,
+                'event_name' => 'notification.created',
+                'notification_type' => $this->notification->type,
+            ]);
+        }
+        
+        return [$channel];
     }
 
     /**
      * The event's broadcast name.
+     * 
+     * Define o nome do evento como 'notification.created' para que o frontend
+     * possa escutar usando .listen('notification.created', callback)
      */
     public function broadcastAs(): string
     {
