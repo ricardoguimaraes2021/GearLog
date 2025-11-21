@@ -16,6 +16,7 @@ return Application::configure(basePath: dirname(__DIR__))
         // CORS must be at the beginning of the middleware stack
         $middleware->api(prepend: [
             \Illuminate\Http\Middleware\HandleCors::class,
+            \App\Http\Middleware\SecurityHeadersMiddleware::class,
             \Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful::class,
         ]);
 
@@ -24,6 +25,7 @@ return Application::configure(basePath: dirname(__DIR__))
         // para capturar e autenticar antes de qualquer outra coisa
         $middleware->web(prepend: [
             \Illuminate\Http\Middleware\HandleCors::class,
+            \App\Http\Middleware\SecurityHeadersMiddleware::class,
             \App\Http\Middleware\LogBroadcastingAuth::class,
             \Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful::class,
         ]);
