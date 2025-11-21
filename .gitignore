@@ -33,6 +33,12 @@ yarn-error.log*
 # Storage files (generated dynamically)
 backend/storage/app/public/products/
 backend/storage/app/public/qrcodes/
+backend/storage/app/public/invoices/
+backend/storage/app/public/tickets/attachments/
+
+# Laravel cache files (generated automatically)
+backend/bootstrap/cache/packages.php
+backend/bootstrap/cache/services.php
 
 # PyInstaller build files
 build/
