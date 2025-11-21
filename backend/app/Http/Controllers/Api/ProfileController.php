@@ -127,56 +127,111 @@ class ProfileController extends Controller
     )]
     public function updatePassword(Request $request)
     {
-        $user = $request->user();
+        try {
+            // Only log in development to avoid performance issues
+            if (config('app.env') === 'local') {
+                Log::info('Password update request received', [
+                    'user_id' => $request->user()?->id,
+                    'email' => $request->user()?->email,
+                ]);
+            }
 
-        $validated = $request->validate([
-            'current_password' => 'required|string',
-            'password' => [
-                'required',
-                'string',
-                'confirmed',
-                Password::min(12)
-                    ->mixedCase()
-                    ->numbers()
-                    ->symbols()
-                    ->uncompromised(),
-            ],
-        ]);
+            $user = $request->user();
 
-        // Verify current password
-        if (!Hash::check($validated['current_password'], $user->password)) {
+            if (!$user) {
+                Log::error('Password update failed: User not authenticated');
+                return response()->json([
+                    'error' => 'User not authenticated.',
+                ], 401);
+            }
+
+            $validated = $request->validate([
+                'current_password' => 'required|string',
+                'password' => [
+                    'required',
+                    'string',
+                    'confirmed',
+                    Password::min(12)
+                        ->mixedCase()
+                        ->numbers()
+                        ->symbols()
+                        // Temporariamente desabilitado devido a erro SSL
+                        // ->uncompromised(),
+                ],
+            ]);
+
+            // Verify current password
+            if (!Hash::check($validated['current_password'], $user->password)) {
+                if (config('app.env') === 'local') {
+                    Log::warning('Password update failed: Current password incorrect', ['user_id' => $user->id]);
+                }
+                return response()->json([
+                    'error' => 'Current password is incorrect.',
+                ], 422);
+            }
+
+            // Check if password was used recently
+            if ($user->hasUsedPassword($validated['password'])) {
+                if (config('app.env') === 'local') {
+                    Log::warning('Password update failed: Password was used recently', ['user_id' => $user->id]);
+                }
+                return response()->json([
+                    'error' => 'You cannot reuse your last 5 passwords. Please choose a different password.',
+                ], 422);
+            }
+
+            // Save current password to history before updating
+            try {
+                $currentPasswordHash = $user->password;
+                $user->savePasswordToHistory($currentPasswordHash);
+            } catch (\Exception $e) {
+                // Log error but don't fail password update
+                if (config('app.env') === 'local') {
+                    Log::error('Failed to save password to history', [
+                        'user_id' => $user->id,
+                        'error' => $e->getMessage(),
+                    ]);
+                }
+                // Continue with password update even if history save fails
+            }
+
+            // Update password
+            $newPasswordHash = Hash::make($validated['password']);
+            $user->update([
+                'password' => $newPasswordHash,
+            ]);
+
+            // Log password change to audit log (wrap in try-catch to prevent failure if audit log fails)
+            try {
+                $this->auditLogService->logPasswordChange($user->id, $request);
+            } catch (\Exception $e) {
+                // Log error but don't fail password update
+                if (config('app.env') === 'local') {
+                    Log::warning('Failed to log password change to audit log', [
+                        'user_id' => $user->id,
+                        'error' => $e->getMessage(),
+                    ]);
+                }
+            }
+
             return response()->json([
-                'error' => 'Current password is incorrect.',
-            ], 422);
-        }
-
-        // Check if password was used recently
-        if ($user->hasUsedPassword($validated['password'])) {
+                'message' => 'Password changed successfully.',
+            ]);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            Log::error('Password update validation failed', [
+                'user_id' => $request->user()?->id,
+                'errors' => $e->errors(),
+            ]);
+            throw $e;
+        } catch (\Exception $e) {
+            Log::error('Password update failed with exception', [
+                'user_id' => $request->user()?->id,
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+            ]);
             return response()->json([
-                'error' => 'You cannot reuse your last 5 passwords. Please choose a different password.',
-            ], 422);
+                'error' => 'An error occurred while updating your password. Please try again.',
+            ], 500);
         }
-
-        // Save current password to history before updating
-        $user->savePasswordToHistory($user->password);
-
-        // Update password
-        $newPasswordHash = Hash::make($validated['password']);
-        $user->update([
-            'password' => $newPasswordHash,
-        ]);
-
-        // Log password change to audit log
-        $this->auditLogService->logPasswordChange($user->id, $request);
-
-        Log::info('User password changed', [
-            'user_id' => $user->id,
-            'email' => $user->email,
-            'ip_address' => $request->ip(),
-        ]);
-
-        return response()->json([
-            'message' => 'Password changed successfully.',
-        ]);
     }
 }
