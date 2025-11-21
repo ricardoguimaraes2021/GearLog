@@ -11,8 +11,17 @@ Route::get('/', function () {
     ]);
 });
 
+// Health check endpoint
+Route::get('/health', [\App\Http\Controllers\HealthController::class, 'check']);
+
 // Broadcasting authentication (only if Pusher is configured)
-if (env('BROADCAST_DRIVER') === 'pusher' && env('PUSHER_APP_KEY')) {
-    Broadcast::routes(['middleware' => ['auth:sanctum']]);
+if (config('broadcasting.default') === 'pusher' && config('broadcasting.connections.pusher.key')) {
+    // Register broadcasting routes with authentication
+    // LogBroadcastingAuth autentica manualmente usando Sanctum e verifica autenticação
+    Broadcast::routes([
+        'middleware' => [
+            \App\Http\Middleware\LogBroadcastingAuth::class,
+        ],
+    ]);
 }
 
