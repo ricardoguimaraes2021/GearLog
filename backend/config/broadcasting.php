@@ -43,6 +43,10 @@ return [
             ],
             'client_options' => [
                 // Guzzle client options: https://docs.guzzlephp.org/en/stable/request-options.html
+                // Em desenvolvimento (local), desabilitar verificação SSL se houver problemas
+                'verify' => env('APP_ENV') === 'local' ? false : true,
+                // Alternativa: usar certificados do sistema
+                // 'verify' => env('PUSHER_VERIFY_SSL', true),
             ],
         ],
 
