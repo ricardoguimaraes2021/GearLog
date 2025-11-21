@@ -215,26 +215,43 @@ GearLog is a modern, feature-rich inventory management solution that combines po
 
 ## 🚀 Quick Start
 
+### Para Desenvolvimento Local
+
 ### 1. Clone the Repository
 ```bash
 git clone https://github.com/ricardoguimaraes2021/GearLog.git
 cd GearLog
 ```
 
-### 2. Backend Setup
+### 2. Create Environment Files
+
+**Option A: Using PowerShell Script (Windows)**
+```powershell
+.\create-env-examples.ps1
+```
+
+**Option B: Manual**
+```bash
+# Backend
+cd backend
+cp .env.example .env  # Se não existir, cria manualmente (ver docs/ENV_SETUP.md)
+
+# Frontend
+cd frontend
+cp .env.example .env  # Se não existir, cria manualmente (ver docs/ENV_SETUP.md)
+```
+
+**Important**: See [docs/ENV_SETUP.md](./docs/ENV_SETUP.md) for detailed instructions on configuring environment variables for local and production.
+
+### 3. Backend Setup
 ```bash
 cd backend
 composer install
-cp .env.example .env
 php artisan key:generate
 
 # Configure your database in .env
-# DB_CONNECTION=mysql
-# DB_HOST=127.0.0.1
-# DB_PORT=3306
-# DB_DATABASE=gearlog
-# DB_USERNAME=root
-# DB_PASSWORD=your_password
+# For LOCAL development, uncomment [LOCAL] variables
+# For PRODUCTION, uncomment [PROD] variables
 
 php artisan migrate --seed
 php artisan storage:link
@@ -243,10 +260,15 @@ php artisan serve
 
 Backend will run on: **http://localhost:8000**
 
-### 3. Frontend Setup
+### 4. Frontend Setup
 ```bash
 cd frontend
 npm install
+
+# Configure environment variables in .env
+# For LOCAL: uncomment [LOCAL] variables
+# For PRODUCTION: uncomment [PROD] variables
+
 npm run dev
 ```
 
@@ -276,6 +298,22 @@ SUPER_ADMIN_EMAILS=admin@admin.com,your-email@example.com
 - **Landing Page**: http://localhost:5173/landing
 - **Admin Panel**: http://localhost:5173/admin (super admin only)
 - **Live Gallery**: [https://gearlogallery.vercel.app/](https://gearlogallery.vercel.app/)
+
+### Para Produção (Deployment)
+
+Quer fazer deploy do projeto? Consulta os guias completos:
+
+- **[Guia Rápido de Deployment](README_DEPLOYMENT.md)** - Começa aqui!
+- **[Guia Completo](docs/DEPLOYMENT_GUIDE.md)** - Visão geral de todas as opções
+- **[Deploy Backend (Railway)](docs/DEPLOYMENT_RAILWAY.md)** - Passo a passo detalhado
+- **[Deploy Frontend (Netlify)](docs/DEPLOYMENT_NETLIFY.md)** - Passo a passo detalhado
+- **[Checklist de Produção](docs/PRODUCTION_CHECKLIST.md)** - Verificações pós-deployment
+- **[Configuração de Variáveis](docs/ENV_SETUP.md)** - Como configurar .env para local/produção
+
+**Recomendado para Iniciantes:**
+- Backend: Railway.app (~$10-15/mês ou gratuito com crédito)
+- Frontend: Netlify (GRATUITO)
+- Total: ~$10-15/mês ou gratuito!
 
 ## 🔑 Default Credentials
 
@@ -365,6 +403,35 @@ Interactive API documentation is available at:
 - **Swagger UI**: http://localhost:8000/api/documentation
 
 The API follows RESTful conventions and uses Laravel Sanctum for authentication.
+
+## 🚀 Deployment
+
+### Quick Deployment Guide
+
+For a complete deployment guide, see [docs/DEPLOYMENT.md](./docs/DEPLOYMENT.md).
+
+**Recommended Setup:**
+- **Frontend**: [Netlify](https://www.netlify.com) (Free, automatic SSL)
+- **Backend**: [Railway](https://railway.app) (Free tier with $5 credit/month)
+- **Database**: MySQL (included with Railway)
+- **Total Cost**: $0-10/month to start
+
+**Detailed Guides:**
+- [Railway Deployment (Backend)](./docs/DEPLOYMENT_RAILWAY.md)
+- [Netlify Deployment (Frontend)](./docs/DEPLOYMENT_NETLIFY.md)
+- [Environment Configuration](./docs/ENV_SETUP.md)
+
+### Pre-Deployment Checklist
+
+- [ ] Environment variables configured
+- [ ] `APP_DEBUG=false` in production
+- [ ] `APP_ENV=production` in production
+- [ ] SSL/HTTPS configured (automatic on Netlify/Railway)
+- [ ] CORS configured for production domain
+- [ ] Database migrations run
+- [ ] Storage link created
+- [ ] Email service configured (SendGrid/Mailgun)
+- [ ] Pusher credentials configured
 
 ## 🎯 Use Cases
 
