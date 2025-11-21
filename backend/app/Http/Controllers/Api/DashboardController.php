@@ -48,10 +48,18 @@ class DashboardController extends Controller
         $user = auth()->user();
         $isViewer = $user && $user->hasRole('viewer');
         
-        $totalProducts = Product::count();
-        $totalValue = Product::sum(DB::raw('quantity * COALESCE(value, 0)'));
-        $damagedProducts = Product::where('status', 'damaged')->count();
-        $lowStockProducts = Product::where('quantity', '<=', 1)->count();
+        // Optimize: Combine multiple count queries where possible
+        $productStats = Product::selectRaw('
+            COUNT(*) as total_products,
+            SUM(quantity * COALESCE(value, 0)) as total_value,
+            SUM(CASE WHEN status = "damaged" THEN 1 ELSE 0 END) as damaged_products,
+            SUM(CASE WHEN quantity <= 1 THEN 1 ELSE 0 END) as low_stock_products
+        ')->first();
+        
+        $totalProducts = $productStats->total_products ?? 0;
+        $totalValue = $productStats->total_value ?? 0;
+        $damagedProducts = $productStats->damaged_products ?? 0;
+        $lowStockProducts = $productStats->low_stock_products ?? 0;
 
         // Products by category
         $productsByCategory = Product::select('categories.name', DB::raw('count(*) as count'))
@@ -96,22 +104,30 @@ class DashboardController extends Controller
 
         // Recent movements - exclude 'allocation' type movements that have corresponding assignments
         // to avoid duplicate entries in recent activities
+        // Optimize: Get assignment timestamps in bulk to avoid N+1 queries
+        $assignmentTimestamps = AssetAssignment::whereIn('product_id', $assignmentProductIds)
+            ->select('product_id', 'created_at')
+            ->get()
+            ->groupBy('product_id')
+            ->map(function ($assignments) {
+                return $assignments->pluck('created_at');
+            });
+        
         $recentMovements = Movement::with(['product.category'])
             ->orderBy('created_at', 'desc')
             ->limit(20)
             ->get()
-            ->filter(function ($movement) use ($assignmentProductIds) {
+            ->filter(function ($movement) use ($assignmentProductIds, $assignmentTimestamps) {
                 // Exclude allocation movements that have a corresponding assignment
                 // (when a product is allocated, both a Movement and AssetAssignment are created)
                 if ($movement->type === 'allocation' && in_array($movement->product_id, $assignmentProductIds)) {
                     // Check if there's an assignment for this product created around the same time
                     // (within 5 seconds, as they're created in the same transaction)
-                    $hasRecentAssignment = AssetAssignment::where('product_id', $movement->product_id)
-                        ->whereBetween('created_at', [
-                            $movement->created_at->copy()->subSeconds(5),
-                            $movement->created_at->copy()->addSeconds(5)
-                        ])
-                        ->exists();
+                    $productAssignments = $assignmentTimestamps->get($movement->product_id, collect());
+                    $hasRecentAssignment = $productAssignments->contains(function ($timestamp) use ($movement) {
+                        $diff = abs($movement->created_at->diffInSeconds($timestamp));
+                        return $diff <= 5;
+                    });
                     
                     // If there's a recent assignment, exclude this movement to avoid duplication
                     return !$hasRecentAssignment;
@@ -203,16 +219,20 @@ class DashboardController extends Controller
                 ];
             });
 
-        // Ticket metrics
-        $totalTickets = Ticket::count();
-        $openTickets = Ticket::where('status', 'open')->count();
-        $inProgressTickets = Ticket::where('status', 'in_progress')->count();
-        $criticalTickets = Ticket::where('priority', 'critical')
-            ->whereIn('status', ['open', 'in_progress'])
-            ->count();
-        $unassignedTickets = Ticket::whereNull('assigned_to')
-            ->whereIn('status', ['open', 'in_progress'])
-            ->count();
+        // Ticket metrics - Optimize: Combine multiple count queries
+        $ticketStats = Ticket::selectRaw('
+            COUNT(*) as total_tickets,
+            SUM(CASE WHEN status = "open" THEN 1 ELSE 0 END) as open_tickets,
+            SUM(CASE WHEN status = "in_progress" THEN 1 ELSE 0 END) as in_progress_tickets,
+            SUM(CASE WHEN priority = "critical" AND status IN ("open", "in_progress") THEN 1 ELSE 0 END) as critical_tickets,
+            SUM(CASE WHEN assigned_to IS NULL AND status IN ("open", "in_progress") THEN 1 ELSE 0 END) as unassigned_tickets
+        ')->first();
+        
+        $totalTickets = $ticketStats->total_tickets ?? 0;
+        $openTickets = $ticketStats->open_tickets ?? 0;
+        $inProgressTickets = $ticketStats->in_progress_tickets ?? 0;
+        $criticalTickets = $ticketStats->critical_tickets ?? 0;
+        $unassignedTickets = $ticketStats->unassigned_tickets ?? 0;
 
         // Recent tickets (last 5)
         $recentTickets = Ticket::with(['product', 'openedBy', 'assignedTo'])
@@ -232,9 +252,14 @@ class DashboardController extends Controller
                 ];
             });
 
-        // Employee metrics
-        $totalEmployees = Employee::count();
-        $activeEmployees = Employee::where('status', 'active')->count();
+        // Employee metrics - Optimize: Combine count queries
+        $employeeStats = Employee::selectRaw('
+            COUNT(*) as total_employees,
+            SUM(CASE WHEN status = "active" THEN 1 ELSE 0 END) as active_employees
+        ')->first();
+        
+        $totalEmployees = $employeeStats->total_employees ?? 0;
+        $activeEmployees = $employeeStats->active_employees ?? 0;
         $totalAssignments = AssetAssignment::whereNull('returned_at')->count();
 
         // Ticket alerts - only for non-viewer roles
@@ -263,8 +288,11 @@ class DashboardController extends Controller
                 });
 
             // Ticket alerts - SLA at risk (80% of time elapsed)
+            // Optimize: Limit query first, then filter in memory (better than loading all tickets)
             $slaAtRiskTickets = Ticket::whereIn('status', ['open', 'in_progress', 'waiting_parts'])
                 ->with(['product', 'assignedTo'])
+                ->orderBy('created_at', 'desc')
+                ->limit(50) // Check first 50 most recent tickets instead of all
                 ->get()
                 ->filter(function ($ticket) {
                     $risks = $this->slaService->isSlaAtRisk($ticket);

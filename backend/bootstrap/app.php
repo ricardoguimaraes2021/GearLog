@@ -3,9 +3,6 @@
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
-use Illuminate\Cache\RateLimiting\Limit;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\RateLimiter;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
@@ -15,13 +12,10 @@ return Application::configure(basePath: dirname(__DIR__))
         commands: __DIR__.'/../routes/console.php',
         health: '/up',
     )
-    ->withRateLimiting(function () {
-        RateLimiter::for('api', function (Request $request) {
-            return Limit::perMinute(60)->by($request->user()?->id ?: $request->ip());
-        });
-    })
     ->withMiddleware(function (Middleware $middleware) {
+        // CORS must be at the beginning of the middleware stack
         $middleware->api(prepend: [
+            \Illuminate\Http\Middleware\HandleCors::class,
             \Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful::class,
         ]);
 
@@ -29,13 +23,13 @@ return Application::configure(basePath: dirname(__DIR__))
         // IMPORTANTE: LogBroadcastingAuth deve vir ANTES de EnsureFrontendRequestsAreStateful
         // para capturar e autenticar antes de qualquer outra coisa
         $middleware->web(prepend: [
+            \Illuminate\Http\Middleware\HandleCors::class,
             \App\Http\Middleware\LogBroadcastingAuth::class,
             \Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful::class,
         ]);
-
-        $middleware->web(append: [
-            \Illuminate\Http\Middleware\HandleCors::class,
-        ]);
+        
+        // Register RateLimitServiceProvider to configure rate limiters
+        app()->register(\App\Providers\RateLimitServiceProvider::class);
 
         $middleware->validateCsrfTokens(except: [
             'api/*',

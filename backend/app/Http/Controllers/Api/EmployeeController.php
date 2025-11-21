@@ -119,7 +119,12 @@ class EmployeeController extends Controller
             'employee_code' => 'nullable|string|unique:employees,employee_code',
             'name' => 'required|string|max:255',
             'email' => 'required|email|unique:employees,email',
-            'phone' => 'nullable|string|max:20',
+            'phone' => [
+                'nullable',
+                'string',
+                'max:20',
+                'regex:/^[\d\s\+\-\(\)]+$/',
+            ],
             'department_id' => 'nullable|exists:departments,id',
             'position' => 'required|string|max:255',
             'status' => 'sometimes|in:active,inactive',
@@ -210,7 +215,12 @@ class EmployeeController extends Controller
         $validated = $request->validate([
             'name' => 'sometimes|required|string|max:255',
             'email' => 'sometimes|required|email|unique:employees,email,' . $employee->id,
-            'phone' => 'nullable|string|max:20',
+            'phone' => [
+                'nullable',
+                'string',
+                'max:20',
+                'regex:/^[\d\s\+\-\(\)]+$/',
+            ],
             'department_id' => 'nullable|exists:departments,id',
             'position' => 'sometimes|required|string|max:255',
             'status' => 'sometimes|in:active,inactive',
