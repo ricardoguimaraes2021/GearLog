@@ -16,8 +16,8 @@ class MovementService
     public function createMovement(Product $product, array $data): Movement
     {
         return DB::transaction(function () use ($product, $data) {
-            // Refresh product to get latest quantity (prevent race conditions)
-            $product->refresh();
+            // Lock the product row for update to prevent race conditions
+            $product = Product::lockForUpdate()->findOrFail($product->id);
 
             // Validate business rules
             $this->validateMovement($product, $data);
