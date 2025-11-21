@@ -19,18 +19,22 @@ COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 WORKDIR /var/www
 
 # Copiar ficheiros de configuração primeiro (para cache do Docker)
-COPY composer.json composer.lock ./
+COPY backend/composer.json backend/composer.lock ./
 
 # Instalar dependências do PHP
 RUN composer install --no-dev --optimize-autoloader --no-interaction --no-scripts
 
 # Copiar resto dos ficheiros
-COPY . .
+COPY backend/ .
 
-# Executar scripts do Composer
+# Criar diretórios necessários ANTES de executar scripts do Composer
+RUN mkdir -p bootstrap/cache storage/framework/cache storage/framework/sessions storage/framework/views \
+    && chmod -R 775 bootstrap/cache storage
+
+# Executar scripts do Composer (agora com diretórios criados)
 RUN composer dump-autoload --optimize
 
-# Configurar permissões
+# Configurar permissões finais
 RUN chown -R www-data:www-data /var/www \
     && chmod -R 755 /var/www/storage \
     && chmod -R 755 /var/www/bootstrap/cache
