@@ -113,6 +113,10 @@ export function validateApiResponse<T>(
   schema: z.ZodSchema<T>,
   context = 'API response'
 ): T {
+  if (!schema) {
+    throw new Error(`Schema is undefined for ${context}`);
+  }
+  
   try {
     return schema.parse(data);
   } catch (error) {
@@ -135,19 +139,24 @@ export function validateApiResponse<T>(
 }
 
 /**
- * Safely validates API response, returning null if validation fails
+ * Safely validates API response, returning data as-is if validation fails
  * Useful for non-critical data where we want to continue even if validation fails
  */
 export function safeValidateApiResponse<T>(
   data: unknown,
-  schema: z.ZodSchema<T>,
+  schema: z.ZodSchema<T> | undefined | null,
   context = 'API response'
-): T | null {
+): T {
+  if (!schema) {
+    console.warn(`Schema is undefined for ${context}, returning data as-is`);
+    return data as T;
+  }
+  
   try {
     return validateApiResponse(data, schema, context);
   } catch (error) {
-    console.warn(`Safe validation failed for ${context}, returning null:`, error);
-    return null;
+    console.warn(`Safe validation failed for ${context}, returning data as-is:`, error);
+    return data as T;
   }
 }
 

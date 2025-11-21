@@ -57,9 +57,31 @@ export const initializeEcho = (token: string): Echo => {
 
 export const disconnectEcho = (): void => {
   if (echoInstance) {
-    echoInstance.disconnect();
-    echoInstance = null;
-    delete window.Echo;
+    try {
+      // Unbind all event listeners before disconnecting to prevent multiple disconnect warnings
+      if (echoInstance.connector && echoInstance.connector.pusher) {
+        const pusher = echoInstance.connector.pusher;
+        // Unbind all connection events to prevent multiple disconnect warnings
+        pusher.connection.unbind();
+        // Disconnect gracefully
+        if (pusher.connection.state !== 'disconnected') {
+          pusher.disconnect();
+        }
+      }
+      // Disconnect Echo
+      echoInstance.disconnect();
+    } catch (error) {
+      // Ignore errors during disconnect (connection might already be closed)
+      // Don't log in production to avoid console noise
+      if (import.meta.env.DEV) {
+        console.debug('Error during Echo disconnect:', error);
+      }
+    } finally {
+      echoInstance = null;
+      if (window.Echo) {
+        delete window.Echo;
+      }
+    }
   }
 };
 
