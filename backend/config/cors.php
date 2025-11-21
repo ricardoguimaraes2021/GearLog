@@ -2,11 +2,18 @@
 
 return [
 
-    'paths' => ['api/*', 'sanctum/csrf-cookie', 'broadcasting/auth', 'login', 'logout', 'register', 'onboarding'],
+    'paths' => ['api/*', 'sanctum/csrf-cookie', 'broadcasting/*', 'login', 'logout', 'register', 'onboarding'],
 
     'allowed_methods' => ['*'],
 
-    'allowed_origins' => ['http://localhost:5173', 'http://127.0.0.1:5173'],
+    'allowed_origins' => array_filter(array_merge(
+        // Default development origins
+        ['http://localhost:5173', 'http://127.0.0.1:5173'],
+        // Production/staging origins from environment
+        explode(',', env('CORS_ALLOWED_ORIGINS', '')),
+        // Frontend URL from environment (if set)
+        env('FRONTEND_URL') ? [env('FRONTEND_URL')] : []
+    )),
 
     'allowed_origins_patterns' => [],
 
