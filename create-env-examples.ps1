@@ -39,8 +39,8 @@ APP_FAKER_LOCALE=en_US
 # FRONTEND_URL=http://localhost:5173
 
 # [PROD] Descomenta e configura para produção
-# APP_URL=https://api.seudominio.com
-# FRONTEND_URL=https://seudominio.com
+# APP_URL=https://gearlog-production.up.railway.app
+# FRONTEND_URL=https://gearlog.netlify.app
 
 # ============================================
 # DATABASE CONFIGURATION
@@ -127,7 +127,8 @@ FILESYSTEM_DISK=local
 # SANCTUM_STATEFUL_DOMAINS=localhost,localhost:3000,localhost:5173,127.0.0.1,127.0.0.1:8000,::1
 
 # [PROD] Descomenta e configura com o teu domínio de produção
-# SANCTUM_STATEFUL_DOMAINS=seudominio.com,www.seudominio.com,api.seudominio.com
+# SANCTUM_STATEFUL_DOMAINS=gearlog.netlify.app,gearlog-production.up.railway.app
+# Nota: Se FRONTEND_URL estiver definido, será automaticamente incluído
 
 # ============================================
 # CORS CONFIGURATION
@@ -136,7 +137,9 @@ FILESYSTEM_DISK=local
 # CORS_ALLOWED_ORIGINS=http://localhost:5173,http://127.0.0.1:5173
 
 # [PROD] Descomenta e configura com o teu domínio de produção
-# CORS_ALLOWED_ORIGINS=https://seudominio.com,https://www.seudominio.com
+# CORS_ALLOWED_ORIGINS=https://gearlog.netlify.app
+# Nota: Se FRONTEND_URL estiver definido, será automaticamente incluído
+# Exemplo completo: CORS_ALLOWED_ORIGINS=https://gearlog.netlify.app,https://www.gearlog.netlify.app
 
 # ============================================
 # SUPER ADMIN
