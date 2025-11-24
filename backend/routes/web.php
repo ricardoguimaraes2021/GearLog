@@ -25,3 +25,23 @@ if (config('broadcasting.default') === 'pusher' && config('broadcasting.connecti
     ]);
 }
 
+// Rota temporária para limpar cache em produção (Railway)
+Route::get('/clear-cache-force', function () {
+    try {
+        \Illuminate\Support\Facades\Artisan::call('config:clear');
+        \Illuminate\Support\Facades\Artisan::call('cache:clear');
+        \Illuminate\Support\Facades\Artisan::call('route:clear');
+        \Illuminate\Support\Facades\Artisan::call('view:clear');
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Cache cleared successfully!',
+            'output' => \Illuminate\Support\Facades\Artisan::output()
+        ]);
+    } catch (\Exception $e) {
+        return response()->json([
+            'status' => 'error',
+            'message' => $e->getMessage()
+        ], 500);
+    }
+});
+
