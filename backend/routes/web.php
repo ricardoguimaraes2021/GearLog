@@ -105,6 +105,35 @@ Route::get('/run-seeder', function () {
     }
 });
 
+// Get last error from logs (temporary debug endpoint)
+Route::get('/last-error', function () {
+    try {
+        $logFile = storage_path('logs/laravel.log');
+        
+        if (!file_exists($logFile)) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Log file not found',
+            ], 404);
+        }
+        
+        // Get last 100 lines of log file
+        $lines = file($logFile);
+        $lastLines = array_slice($lines, -100);
+        
+        return response()->json([
+            'status' => 'ok',
+            'last_100_lines' => implode('', $lastLines),
+        ]);
+    } catch (\Exception $e) {
+        return response()->json([
+            'status' => 'error',
+            'message' => $e->getMessage(),
+        ], 500);
+    }
+});
+
+
 
 
 
