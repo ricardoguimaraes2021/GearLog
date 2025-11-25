@@ -105,33 +105,114 @@ Route::get('/run-seeder', function () {
     }
 });
 
-// Get last error from logs (temporary debug endpoint)
-Route::get('/last-error', function () {
+// Comprehensive database status check
+Route::get('/db-status', function () {
     try {
-        $logFile = storage_path('logs/laravel.log');
+        $status = [
+            'database' => 'connected',
+            'tables' => [],
+            'migrations' => [],
+            'roles' => [],
+            'permissions' => [],
+            'users' => [],
+            'companies' => [],
+            'issues' => [],
+        ];
         
-        if (!file_exists($logFile)) {
+        // Check database connection
+        try {
+            DB::connection()->getPdo();
+        } catch (\Exception $e) {
             return response()->json([
                 'status' => 'error',
-                'message' => 'Log file not found',
-            ], 404);
+                'message' => 'Database connection failed: ' . $e->getMessage(),
+            ], 500);
         }
         
-        // Get last 100 lines of log file
-        $lines = file($logFile);
-        $lastLines = array_slice($lines, -100);
+        // Get all tables
+        $tables = DB::select('SHOW TABLES');
+        $tableNames = array_map(function($table) {
+            return array_values((array)$table)[0];
+        }, $tables);
+        $status['tables'] = $tableNames;
         
-        return response()->json([
-            'status' => 'ok',
-            'last_100_lines' => implode('', $lastLines),
-        ]);
+        // Expected tables
+        $expectedTables = [
+            'users', 'companies', 'roles', 'permissions', 'model_has_roles',
+            'model_has_permissions', 'role_has_permissions', 'categories',
+            'products', 'movements', 'employees', 'departments', 'asset_assignments',
+            'tickets', 'ticket_comments', 'company_invites', 'migrations',
+            'password_reset_tokens', 'sessions', 'cache', 'cache_locks',
+            'personal_access_tokens', 'failed_jobs', 'jobs', 'job_batches'
+        ];
+        
+        $missingTables = array_diff($expectedTables, $tableNames);
+        if (!empty($missingTables)) {
+            $status['issues'][] = 'Missing tables: ' . implode(', ', $missingTables);
+        }
+        
+        // Check migrations
+        $migrations = DB::table('migrations')->pluck('migration')->toArray();
+        $status['migrations'] = [
+            'count' => count($migrations),
+            'last_5' => array_slice($migrations, -5),
+        ];
+        
+        // Check roles
+        if (in_array('roles', $tableNames)) {
+            $roles = \Spatie\Permission\Models\Role::all();
+            $status['roles'] = $roles->pluck('name')->toArray();
+            
+            $expectedRoles = ['admin', 'gestor', 'tecnico', 'viewer'];
+            $missingRoles = array_diff($expectedRoles, $status['roles']);
+            if (!empty($missingRoles)) {
+                $status['issues'][] = 'Missing roles: ' . implode(', ', $missingRoles);
+            }
+        }
+        
+        // Check permissions
+        if (in_array('permissions', $tableNames)) {
+            $permissions = \Spatie\Permission\Models\Permission::all();
+            $status['permissions'] = [
+                'count' => $permissions->count(),
+                'names' => $permissions->pluck('name')->toArray(),
+            ];
+        }
+        
+        // Check users
+        if (in_array('users', $tableNames)) {
+            $users = \App\Models\User::all();
+            $status['users'] = [
+                'count' => $users->count(),
+                'emails' => $users->pluck('email')->toArray(),
+                'with_company' => $users->whereNotNull('company_id')->count(),
+                'without_company' => $users->whereNull('company_id')->count(),
+            ];
+        }
+        
+        // Check companies
+        if (in_array('companies', $tableNames)) {
+            $companies = \App\Models\Company::all();
+            $status['companies'] = [
+                'count' => $companies->count(),
+                'names' => $companies->pluck('name')->toArray(),
+            ];
+        }
+        
+        // Overall status
+        $status['overall'] = empty($status['issues']) ? 'healthy' : 'issues_found';
+        
+        return response()->json($status);
+        
     } catch (\Exception $e) {
         return response()->json([
             'status' => 'error',
             'message' => $e->getMessage(),
+            'trace' => $e->getTraceAsString(),
         ], 500);
     }
 });
+
 
 
 
