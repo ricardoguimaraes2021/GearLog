@@ -400,11 +400,15 @@ class AuthController extends Controller
             Log::error('Onboarding failed', [
                 'user_id' => $user->id,
                 'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
             ]);
 
             return response()->json([
                 'error' => 'Failed to complete onboarding. Please try again.',
-                'message' => config('app.debug') ? $e->getMessage() : null,
+                'message' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+                'line' => $e->getLine(),
+                'file' => $e->getFile(),
             ], 500);
         }
     }
