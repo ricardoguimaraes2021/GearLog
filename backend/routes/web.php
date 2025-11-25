@@ -45,3 +45,29 @@ Route::get('/clear-cache-force', function () {
     }
 });
 
+// Debug endpoint to check system status
+Route::get('/debug-status', function () {
+    try {
+        $roles = \Spatie\Permission\Models\Role::all()->pluck('name');
+        $userCount = \App\Models\User::count();
+        $companyCount = \App\Models\Company::count();
+        
+        return response()->json([
+            'status' => 'ok',
+            'database' => 'connected',
+            'roles' => $roles,
+            'users_count' => $userCount,
+            'companies_count' => $companyCount,
+            'app_env' => config('app.env'),
+            'app_debug' => config('app.debug'),
+        ]);
+    } catch (\Exception $e) {
+        return response()->json([
+            'status' => 'error',
+            'message' => $e->getMessage(),
+            'trace' => config('app.debug') ? $e->getTraceAsString() : null,
+        ], 500);
+    }
+});
+
+
