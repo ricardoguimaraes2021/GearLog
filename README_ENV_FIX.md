@@ -1,47 +1,70 @@
 # Correção de Configuração de Ambiente (CORS & Cookies)
 
+## ⚠️ IMPORTANTE: Variáveis Duplicadas no Railway
+
+**REMOVE a variável duplicada:**
+- `SESSION_SECURE_COOKIE`` (com acento grave no final) - **APAGA ESTA**
+
+Mantém apenas:
+- `SESSION_SECURE_COOKIE=true` (sem acento grave)
+
 ## 1. Variáveis para o Netlify (Frontend)
 
-No painel do Netlify, em **Site configuration > Environment variables**, adicione:
+No painel do Netlify, em **Site configuration > Environment variables**, adiciona:
 
 ```ini
 VITE_API_URL=https://gearlog-production.up.railway.app/api/v1
 ```
 
-*Nota: Se usares Pusher, adiciona também as variáveis `VITE_PUSHER_...`.*
+## 2. Variáveis Corretas no Railway (Backend)
 
-## 2. Correção das Variáveis no Railway (Backend)
+Estas são as variáveis que devem estar configuradas no Railway:
 
-O erro de CORS e problemas de autenticação (419/401) ocorrem frequentemente devido à configuração incorreta de cookies em ambientes Cross-Domain (Frontend no Netlify e Backend no Railway).
-
-Atualiza as seguintes variáveis no Railway:
-
-| Variável | Valor Atual (Incorreto) | Novo Valor (Correto) | Explicação |
-|----------|-------------------------|----------------------|------------|
-| `SESSION_DOMAIN` | `gearlog.netlify.app` | `null` (ou remove a variável) | **CRÍTICO:** O backend não pode definir cookies para o domínio do frontend. Deixa vazio para usar o domínio do backend automaticamente. |
-| `SESSION_SECURE_COOKIE` | (não definida) | `true` | Necessário para cookies `SameSite=None`. |
-| `SESSION_SAME_SITE` | (não definida) | `none` | Necessário para permitir cookies entre domínios diferentes (Netlify -> Railway). |
-| `CORS_ALLOWED_ORIGINS` | `https://gearlog.netlify.app` | `https://gearlog.netlify.app` | Mantém assim (sem barra no final). |
-
-**Resumo das variáveis a adicionar/alterar no Railway:**
-
+### ✅ Variáveis Corretas (já tens):
 ```ini
+APP_URL=https://gearlog-production.up.railway.app
+CORS_ALLOWED_ORIGINS=https://gearlog.netlify.app
+FRONTEND_URL=https://gearlog.netlify.app
+SANCTUM_STATEFUL_DOMAINS=gearlog.netlify.app,gearlog-production.up.railway.app
 SESSION_DOMAIN=
-SESSION_SECURE_COOKIE=true
+SESSION_DRIVER=cookie
+SESSION_LIFETIME=120
 SESSION_SAME_SITE=none
+SESSION_SECURE_COOKIE=true
 ```
-*(Para `SESSION_DOMAIN`, podes simplesmente apagar a variável ou deixá-la em branco).*
 
-## 3. Correção Crítica: Ficheiros de Configuração em Falta
+### ❌ Remove esta variável duplicada:
+```ini
+SESSION_SECURE_COOKIE`=true   # <-- APAGA (tem acento grave no final)
+```
 
-Detetei que vários ficheiros de configuração essenciais do Laravel (`config/session.php`, `config/auth.php`, `config/logging.php`, etc.) estavam em falta no projeto. Isso causava o erro "Application failed to respond" (502 Bad Gateway) no Railway, pois a aplicação não conseguia iniciar corretamente.
+## 3. Melhorias no Dockerfile
 
-**Já restaurei estes ficheiros.** Ao fazeres o próximo deploy (que será automático após eu enviar para o GitHub), o backend deve voltar a funcionar.
+Atualizei o Dockerfile para:
+- Limpar a cache automaticamente no startup (importante porque as variáveis de ambiente podem mudar no Railway)
+- Adicionar logs detalhados para facilitar o debug
+- Verificar a configuração antes de iniciar o servidor
 
-## 4. Limpar Cache no Railway
+## 4. Próximos Passos
 
-Após o deploy terminar com sucesso, abre este link no navegador para garantir que a cache está limpa:
-   
-👉 **[https://gearlog-production.up.railway.app/clear-cache-force](https://gearlog-production.up.railway.app/clear-cache-force)**
+1. **No Railway:**
+   - Remove a variável `SESSION_SECURE_COOKIE`` (com acento grave)
+   - Verifica que todas as outras variáveis estão corretas
 
-Se vires a mensagem `Cache cleared successfully!`, a cache foi limpa e o sistema deve estar operacional.
+2. **Aguarda o Deploy:**
+   - O Railway vai fazer deploy automaticamente após eu enviar as alterações
+   - Verifica os logs do Railway para ver se há erros
+
+3. **Testa o Endpoint:**
+   - Após o deploy, testa: `https://gearlog-production.up.railway.app/health`
+   - Se funcionar, testa: `https://gearlog-production.up.railway.app/clear-cache-force`
+
+## Explicação Técnica
+
+O erro 502 (Bad Gateway) significa que o Railway não consegue conectar-se à aplicação. Isto pode acontecer por:
+
+1. **Ficheiros de configuração em falta** ✅ (já corrigido)
+2. **Variáveis de ambiente inválidas** ⚠️ (tens uma duplicada)
+3. **Erro no startup da aplicação** - Os novos logs vão ajudar a identificar
+
+Com os logs melhorados no Dockerfile, vais conseguir ver exatamente onde está a falhar nos logs do Railway.

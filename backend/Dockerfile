@@ -46,16 +46,28 @@ EXPOSE 8000
 RUN echo '#!/bin/bash\n\
 set -e\n\
 \n\
+echo "=== GearLog Backend Starting ==="\n\
+echo "Environment: ${APP_ENV:-unknown}"\n\
+echo "Port: ${PORT:-8000}"\n\
+\n\
+# Limpar cache (importante para Railway, onde env vars podem mudar)\n\
+echo "Clearing caches..."\n\
+php artisan config:clear || echo "Config clear failed"\n\
+php artisan cache:clear || echo "Cache clear failed"\n\
+php artisan route:clear || echo "Route clear failed"\n\
+php artisan view:clear || echo "View clear failed"\n\
+\n\
 # Tentar executar migrações (não falhar se BD não estiver pronta)\n\
+echo "Running migrations..."\n\
 php artisan migrate --force || echo "Migration failed, continuing..."\n\
 \n\
 # Criar storage link (ignorar se já existir)\n\
+echo "Creating storage link..."\n\
 php artisan storage:link || true\n\
 \n\
-# Cache de configuração (ignorar erros)\n\
-php artisan config:cache || true\n\
-php artisan route:cache || true\n\
-php artisan view:cache || true\n\
+# Verificar configuração crítica\n\
+echo "Checking configuration..."\n\
+php artisan config:show app.url || echo "Config check failed"\n\
 \n\
 # Iniciar servidor PHP\n\
 echo "Starting PHP server on port ${PORT:-8000}"\n\
@@ -64,4 +76,3 @@ exec php -S 0.0.0.0:${PORT:-8000} -t public\n\
 
 # Comando de start
 CMD ["/start.sh"]
-
