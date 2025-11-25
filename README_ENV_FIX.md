@@ -32,20 +32,16 @@ SESSION_SAME_SITE=none
 ```
 *(Para `SESSION_DOMAIN`, podes simplesmente apagar a variável ou deixá-la em branco).*
 
-## 3. Limpar Cache no Railway (Sem Acesso ao Terminal)
+## 3. Correção Crítica: Ficheiros de Configuração em Falta
 
-Como não tens acesso ao terminal, adicionei uma rota temporária ao código para forçar a limpeza da cache.
+Detetei que vários ficheiros de configuração essenciais do Laravel (`config/session.php`, `config/auth.php`, `config/logging.php`, etc.) estavam em falta no projeto. Isso causava o erro "Application failed to respond" (502 Bad Gateway) no Railway, pois a aplicação não conseguia iniciar corretamente.
 
-1. **Faz o Deploy** das alterações atuais (incluindo o ficheiro `routes/web.php` que acabei de modificar).
-2. Após o deploy terminar, abre este link no navegador:
+**Já restaurei estes ficheiros.** Ao fazeres o próximo deploy (que será automático após eu enviar para o GitHub), o backend deve voltar a funcionar.
+
+## 4. Limpar Cache no Railway
+
+Após o deploy terminar com sucesso, abre este link no navegador para garantir que a cache está limpa:
    
-   👉 **[https://gearlog-production.up.railway.app/clear-cache-force](https://gearlog-production.up.railway.app/clear-cache-force)**
+👉 **[https://gearlog-production.up.railway.app/clear-cache-force](https://gearlog-production.up.railway.app/clear-cache-force)**
 
-3. Se vires a mensagem `Cache cleared successfully!`, a cache foi limpa.
-4. **IMPORTANTE:** Depois de testares e veres que tudo funciona, remove o bloco de código que adicionei no final de `backend/routes/web.php` e faz deploy novamente, por questões de segurança.
-
-## Explicação Técnica
-
-O erro `No 'Access-Control-Allow-Origin'` pode ser enganador. Muitas vezes acontece quando o backend tenta definir um cookie inválido (devido ao `SESSION_DOMAIN` errado) ou quando o navegador bloqueia o cookie por falta de `SameSite=None; Secure`, fazendo com que a requisição subsequente falhe ou o preflight (OPTIONS) falhe.
-
-Ao definir `SESSION_DOMAIN=gearlog.netlify.app` no backend (que está em `railway.app`), o navegador rejeita o cookie imediatamente, pois `railway.app` não tem permissão para definir cookies para `netlify.app`.
+Se vires a mensagem `Cache cleared successfully!`, a cache foi limpa e o sistema deve estar operacional.
