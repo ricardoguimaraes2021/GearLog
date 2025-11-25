@@ -203,8 +203,7 @@ class AuthController extends Controller
                 \Illuminate\Validation\Rules\Password::min(12)
                     ->mixedCase()
                     ->numbers()
-                    ->symbols()
-                    ->uncompromised(),
+                    ->symbols(),
             ],
         ]);
 
