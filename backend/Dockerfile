@@ -19,13 +19,14 @@ COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 WORKDIR /var/www
 
 # Copiar ficheiros de configuração primeiro (para cache do Docker)
-COPY composer.json composer.lock ./
+# Como o contexto de build é a raiz do projeto, precisamos especificar backend/
+COPY backend/composer.json backend/composer.lock ./
 
 # Instalar dependências do PHP
 RUN composer install --no-dev --optimize-autoloader --no-interaction --no-scripts
 
-# Copiar resto dos ficheiros
-COPY . .
+# Copiar resto dos ficheiros do backend
+COPY backend/ .
 
 # Criar diretórios necessários ANTES de executar scripts do Composer
 RUN mkdir -p bootstrap/cache storage/framework/cache storage/framework/sessions storage/framework/views \
