@@ -70,4 +70,41 @@ Route::get('/debug-status', function () {
     }
 });
 
+// Run database seeder (temporary endpoint for production setup)
+Route::get('/run-seeder', function () {
+    try {
+        // Run the DatabaseSeeder
+        \Illuminate\Support\Facades\Artisan::call('db:seed', [
+            '--class' => 'DatabaseSeeder',
+            '--force' => true,
+        ]);
+        
+        $output = \Illuminate\Support\Facades\Artisan::output();
+        
+        // Get updated counts
+        $roles = \Spatie\Permission\Models\Role::all()->pluck('name');
+        $permissions = \Spatie\Permission\Models\Permission::all()->pluck('name');
+        $userCount = \App\Models\User::count();
+        $companyCount = \App\Models\Company::count();
+        
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Database seeded successfully',
+            'output' => $output,
+            'roles' => $roles,
+            'permissions_count' => $permissions->count(),
+            'users_count' => $userCount,
+            'companies_count' => $companyCount,
+        ]);
+    } catch (\Exception $e) {
+        return response()->json([
+            'status' => 'error',
+            'message' => $e->getMessage(),
+            'trace' => config('app.debug') ? $e->getTraceAsString() : null,
+        ], 500);
+    }
+});
+
+
+
 
