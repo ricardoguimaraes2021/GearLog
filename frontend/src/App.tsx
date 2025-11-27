@@ -34,6 +34,8 @@ import Profile from './pages/Profile/Profile';
 import CompanySettings from './pages/Settings/CompanySettings';
 import HomeRedirect from './components/HomeRedirect';
 import PageTransition from './components/PageTransition';
+import BetaBanner from './components/BetaBanner';
+
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { isAuthenticated, isLoading, isInitializing } = useAuthStore();
@@ -74,101 +76,102 @@ function App() {
           v7_relativeSplatPath: true,
         }}
       >
-          <Routes>
-            <Route path="/landing" element={
-              <PageTransition animationType="fade">
-                <Landing />
-              </PageTransition>
-            } />
-            <Route path="/login" element={
-              <PageTransition animationType="slideUp">
-                <Login />
-              </PageTransition>
-            } />
-            <Route path="/register" element={
-              <PageTransition animationType="slideUp">
-                <Register />
-              </PageTransition>
-            } />
-            <Route path="/forgot-password" element={
-              <PageTransition animationType="slideUp">
-                <ForgotPassword />
-              </PageTransition>
-            } />
-            <Route path="/reset-password" element={
-              <PageTransition animationType="slideUp">
-                <ResetPassword />
-              </PageTransition>
-            } />
-            <Route 
-              path="/onboarding" 
-              element={
-                <ProtectedRoute>
-                  <PageTransition animationType="slideUp">
-                    <Onboarding />
-                  </PageTransition>
-                </ProtectedRoute>
-              } 
-            />
-            <Route path="/products/:id/view" element={<ProductPublicView />} />
-            <Route path="/" element={<HomeRedirect />} />
-            <Route
-              path="/"
-              element={
-                <ProtectedRoute>
-                  <Layout />
-                </ProtectedRoute>
-              }
-            >
-              <Route path="dashboard" element={<Dashboard />} />
-              <Route path="inventory" element={<Inventory />}>
-                <Route index element={<Navigate to="/inventory/products" replace />} />
-                <Route path="products" element={<Products />} />
-                <Route path="products/new" element={<ProductForm />} />
-                <Route path="products/:id" element={<ProductDetail />} />
-                <Route path="products/:id/edit" element={<ProductForm />} />
-                <Route path="categories" element={<Categories />} />
-              </Route>
-              <Route path="tickets" element={<Tickets />} />
-              <Route path="tickets/dashboard" element={<TicketDashboard />} />
-              <Route path="tickets/new" element={<TicketForm />} />
-              <Route path="tickets/:id" element={<TicketDetail />} />
-              <Route path="tickets/:id/edit" element={<TicketForm />} />
-              <Route path="notifications" element={<Notifications />} />
-              <Route path="employees" element={<Employees />} />
-              <Route path="employees/new" element={<EmployeeForm />} />
-              <Route path="employees/:id" element={<EmployeeDetail />} />
-              <Route path="employees/:id/edit" element={<EmployeeForm />} />
-              <Route path="departments" element={<Departments />} />
-              <Route path="departments/new" element={<DepartmentForm />} />
-              <Route path="departments/:id" element={<DepartmentDetail />} />
-              <Route path="departments/:id/edit" element={<DepartmentForm />} />
-              <Route path="profile" element={<Profile />} />
-              <Route path="settings" element={<CompanySettings />} />
+        <BetaBanner />
+        <Routes>
+          <Route path="/landing" element={
+            <PageTransition animationType="fade">
+              <Landing />
+            </PageTransition>
+          } />
+          <Route path="/login" element={
+            <PageTransition animationType="slideUp">
+              <Login />
+            </PageTransition>
+          } />
+          <Route path="/register" element={
+            <PageTransition animationType="slideUp">
+              <Register />
+            </PageTransition>
+          } />
+          <Route path="/forgot-password" element={
+            <PageTransition animationType="slideUp">
+              <ForgotPassword />
+            </PageTransition>
+          } />
+          <Route path="/reset-password" element={
+            <PageTransition animationType="slideUp">
+              <ResetPassword />
+            </PageTransition>
+          } />
+          <Route
+            path="/onboarding"
+            element={
+              <ProtectedRoute>
+                <PageTransition animationType="slideUp">
+                  <Onboarding />
+                </PageTransition>
+              </ProtectedRoute>
+            }
+          />
+          <Route path="/products/:id/view" element={<ProductPublicView />} />
+          <Route path="/" element={<HomeRedirect />} />
+          <Route
+            path="/"
+            element={
+              <ProtectedRoute>
+                <Layout />
+              </ProtectedRoute>
+            }
+          >
+            <Route path="dashboard" element={<Dashboard />} />
+            <Route path="inventory" element={<Inventory />}>
+              <Route index element={<Navigate to="/inventory/products" replace />} />
+              <Route path="products" element={<Products />} />
+              <Route path="products/new" element={<ProductForm />} />
+              <Route path="products/:id" element={<ProductDetail />} />
+              <Route path="products/:id/edit" element={<ProductForm />} />
+              <Route path="categories" element={<Categories />} />
             </Route>
-            
-            {/* Admin Panel - Separate routes without Layout */}
-            <Route
-              path="/admin"
-              element={
-                <ProtectedRoute>
-                  <PageTransition animationType="fade">
-                    <AdminPanel />
-                  </PageTransition>
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/admin/profile"
-              element={
-                <ProtectedRoute>
-                  <PageTransition animationType="fade">
-                    <AdminProfile />
-                  </PageTransition>
-                </ProtectedRoute>
-              }
-            />
-          </Routes>
+            <Route path="tickets" element={<Tickets />} />
+            <Route path="tickets/dashboard" element={<TicketDashboard />} />
+            <Route path="tickets/new" element={<TicketForm />} />
+            <Route path="tickets/:id" element={<TicketDetail />} />
+            <Route path="tickets/:id/edit" element={<TicketForm />} />
+            <Route path="notifications" element={<Notifications />} />
+            <Route path="employees" element={<Employees />} />
+            <Route path="employees/new" element={<EmployeeForm />} />
+            <Route path="employees/:id" element={<EmployeeDetail />} />
+            <Route path="employees/:id/edit" element={<EmployeeForm />} />
+            <Route path="departments" element={<Departments />} />
+            <Route path="departments/new" element={<DepartmentForm />} />
+            <Route path="departments/:id" element={<DepartmentDetail />} />
+            <Route path="departments/:id/edit" element={<DepartmentForm />} />
+            <Route path="profile" element={<Profile />} />
+            <Route path="settings" element={<CompanySettings />} />
+          </Route>
+
+          {/* Admin Panel - Separate routes without Layout */}
+          <Route
+            path="/admin"
+            element={
+              <ProtectedRoute>
+                <PageTransition animationType="fade">
+                  <AdminPanel />
+                </PageTransition>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin/profile"
+            element={
+              <ProtectedRoute>
+                <PageTransition animationType="fade">
+                  <AdminProfile />
+                </PageTransition>
+              </ProtectedRoute>
+            }
+          />
+        </Routes>
       </BrowserRouter>
     </ErrorBoundary>
   );
