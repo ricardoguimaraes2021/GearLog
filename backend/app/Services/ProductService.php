@@ -137,58 +137,54 @@ class ProductService
 
     protected function storeImage(UploadedFile $image): string
     {
-        // Use uniqid with more entropy for better uniqueness, fallback if uuid fails
         try {
-            $filename = Str::uuid() . '.jpg';
+            // Use uniqid with more entropy for better uniqueness, fallback if uuid fails
+            try {
+                $filename = Str::uuid() . '.jpg';
+            } catch (\Exception $e) {
+                $filename = uniqid('img_', true) . '_' . time() . '.jpg';
+            }
+            
+            // Resize and optimize image
+            $img = Image::read($image);
+            
+            // Resize to max 1200px width while maintaining aspect ratio
+            $img->scale(width: 1200);
+            
+            // Encode as optimized JPEG (quality 85)
+            $encoded = $img->toJpeg(85);
+            
+            // Save using Storage facade
+            $path = 'products/' . $filename;
+            Storage::disk('public')->put($path, (string) $encoded);
+
+            return $path;
         } catch (\Exception $e) {
-            // Fallback if UUID generation fails (e.g., missing PHP uuid extension on Windows)
-            $filename = uniqid('img_', true) . '_' . time() . '.jpg';
+            throw new \Exception('Failed to process image: ' . $e->getMessage());
         }
-        $path = storage_path('app/public/products/' . $filename);
-        
-        // Ensure directory exists
-        $directory = dirname($path);
-        if (!is_dir($directory)) {
-            mkdir($directory, 0755, true);
-        }
-
-        // Resize and optimize image
-        $img = Image::read($image);
-        
-        // Resize to max 1200px width while maintaining aspect ratio
-        $img->scale(width: 1200);
-        
-        // Save as optimized JPEG (quality 85)
-        $img->toJpeg(85)->save($path);
-
-        return 'products/' . $filename;
     }
 
     protected function storeInvoice(UploadedFile $invoice): string
     {
-        // Generate unique filename
         try {
-            $originalName = pathinfo($invoice->getClientOriginalName(), PATHINFO_FILENAME);
-            $extension = $invoice->getClientOriginalExtension();
-            $filename = Str::slug($originalName) . '_' . Str::uuid() . '.' . $extension;
+            // Generate unique filename
+            try {
+                $originalName = pathinfo($invoice->getClientOriginalName(), PATHINFO_FILENAME);
+                $extension = $invoice->getClientOriginalExtension();
+                $filename = Str::slug($originalName) . '_' . Str::uuid() . '.' . $extension;
+            } catch (\Exception $e) {
+                $extension = $invoice->getClientOriginalExtension();
+                $filename = 'invoice_' . uniqid('', true) . '_' . time() . '.' . $extension;
+            }
+            
+            // Store using Storage facade
+            $path = 'invoices/' . $filename;
+            Storage::disk('public')->put($path, file_get_contents($invoice));
+
+            return $path;
         } catch (\Exception $e) {
-            // Fallback if UUID generation fails
-            $extension = $invoice->getClientOriginalExtension();
-            $filename = 'invoice_' . uniqid('', true) . '_' . time() . '.' . $extension;
+            throw new \Exception('Failed to upload invoice: ' . $e->getMessage());
         }
-        
-        $path = storage_path('app/public/invoices/' . $filename);
-        
-        // Ensure directory exists
-        $directory = dirname($path);
-        if (!is_dir($directory)) {
-            mkdir($directory, 0755, true);
-        }
-
-        // Store the file
-        $invoice->move($directory, $filename);
-
-        return 'invoices/' . $filename;
     }
 }
 
