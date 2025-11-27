@@ -209,9 +209,22 @@ class TicketController extends Controller
         
         foreach ($files as $file) {
             if ($file && $file->isValid()) {
-                $path = $file->store('tickets/attachments', 'public');
-                $attachmentPaths[] = $path;
-                \Log::info('File stored', ['path' => $path, 'original_name' => $file->getClientOriginalName()]);
+                try {
+                    // Use Storage facade explicitly for better control and error handling
+                    $filename = \Illuminate\Support\Str::uuid() . '.' . $file->getClientOriginalExtension();
+                    $path = 'tickets/attachments/' . $filename;
+                    
+                    \Illuminate\Support\Facades\Storage::disk('public')->put($path, file_get_contents($file));
+                    
+                    $attachmentPaths[] = $path;
+                    \Log::info('File stored', ['path' => $path, 'original_name' => $file->getClientOriginalName()]);
+                } catch (\Exception $e) {
+                    \Log::error('Failed to upload ticket attachment', [
+                        'error' => $e->getMessage(),
+                        'file' => $file->getClientOriginalName()
+                    ]);
+                    // Continue with other files instead of failing the whole request
+                }
             }
         }
 
@@ -347,9 +360,22 @@ class TicketController extends Controller
         
         foreach ($files as $file) {
             if ($file && $file->isValid()) {
-                $path = $file->store('tickets/attachments', 'public');
-                $attachmentPaths[] = $path;
-                \Log::info('File stored', ['path' => $path, 'original_name' => $file->getClientOriginalName()]);
+                try {
+                    // Use Storage facade explicitly for better control and error handling
+                    $filename = \Illuminate\Support\Str::uuid() . '.' . $file->getClientOriginalExtension();
+                    $path = 'tickets/attachments/' . $filename;
+                    
+                    \Illuminate\Support\Facades\Storage::disk('public')->put($path, file_get_contents($file));
+                    
+                    $attachmentPaths[] = $path;
+                    \Log::info('File stored', ['path' => $path, 'original_name' => $file->getClientOriginalName()]);
+                } catch (\Exception $e) {
+                    \Log::error('Failed to upload ticket attachment', [
+                        'error' => $e->getMessage(),
+                        'file' => $file->getClientOriginalName()
+                    ]);
+                    // Continue with other files instead of failing the whole request
+                }
             }
         }
 
