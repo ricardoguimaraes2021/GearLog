@@ -35,5 +35,13 @@ return [
 
         'store' => 'default',
     ],
+
+    'register_permission_check_method' => true,
+
+    'display_permission_in_exception' => false,
+
+    'display_role_in_exception' => false,
+
+    'enable_wildcard_permission' => false,
 ];
 

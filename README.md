@@ -4,9 +4,43 @@
 
 A comprehensive, full-stack inventory management system designed specifically for IT teams to track, manage, and optimize their equipment efficiently.
 
+## 🚀 Live Demo
+
+**Try it now:** [https://gearlog.netlify.app/landing](https://gearlog.netlify.app/landing)
+
+Experience the full application in action! The live demo is deployed on Netlify (frontend) and Railway (backend) with a production MySQL database.
+
 ## 🖼️ Gallery
 
 Check out the [**Live Gallery**](https://gearlogallery.vercel.app/) to see screenshots and features of the application.
+
+## 📊 Project Status
+
+**Current Status:** ✅ **Beta - Production Ready**
+
+GearLog is currently in **beta** and deployed in production. The application is fully functional with all core features implemented and tested. 
+
+### Deployment Information
+- **Frontend:** Deployed on Netlify (https://gearlog.netlify.app)
+- **Backend:** Deployed on Railway with MySQL database
+- **Status:** Live and accepting user registrations
+
+### Known Limitations (Beta)
+- **File Storage:** Files (product images, invoices, ticket attachments) are stored on Railway's ephemeral filesystem. Files may be lost during deployments or container restarts. A persistent storage solution (S3, Cloudinary) will be implemented in the future.
+- **Beta Warning:** Users are notified about the beta status and ephemeral file storage via a dismissible banner on the frontend.
+
+### What's Working
+✅ Complete user authentication and authorization (RBAC)  
+✅ Multi-tenancy with company isolation  
+✅ Full product inventory management  
+✅ Ticket system with SLA tracking  
+✅ Employee and department management  
+✅ Asset assignment and movement tracking  
+✅ Dashboard analytics and reporting  
+✅ Export functionality (CSV, Excel, PDF)  
+✅ QR code generation and public product views  
+✅ Super admin panel for system management  
+✅ Real-time notifications and activity logs  
 
 ## 🎯 Overview
 
@@ -293,10 +327,16 @@ SUPER_ADMIN_EMAILS=admin@admin.com,your-email@example.com
 ```
 
 ### 6. Access the Application
-- **Frontend**: http://localhost:5173
-- **API Documentation**: http://localhost:8000/api/documentation
+
+**Local Development:**
+- **Frontend**: http://localhost:5173 (redirects to landing page)
 - **Landing Page**: http://localhost:5173/landing
+- **Login**: http://localhost:5173/login
+- **API Documentation**: http://localhost:8000/api/documentation
 - **Admin Panel**: http://localhost:5173/admin (super admin only)
+
+**Production:**
+- **Live Application**: https://gearlog.netlify.app/landing
 - **Live Gallery**: [https://gearlogallery.vercel.app/](https://gearlogallery.vercel.app/)
 
 ### Para Produção (Deployment)

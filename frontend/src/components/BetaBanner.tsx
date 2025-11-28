@@ -22,13 +22,13 @@ export default function BetaBanner() {
             BETA
           </span>
           <p className="text-sm md:text-base">
-            <strong>GearLog is in Beta.</strong> Uploaded images and files may not be stored permanently due to testing environment limitations.
+            <strong>GearLog está em fase Beta.</strong> As imagens e ficheiros carregados podem não ser guardados permanentemente devido às limitações do ambiente de testes.
           </p>
         </div>
         <button
           onClick={handleDismiss}
           className="p-1 hover:bg-white/20 rounded-full transition-colors flex-shrink-0"
-          aria-label="Close banner"
+          aria-label="Fechar aviso"
         >
           <X size={20} />
         </button>

@@ -13,12 +13,12 @@ export default function HomeRedirect() {
   }
 
   if (!isAuthenticated) {
-    return <Navigate to="/login" replace />;
+    return <Navigate to="/landing" replace />;
   }
 
   // Check if user is super admin
   const isSuperAdmin = user?.email === 'admin@admin.com';
-  
+
   if (isSuperAdmin) {
     return <Navigate to="/admin" replace />;
   }
